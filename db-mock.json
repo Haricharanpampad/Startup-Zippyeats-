@@ -1,0 +1,718 @@
+{
+  "users": [
+    {
+      "id": "mock-user-id",
+      "name": "Alex Driver",
+      "email": "alex@traveler.com",
+      "password": "$2a$10$7zB3rTeeW/eXmFvC0w.6n.I6mS6/6x1Z7r3V4j9M1Y5W7g8b9cOaG",
+      "phone": "+1-555-0199"
+    },
+    {
+      "id": "user-1784265111240",
+      "name": "Hari Charan",
+      "email": "haricharan4234@gmail.com",
+      "password": "$2b$10$ZH2UolCPVroDRGSouXhzFeTAgJYVV4puJ3nGmCI5dNjmojrNdPHfa",
+      "phone": "6303477336"
+    }
+  ],
+  "restaurants": [
+    {
+      "id": "f82e4f22-3816-4243-9a15-e642b8c2a0c0",
+      "name": "Pitstop Highway Diner",
+      "address": "456 Interstate Route 95, Exit 12",
+      "latitude": 40.7128,
+      "longitude": -74.006,
+      "average_prep_time": 15,
+      "is_active": true,
+      "email": "diner@pitstop.com",
+      "password": "password"
+    },
+    {
+      "id": "1b1df56c-9f3f-4c12-9332-58144aa5b7f2",
+      "name": "Kitchen Live Diner",
+      "address": "789 Highway Avenue",
+      "latitude": 40.7306,
+      "longitude": -73.9352,
+      "average_prep_time": 10,
+      "is_active": true,
+      "email": "kitchen@live.com",
+      "password": "password"
+    },
+    {
+      "id": "rest-gardenstate123",
+      "name": "Garden State Expressway Diner",
+      "address": "1200 Garden State Parkway, Service Plaza South",
+      "latitude": 40.6900,
+      "longitude": -74.1500,
+      "average_prep_time": 12,
+      "is_active": true,
+      "email": "garden@expressway.com",
+      "password": "password"
+    },
+    {
+      "id": "rest-crossbronx456",
+      "name": "Cross Bronx Express Junction",
+      "address": "580 Cross Bronx Expressway, Exit 4B",
+      "latitude": 40.8400,
+      "longitude": -73.8900,
+      "average_prep_time": 15,
+      "is_active": true,
+      "email": "bronx@junction.com",
+      "password": "password"
+    },
+    {
+      "id": "rest-1784265186622",
+      "name": "zippyeats",
+      "address": "Khambapur 1-34",
+      "latitude": 17.593452048111065,
+      "longitude": 78.43969406841158,
+      "email": "haricharan4234@gmail.com",
+      "password": "9849",
+      "average_prep_time": 15,
+      "is_active": true
+    },
+    {
+      "id": "rest-secunderabad789",
+      "name": "Secunderabad Express Diner",
+      "address": "90 Highway Corridor NH-44, Secunderabad",
+      "latitude": 17.4500,
+      "longitude": 78.4800,
+      "average_prep_time": 10,
+      "is_active": true,
+      "email": "secunderabad@diner.com",
+      "password": "password"
+    },
+    {
+      "id": "rest-nh44pitstop",
+      "name": "NH-44 Bypass Pitstop",
+      "address": "Highway 44, Medchal-Khambapur Toll Plaza",
+      "latitude": 17.5200,
+      "longitude": 78.4500,
+      "average_prep_time": 15,
+      "is_active": true,
+      "email": "nh44@pitstop.com",
+      "password": "password"
+    },
+    {
+      "id": "rest-kompallyoasis",
+      "name": "Kompally Highway Oasis",
+      "address": "NH-44, Next to Cineplanet, Kompally",
+      "latitude": 17.5420,
+      "longitude": 78.4410,
+      "average_prep_time": 12,
+      "is_active": true,
+      "email": "kompally@oasis.com",
+      "password": "password"
+    },
+    {
+      "id": "rest-bowenpallygrill",
+      "name": "Bowenpally Junction Grill",
+      "address": "Bowenpally X Roads, National Highway 44",
+      "latitude": 17.4850,
+      "longitude": 78.4680,
+      "average_prep_time": 8,
+      "is_active": true,
+      "email": "bowenpally@grill.com",
+      "password": "password"
+    },
+    {
+      "id": "rest-kandlakoyadhaba",
+      "name": "Kandlakoya Toll Plaza Dhaba",
+      "address": "Outer Ring Road Exit, Kandlakoya, NH-44",
+      "latitude": 17.5810,
+      "longitude": 78.4320,
+      "average_prep_time": 14,
+      "is_active": true,
+      "email": "kandlakoya@dhaba.com",
+      "password": "password"
+    },
+    {
+      "id": "rest-manhattanbistro",
+      "name": "Manhattan Mid-Route Bistro",
+      "address": "142 West 34th St, Midtown Manhattan",
+      "latitude": 40.7520,
+      "longitude": -73.9820,
+      "average_prep_time": 11,
+      "is_active": true,
+      "email": "manhattan@bistro.com",
+      "password": "password"
+    },
+    {
+      "id": "rest-hobokendiner",
+      "name": "Hoboken Hudson Diner",
+      "address": "80 River Street, Hoboken, NJ",
+      "latitude": 40.7390,
+      "longitude": -74.0300,
+      "average_prep_time": 9,
+      "is_active": true,
+      "email": "hoboken@diner.com",
+      "password": "password"
+    },
+    {
+      "id": "rest-astoriafood",
+      "name": "Astoria Transit Food Court",
+      "address": "31-10 Astoria Blvd, Queens, NY",
+      "latitude": 40.7680,
+      "longitude": -73.9210,
+      "average_prep_time": 13,
+      "is_active": true,
+      "email": "astoria@transit.com",
+      "password": "password"
+    }
+  ],
+  "menu_items": [
+    {
+      "id": "item-burger",
+      "restaurant_id": "f82e4f22-3816-4243-9a15-e642b8c2a0c0",
+      "name": "Classic Trucker Burger",
+      "description": "Juicy beef patty with cheddar cheese, lettuce, and secret sauce. Comes with fries.",
+      "price": 14.99,
+      "is_available": true
+    },
+    {
+      "id": "item-coffee",
+      "restaurant_id": "f82e4f22-3816-4243-9a15-e642b8c2a0c0",
+      "name": "Roadtrip Iced Coffee",
+      "description": "Freshly brewed cold brew over ice with vanilla sweet cream.",
+      "price": 4.5,
+      "is_available": true
+    },
+    {
+      "id": "item-burger-2",
+      "restaurant_id": "1b1df56c-9f3f-4c12-9332-58144aa5b7f2",
+      "name": "Classic Trucker Burger",
+      "description": "Juicy beef patty with cheddar cheese, lettuce, and secret sauce. Comes with fries.",
+      "price": 14.99,
+      "is_available": true
+    },
+    {
+      "id": "item-coffee-2",
+      "restaurant_id": "1b1df56c-9f3f-4c12-9332-58144aa5b7f2",
+      "name": "Roadtrip Iced Coffee",
+      "description": "Freshly brewed cold brew over ice with vanilla sweet cream.",
+      "price": 4.5,
+      "is_available": true
+    },
+    {
+      "id": "item-1784265206947",
+      "restaurant_id": "rest-1784265186622",
+      "name": "burger",
+      "price": 1000,
+      "is_available": true
+    },
+    {
+      "id": "item-gs-porkroll",
+      "restaurant_id": "rest-gardenstate123",
+      "name": "Jersey Pork Roll & Egg Sandwich",
+      "description": "Thick-sliced grilled pork roll, fried egg, and American cheese on a toasted kaiser roll.",
+      "price": 8.99,
+      "is_available": true
+    },
+    {
+      "id": "item-gs-discofries",
+      "restaurant_id": "rest-gardenstate123",
+      "name": "Disco Fries",
+      "description": "Crispy golden french fries smothered in rich brown gravy and melted mozzarella cheese.",
+      "price": 7.50,
+      "is_available": true
+    },
+    {
+      "id": "item-gs-shake",
+      "restaurant_id": "rest-gardenstate123",
+      "name": "Turnpike Vanilla Milkshake",
+      "description": "Old-fashioned hand-spun vanilla bean milkshake topped with whipped cream and a cherry.",
+      "price": 5.50,
+      "is_available": true
+    },
+    {
+      "id": "item-cb-cheesesteak",
+      "restaurant_id": "rest-crossbronx456",
+      "name": "Philly Cheesesteak Hero",
+      "description": "Thinly shaved ribeye steak with grilled onions and melted cheese whiz on an authentic hoagie roll.",
+      "price": 13.50,
+      "is_available": true
+    },
+    {
+      "id": "item-cb-wafflefries",
+      "restaurant_id": "rest-crossbronx456",
+      "name": "Loaded Waffle Fries",
+      "description": "Crispy seasoned waffle fries topped with bacon bits, cheddar cheese, and sour cream.",
+      "price": 6.99,
+      "is_available": true
+    },
+    {
+      "id": "item-cb-cheesecake",
+      "restaurant_id": "rest-crossbronx456",
+      "name": "New York Cheesecake Slice",
+      "description": "Creamy, rich NY-style cheesecake with a buttery graham cracker crust.",
+      "price": 6.50,
+      "is_available": true
+    },
+    {
+      "id": "item-sc-biryani",
+      "restaurant_id": "rest-secunderabad789",
+      "name": "Hyderabadi Chicken Biryani",
+      "description": "Authentic fragrant basmati rice layered with spiced marinated chicken, cooked in dum style.",
+      "price": 12.99,
+      "is_available": true
+    },
+    {
+      "id": "item-sc-paneerroll",
+      "restaurant_id": "rest-secunderabad789",
+      "name": "Paneer Tikka Roll",
+      "description": "Spiced grilled cottage cheese cubes wrapped in a soft paratha with mint chutney and onions.",
+      "price": 8.50,
+      "is_available": true
+    },
+    {
+      "id": "item-sc-lassi",
+      "restaurant_id": "rest-secunderabad789",
+      "name": "Mango Lassi",
+      "description": "Chilled sweet yogurt beverage blended with premium Alphonso mango pulp.",
+      "price": 3.99,
+      "is_available": true
+    },
+    {
+      "id": "item-nh-dosa",
+      "restaurant_id": "rest-nh44pitstop",
+      "name": "Spicy Butter Masala Dosa",
+      "description": "Crispy fermented rice-lentil crepe with spicy red chutney and potato mash filling, served with sambar.",
+      "price": 7.99,
+      "is_available": true
+    },
+    {
+      "id": "item-nh-kadaipaneer",
+      "restaurant_id": "rest-nh44pitstop",
+      "name": "Highway Kadai Paneer with Roti",
+      "description": "Fresh cottage cheese cooked with bell peppers and freshly ground spices in a traditional wok. Served with 2 rotis.",
+      "price": 11.50,
+      "is_available": true
+    },
+    {
+      "id": "item-nh-chai",
+      "restaurant_id": "rest-nh44pitstop",
+      "name": "Irani Chai with Osmania Biscuits",
+      "description": "Rich, creamy milk-reduced tea served alongside two classic sweet-salty biscuits.",
+      "price": 3.50,
+      "is_available": true
+    },
+    {
+      "id": "item-ko-biryani",
+      "restaurant_id": "rest-kompallyoasis",
+      "name": "Special Mughlai Chicken Biryani",
+      "description": "Aromatic slow-cooked basmati rice served with double masala chicken and raita.",
+      "price": 13.99,
+      "is_available": true
+    },
+    {
+      "id": "item-ko-kebab",
+      "restaurant_id": "rest-kompallyoasis",
+      "name": "Tandoori Malai Kebab",
+      "description": "Creamy, melt-in-mouth chicken chunks marinated in cheese and cashew paste.",
+      "price": 9.50,
+      "is_available": true
+    },
+    {
+      "id": "item-bg-shawarma",
+      "restaurant_id": "rest-bowenpallygrill",
+      "name": "Highway Jumbo Shawarma Wrap",
+      "description": "Spiced shredded chicken, pickled veggies, and garlic aioli wrapped in rumali roti.",
+      "price": 7.99,
+      "is_available": true
+    },
+    {
+      "id": "item-bg-mojito",
+      "restaurant_id": "rest-bowenpallygrill",
+      "name": "Spiced Mint Mojito",
+      "description": "A refreshing cooler with fresh mint, lime, and a pinch of Indian black salt.",
+      "price": 4.50,
+      "is_available": true
+    },
+    {
+      "id": "item-kd-lassi",
+      "restaurant_id": "rest-kandlakoyadhaba",
+      "name": "Clay Pot Sweet Lassi",
+      "description": "Thick, churned yogurt sweetened with sugar and topped with thick malai.",
+      "price": 3.99,
+      "is_available": true
+    },
+    {
+      "id": "item-kd-butterchicken",
+      "restaurant_id": "rest-kandlakoyadhaba",
+      "name": "Dhaba Butter Chicken with Butter Naan",
+      "description": "Rich, creamy tomato gravy with charcoal-grilled chicken. Served with 2 hot butter naans.",
+      "price": 14.50,
+      "is_available": true
+    },
+    {
+      "id": "item-mb-pasta",
+      "restaurant_id": "rest-manhattanbistro",
+      "name": "Midtown Truffle Penne",
+      "description": "Penne pasta tossed in white wine truffle cream sauce with wild mushrooms.",
+      "price": 16.99,
+      "is_available": true
+    },
+    {
+      "id": "item-mb-espresso",
+      "restaurant_id": "rest-manhattanbistro",
+      "name": "Artisan Double Espresso",
+      "description": "Freshly pulled double shot of organic espresso beans.",
+      "price": 3.50,
+      "is_available": true
+    },
+    {
+      "id": "item-hd-pancakes",
+      "restaurant_id": "rest-hobokendiner",
+      "name": "Hudson Blueberry Pancakes",
+      "description": "Three fluffy buttermilk pancakes loaded with fresh blueberries and maple syrup.",
+      "price": 9.99,
+      "is_available": true
+    },
+    {
+      "id": "item-hd-burger",
+      "restaurant_id": "rest-hobokendiner",
+      "name": "Riverview Bacon Cheeseburger",
+      "description": "Angus beef, applewood bacon, sharp cheddar, on a toasted brioche bun.",
+      "price": 12.99,
+      "is_available": true
+    },
+    {
+      "id": "item-af-gyros",
+      "restaurant_id": "rest-astoriafood",
+      "name": "Astoria Greek Gyro Platter",
+      "description": "Shaved lamb gyro, greek salad, pita bread, and homemade tzatziki sauce.",
+      "price": 14.99,
+      "is_available": true
+    },
+    {
+      "id": "item-af-baklava",
+      "restaurant_id": "rest-astoriafood",
+      "name": "Honey Pistachio Baklava",
+      "description": "Sweet pastry made of layers of filo filled with chopped nuts and sweetened with syrup.",
+      "price": 5.50,
+      "is_available": true
+    }
+  ],
+  "orders": [
+    {
+      "id": "order-1784265237366",
+      "user_id": "user-1784265111240",
+      "restaurant_id": "rest-1784265186622",
+      "total_amount": 1000,
+      "fulfillment_type": "DINE_IN",
+      "current_driver_eta": "2026-07-17T05:28:57.366Z",
+      "scheduled_fire_time": "2026-07-17T05:13:57.366Z",
+      "order_status": "PREPARING"
+    },
+    {
+      "id": "order-1784265667792",
+      "user_id": "user-1784265111240",
+      "restaurant_id": "rest-1784265186622",
+      "total_amount": 1000,
+      "fulfillment_type": "DINE_IN",
+      "current_driver_eta": "2026-07-17T08:03:07.792Z",
+      "scheduled_fire_time": "2026-07-17T07:48:07.792Z",
+      "order_status": "PREPARING"
+    },
+    {
+      "id": "order-1784266776723",
+      "user_id": "user-1784265111240",
+      "restaurant_id": "rest-1784265186622",
+      "total_amount": 1000,
+      "fulfillment_type": "DINE_IN",
+      "current_driver_eta": "2026-07-17T08:21:36.723Z",
+      "scheduled_fire_time": "2026-07-17T08:06:36.723Z",
+      "order_status": "PREPARING"
+    },
+    {
+      "id": "order-1784268114004",
+      "user_id": "user-1784265111240",
+      "restaurant_id": "rest-1784265186622",
+      "total_amount": 0,
+      "fulfillment_type": "DINE_IN",
+      "current_driver_eta": "2026-07-17T06:16:54.004Z",
+      "scheduled_fire_time": "2026-07-17T06:01:54.004Z",
+      "order_status": "PREPARING"
+    },
+    {
+      "id": "order-1784269002711",
+      "user_id": "user-1784265111240",
+      "restaurant_id": "rest-1784265186622",
+      "total_amount": 1000,
+      "fulfillment_type": "DINE_IN",
+      "current_driver_eta": "2026-07-17T06:31:42.711Z",
+      "scheduled_fire_time": "2026-07-17T06:16:42.711Z",
+      "order_status": "PREPARING"
+    },
+    {
+      "id": "order-1784270575351",
+      "user_id": "user-1784265111240",
+      "restaurant_id": "rest-1784265186622",
+      "total_amount": 0,
+      "fulfillment_type": "DINE_IN",
+      "current_driver_eta": "2026-07-17T09:30:44.447Z",
+      "scheduled_fire_time": "2026-07-17T09:15:44.447Z",
+      "order_status": "COMPLETED"
+    },
+    {
+      "id": "order-1784270654983",
+      "user_id": "user-1784265111240",
+      "restaurant_id": "rest-1784265186622",
+      "total_amount": 0,
+      "fulfillment_type": "DINE_IN",
+      "current_driver_eta": "2026-07-17T09:26:14.983Z",
+      "scheduled_fire_time": "2026-07-17T09:11:14.983Z",
+      "order_status": "PLACED"
+    },
+    {
+      "id": "order-1784270720509",
+      "user_id": "user-1784265111240",
+      "restaurant_id": "rest-1784265186622",
+      "total_amount": 1000,
+      "fulfillment_type": "DINE_IN",
+      "current_driver_eta": "2026-07-17T06:57:31.813Z",
+      "scheduled_fire_time": "2026-07-17T06:32:20.509Z",
+      "order_status": "PREPARING"
+    },
+    {
+      "id": "order-1784270993881",
+      "user_id": "user-1784265111240",
+      "restaurant_id": "rest-1784265186622",
+      "total_amount": 1000,
+      "fulfillment_type": "DINE_IN",
+      "current_driver_eta": "2026-07-17T06:51:53.881Z",
+      "scheduled_fire_time": "2026-07-17T06:36:53.881Z",
+      "order_status": "PREPARING",
+      "payment_intent_id": "pi_test_mock_thw89201kdjsa",
+      "escrow_status": "HOLD"
+    },
+    {
+      "id": "order-1784277086377",
+      "user_id": "user-1784265111240",
+      "restaurant_id": "rest-1784265186622",
+      "total_amount": 1000,
+      "fulfillment_type": "TAKEAWAY",
+      "current_driver_eta": "2026-07-17T11:03:26.377Z",
+      "scheduled_fire_time": "2026-07-17T10:48:26.377Z",
+      "order_status": "PLACED",
+      "table_id": null
+    },
+    {
+      "id": "order-1784277097571",
+      "user_id": "user-1784265111240",
+      "restaurant_id": "rest-1784265186622",
+      "total_amount": 1000,
+      "fulfillment_type": "TAKEAWAY",
+      "current_driver_eta": "2026-07-17T11:03:37.571Z",
+      "scheduled_fire_time": "2026-07-17T10:48:37.571Z",
+      "order_status": "PLACED",
+      "table_id": null
+    }
+  ],
+  "order_items": [
+    {
+      "order_id": "order-1784265237366",
+      "menu_item_id": "item-1784265206947",
+      "quantity": 1,
+      "price_at_purchase": 1000
+    },
+    {
+      "order_id": "order-1784265667792",
+      "menu_item_id": "item-1784265206947",
+      "quantity": 1,
+      "price_at_purchase": 1000
+    },
+    {
+      "order_id": "order-1784266776723",
+      "menu_item_id": "item-1784265206947",
+      "quantity": 1,
+      "price_at_purchase": 1000
+    },
+    {
+      "order_id": "order-1784269002711",
+      "menu_item_id": "item-1784265206947",
+      "quantity": 1,
+      "price_at_purchase": 1000
+    },
+    {
+      "order_id": "order-1784270720509",
+      "menu_item_id": "item-1784265206947",
+      "quantity": 1,
+      "price_at_purchase": 1000
+    },
+    {
+      "order_id": "order-1784270993881",
+      "menu_item_id": "item-1784265206947",
+      "quantity": 1,
+      "price_at_purchase": 1000
+    },
+    {
+      "order_id": "order-1784277086377",
+      "menu_item_id": "item-1784265206947",
+      "quantity": 1,
+      "price_at_purchase": 1000
+    },
+    {
+      "order_id": "order-1784277097571",
+      "menu_item_id": "item-1784265206947",
+      "quantity": 1,
+      "price_at_purchase": 1000
+    }
+  ],
+  "tables": [
+    {
+      "id": "table-d1",
+      "restaurant_id": "f82e4f22-3816-4243-9a15-e642b8c2a0c0",
+      "table_number": "Table 1",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-d2",
+      "restaurant_id": "f82e4f22-3816-4243-9a15-e642b8c2a0c0",
+      "table_number": "Table 2",
+      "capacity": 2,
+      "is_available": false
+    },
+    {
+      "id": "table-d3",
+      "restaurant_id": "f82e4f22-3816-4243-9a15-e642b8c2a0c0",
+      "table_number": "Table 3",
+      "capacity": 6,
+      "is_available": true
+    },
+    {
+      "id": "table-k1",
+      "restaurant_id": "1b1df56c-9f3f-4c12-9332-58144aa5b7f2",
+      "table_number": "Table A",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-k2",
+      "restaurant_id": "1b1df56c-9f3f-4c12-9332-58144aa5b7f2",
+      "table_number": "Table B",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-1784265199921",
+      "restaurant_id": "rest-1784265186622",
+      "table_number": "Table 1",
+      "capacity": 2,
+      "is_available": true
+    },
+    {
+      "id": "table-gs1",
+      "restaurant_id": "rest-gardenstate123",
+      "table_number": "Table 1",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-gs2",
+      "restaurant_id": "rest-gardenstate123",
+      "table_number": "Booth 3",
+      "capacity": 6,
+      "is_available": true
+    },
+    {
+      "id": "table-cb1",
+      "restaurant_id": "rest-crossbronx456",
+      "table_number": "Counter Seat 5",
+      "capacity": 1,
+      "is_available": true
+    },
+    {
+      "id": "table-cb2",
+      "restaurant_id": "rest-crossbronx456",
+      "table_number": "Table 12",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-sc1",
+      "restaurant_id": "rest-secunderabad789",
+      "table_number": "Table A1",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-sc2",
+      "restaurant_id": "rest-secunderabad789",
+      "table_number": "Family Table",
+      "capacity": 8,
+      "is_available": true
+    },
+    {
+      "id": "table-nh1",
+      "restaurant_id": "rest-nh44pitstop",
+      "table_number": "AC Cabin Table 1",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-nh2",
+      "restaurant_id": "rest-nh44pitstop",
+      "table_number": "Highway Garden Seat 2",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-ko1",
+      "restaurant_id": "rest-kompallyoasis",
+      "table_number": "Garden View Table 3",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-ko2",
+      "restaurant_id": "rest-kompallyoasis",
+      "table_number": "Standard Booth 5",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-bg1",
+      "restaurant_id": "rest-bowenpallygrill",
+      "table_number": "Window Table 1",
+      "capacity": 2,
+      "is_available": true
+    },
+    {
+      "id": "table-kd1",
+      "restaurant_id": "rest-kandlakoyadhaba",
+      "table_number": "Charpai Bed Seat A",
+      "capacity": 6,
+      "is_available": true
+    },
+    {
+      "id": "table-kd2",
+      "restaurant_id": "rest-kandlakoyadhaba",
+      "table_number": "Charpai Bed Seat B",
+      "capacity": 6,
+      "is_available": true
+    },
+    {
+      "id": "table-mb1",
+      "restaurant_id": "rest-manhattanbistro",
+      "table_number": "Cozy Corner Table 10",
+      "capacity": 2,
+      "is_available": true
+    },
+    {
+      "id": "table-hd1",
+      "restaurant_id": "rest-hobokendiner",
+      "table_number": "Booth #4",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-af1",
+      "restaurant_id": "rest-astoriafood",
+      "table_number": "Main Hall Table A",
+      "capacity": 4,
+      "is_available": true
+    }
+  ]
+}

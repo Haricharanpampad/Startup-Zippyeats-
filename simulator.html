@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startup Dev Tools - Escrow Webhook Simulator</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f7f9fa; color: #2d3748; }
+        .nav-bar { background: white; padding: 15px 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin-left: auto; margin-right: auto; width: 100%; box-sizing: border-box; }
+        .nav-logo { font-size: 18px; font-weight: bold; color: #ff4757; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+        .nav-link { text-decoration: none; color: #555; font-weight: 600; font-size: 14px; transition: 0.2s; padding-bottom: 4px; }
+        .nav-link:hover { color: #ff4757; }
+        .nav-link.active { color: #ff4757; font-weight: bold; border-bottom: 2px solid #ff4757; }
+        
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 500px; margin: 0 auto; }
+        h2 { color: #2f3542; margin-top: 0; border-bottom: 2px solid #f1f2f6; padding-bottom: 10px; }
+        .form-group { display: flex; flex-direction: column; margin-bottom: 15px; }
+        label { font-size: 12px; font-weight: bold; color: #57606f; margin-bottom: 5px; text-transform: uppercase; }
+        input { padding: 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; }
+        button { background-color: #2ed573; color: white; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s; margin-top: 10px; }
+        button:hover { background-color: #26af5f; }
+        #response-box { margin-top: 20px; padding: 15px; border-radius: 6px; display: none; font-family: monospace; font-size: 13px; }
+        .success { background-color: #e3fcef; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <a href="index.html" class="nav-logo">🚗 Route & Preorder Food Sync</a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">🗺️ Route Map</a>
+            <a href="restaurant-signup.html" class="nav-link">🏪 Restaurant Sign-up</a>
+            <a href="kitchen.html" class="nav-link">🔥 Kitchen Display</a>
+            <a href="simulator.html" class="nav-link active">💳 Webhook Simulator</a>
+            <a href="restaurant-admin.html" class="nav-link">📈 Operations & ROI</a>
+        </div>
+    </div>
+
+<div class="card">
+    <h2>💳 Webhook Simulator</h2>
+    <p style="font-size: 13px; color: #747d8c;">Use this developer module to mock a successful payment gateway checkout event.</p>
+    
+    <div class="form-group">
+        <label for="order-id">Active Order UUID</label>
+        <input id="order-id" type="text" placeholder="e.g., a1b2c3d4-e5f6-7788-99aa...">
+    </div>
+
+    <div class="form-group">
+        <label for="intent-id">Mock Payment Intent ID</label>
+        <input id="intent-id" type="text" value="pi_test_mock_thw89201kdjsa" readonly>
+    </div>
+
+    <button id="simulate-btn">Simulate Payment Success</button>
+
+    <div id="response-box"></div>
+</div>
+
+<script>
+    // Auto-populate from localStorage if available
+    window.addEventListener('DOMContentLoaded', () => {
+        const lastOrderId = localStorage.getItem('last_placed_order_id');
+        if (lastOrderId) {
+            document.getElementById('order-id').value = lastOrderId;
+        }
+    });
+
+    document.getElementById('simulate-btn').addEventListener('click', async () => {
+        const orderId = document.getElementById('order-id').value.trim();
+        const intentId = document.getElementById('intent-id').value;
+        const responseBox = document.getElementById('response-box');
+
+        if (!orderId) {
+            alert('Please input a valid Order UUID from your database to run the webhook target.');
+            return;
+        }
+
+        // Mirroring the exact JSON body structure your Express server expects
+        const webhookPayload = {
+            payment_intent_id: intentId,
+            metadata: {
+                order_id: orderId
+            }
+        };
+
+        try {
+            responseBox.style.display = 'block';
+            responseBox.className = '';
+            responseBox.innerText = 'Sending transaction broadcast...';
+
+            const response = await fetch('/api/webhooks/payment-success', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(webhookPayload)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                responseBox.classList.add('success');
+                responseBox.innerText = `✅ Server Response Code 200:\n${JSON.stringify(data, null, 2)}`;
+            } else {
+                responseBox.classList.add('error');
+                responseBox.innerText = `❌ Error Code ${response.status}:\n${JSON.stringify(data, null, 2)}`;
+            }
+
+        } catch (err) {
+            responseBox.classList.add('error');
+            responseBox.innerText = `❌ Delivery Failed! Is your server running on port 3000?\nError Details: ${err.message}`;
+        }
+    });
+</script>
+
+</body>
+</html>

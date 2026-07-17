@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traveler Authentication - Route Preorder</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f7f9fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .login-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 440px; box-sizing: border-box; transition: all 0.3s ease; border-top: 5px solid #ff4757; }
+        h2 { margin-top: 0; color: #2f3542; font-size: 24px; border-bottom: 2px solid #f1f2f6; padding-bottom: 12px; text-align: center; font-weight: 700; }
+        .form-group { display: flex; flex-direction: column; margin-bottom: 16px; }
+        label { font-size: 11px; font-weight: bold; color: #57606f; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+        input { padding: 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; transition: all 0.2s; box-sizing: border-box; width: 100%; }
+        input:focus { border-color: #ff4757; box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.1); }
+        button { background-color: #ff4757; color: white; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; transition: all 0.2s; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+        button:hover { background-color: #e84118; transform: translateY(-1px); }
+        button:active { transform: translateY(0); }
+        .error-message { background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 6px; font-size: 13px; margin-bottom: 15px; display: none; text-align: center; border: 1px solid #f5c6cb; font-weight: 500; }
+        .success-message { background-color: #e3fcef; color: #155724; padding: 12px; border-radius: 6px; font-size: 13px; margin-bottom: 15px; display: none; text-align: center; border: 1px solid #c3e6cb; font-weight: 500; }
+        .toggle-link { text-align: center; margin-top: 20px; font-size: 13px; color: #57606f; }
+        .toggle-link a { color: #ff4757; font-weight: bold; text-decoration: none; transition: color 0.2s; }
+        .toggle-link a:hover { color: #e84118; text-decoration: underline; }
+        .back-home { text-align: center; margin-top: 15px; }
+        .back-home a { font-size: 13px; color: #718096; text-decoration: none; font-weight: 500; }
+        .back-home a:hover { color: #1a202c; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <!-- LOGIN VIEW -->
+    <div id="login-form-view">
+        <h2>Traveler Login</h2>
+        
+        <div id="error-box" class="error-message"></div>
+        <div id="success-box" class="success-message"></div>
+
+        <div class="form-group">
+            <label for="email-input">Email Address</label>
+            <input id="email-input" type="email" placeholder="e.g., alex@traveler.com" autocomplete="email">
+        </div>
+
+        <div class="form-group">
+            <label for="password-input">Password</label>
+            <input id="password-input" type="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+
+        <button id="login-btn">Sign In</button>
+        
+        <div class="toggle-link">
+            Don't have an account? <a href="#" id="to-register-btn">Create traveler account</a>
+        </div>
+    </div>
+
+    <!-- REGISTER VIEW -->
+    <div id="register-form-view" style="display: none;">
+        <h2>Traveler Register</h2>
+        
+        <div id="reg-error-box" class="error-message"></div>
+        <div id="reg-success-box" class="success-message"></div>
+
+        <div class="form-group">
+            <label for="reg-name">Full Name</label>
+            <input id="reg-name" type="text" placeholder="e.g., Alex Johnson" autocomplete="name">
+        </div>
+
+        <div class="form-group">
+            <label for="reg-email">Email Address</label>
+            <input id="reg-email" type="email" placeholder="e.g., alex@traveler.com" autocomplete="email">
+        </div>
+
+        <div class="form-group">
+            <label for="reg-phone">Phone Number</label>
+            <input id="reg-phone" type="tel" placeholder="e.g., +1 (555) 019-2834" autocomplete="tel">
+        </div>
+
+        <div class="form-group">
+            <label for="reg-password">Password</label>
+            <input id="reg-password" type="password" placeholder="Choose a secure password" autocomplete="new-password">
+        </div>
+
+        <button id="register-btn">Sign Up</button>
+        
+        <div class="toggle-link">
+            Already registered? <a href="#" id="to-login-btn">Log in to your account</a>
+        </div>
+    </div>
+
+    <div class="back-home">
+        <a href="index.html">← Back to Map Dashboard</a>
+    </div>
+</div>
+
+<script>
+    const loginView = document.getElementById('login-form-view');
+    const registerView = document.getElementById('register-form-view');
+
+    // Navigation switches
+    document.getElementById('to-register-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        loginView.style.display = 'none';
+        registerView.style.display = 'block';
+    });
+
+    document.getElementById('to-login-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        registerView.style.display = 'none';
+        loginView.style.display = 'block';
+    });
+
+    // 🔑 traveler Login handler
+    document.getElementById('login-btn').addEventListener('click', async () => {
+        const email = document.getElementById('email-input').value.trim();
+        const password = document.getElementById('password-input').value;
+        const errorBox = document.getElementById('error-box');
+        const successBox = document.getElementById('success-box');
+
+        errorBox.style.display = 'none';
+        successBox.style.display = 'none';
+
+        if (!email || !password) {
+            errorBox.innerText = "Please complete all login fields.";
+            errorBox.style.display = 'block';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                successBox.innerText = "🚀 Login Successful! Redirecting...";
+                successBox.style.display = 'block';
+
+                // Securely save JWT Token and customer details in local browser storage
+                localStorage.setItem('traveler_jwt_token', data.token);
+                localStorage.setItem('traveler_user_id', data.user.id);
+                localStorage.setItem('traveler_user_name', data.user.name);
+
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1200);
+
+            } else {
+                errorBox.innerText = data.error || "Authentication failed.";
+                errorBox.style.display = 'block';
+            }
+        } catch (err) {
+            errorBox.innerText = "Unable to reach auth server. Please make sure the backend is running.";
+            errorBox.style.display = 'block';
+        }
+    });
+
+    // 📝 traveler Registration handler
+    document.getElementById('register-btn').addEventListener('click', async () => {
+        const name = document.getElementById('reg-name').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const phone = document.getElementById('reg-phone').value.trim();
+        const password = document.getElementById('reg-password').value;
+        const errorBox = document.getElementById('reg-error-box');
+        const successBox = document.getElementById('reg-success-box');
+
+        errorBox.style.display = 'none';
+        successBox.style.display = 'none';
+
+        if (!name || !email || !password) {
+            errorBox.innerText = "Full Name, Email Address, and Password are required.";
+            errorBox.style.display = 'block';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password, phone })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                successBox.innerText = "🎉 Registration Successful! Automatically logging you in...";
+                successBox.style.display = 'block';
+
+                // Automatically log in traveler using standard credentials
+                try {
+                    const loginRes = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    const loginData = await loginRes.json();
+                    
+                    if (loginRes.ok) {
+                        localStorage.setItem('traveler_jwt_token', loginData.token);
+                        localStorage.setItem('traveler_user_id', loginData.user.id);
+                        localStorage.setItem('traveler_user_name', loginData.user.name);
+                        
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1200);
+                        return;
+                    }
+                } catch(loginErr) {
+                    console.error("Auto login error:", loginErr);
+                }
+
+                // Fallback login direction
+                setTimeout(() => {
+                    registerView.style.display = 'none';
+                    loginView.style.display = 'block';
+                    document.getElementById('email-input').value = email;
+                    document.getElementById('password-input').value = password;
+                    document.getElementById('success-box').innerText = "Account created. Please login.";
+                    document.getElementById('success-box').style.display = "block";
+                }, 1500);
+
+            } else {
+                errorBox.innerText = data.error || "Registration failed.";
+                errorBox.style.display = 'block';
+            }
+        } catch (err) {
+            errorBox.innerText = "Unable to reach registration server. Please make sure the backend is running.";
+            errorBox.style.display = 'block';
+        }
+    });
+</script>
+
+</body>
+</html>

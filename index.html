@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route & Preorder Food Sync Map</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f7f9fa; }
+        .nav-bar { background: white; padding: 15px 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin-left: auto; margin-right: auto; width: 100%; box-sizing: border-box; }
+        .nav-logo { font-size: 18px; font-weight: bold; color: #ff4757; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+        .nav-link { text-decoration: none; color: #555; font-weight: 600; font-size: 14px; transition: 0.2s; padding-bottom: 4px; }
+        .nav-link:hover { color: #ff4757; }
+        .nav-link.active { color: #ff4757; font-weight: bold; border-bottom: 2px solid #ff4757; }
+        
+        .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+        .controls { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; gap: 15px; align-items: center; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+        label { font-size: 12px; font-weight: bold; color: #555; text-transform: uppercase; }
+        input { padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+        button { padding: 12px 24px; background-color: #ff4757; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 17px; transition: 0.2s; }
+        button:hover { background-color: #e84118; }
+        #map { height: 600px; width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <a href="index.html" class="nav-logo">🚗 Route & Preorder Food Sync</a>
+        <div class="nav-links" id="nav-links-container">
+            <a href="index.html" class="nav-link active">🗺️ Route Map</a>
+            <a href="restaurant-signup.html" class="nav-link">🏪 Restaurant Sign-up</a>
+            <a href="kitchen.html" class="nav-link">🔥 Kitchen Display</a>
+            <a href="simulator.html" class="nav-link">💳 Webhook Simulator</a>
+            <a href="restaurant-admin.html" class="nav-link">📈 Operations & ROI</a>
+        </div>
+    </div>
+
+<div class="container">
+    <h2>Route-Based Preorder System</h2>
+
+    <div class="controls" style="flex-wrap: wrap; gap: 20px;">
+        <div class="input-group" style="flex: 2; min-width: 250px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                <label for="origin-input" style="margin-bottom: 0;">Starting From (Point A)</label>
+                <button id="use-location-btn" style="margin: 0; padding: 4px 10px; font-size: 11px; background: #3b82f6; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: 0.2s; line-height: 1;">
+                    📍 Use My Location
+                </button>
+            </div>
+            <input id="origin-input" type="text" placeholder="Enter starting address or city...">
+        </div>
+
+        <div class="input-group" style="flex: 2; min-width: 250px;">
+            <label for="destination-input">Heading To (Point B)</label>
+            <input id="destination-input" type="text" placeholder="Enter destination address or city...">
+        </div>
+
+        <div class="input-group" style="flex: 1; min-width: 150px; max-width: 220px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label for="speed-input" style="margin-bottom: 0;">🚗 Speed (mph)</label>
+                <span id="speed-val" style="font-weight: bold; color: #ff4757; font-size: 13px;">60 mph</span>
+            </div>
+            <input id="speed-input" type="range" min="15" max="90" value="60" style="padding: 0; margin-top: 10px; width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; cursor: pointer; outline: none;">
+        </div>
+
+        <button id="find-route-btn" style="height: 46px; margin-top: auto; display: flex; align-items: center; justify-content: center; margin-bottom: 0;">Plan Route</button>
+    </div>
+
+    <!-- Map & Sidebar Side-by-Side Container -->
+    <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px; margin-bottom: 30px;">
+        <!-- Map (2/3 width on wide screens) -->
+        <div style="flex: 2; min-width: 300px; display: flex; flex-direction: column;">
+            <div id="map"></div>
+        </div>
+        
+        <!-- Sidebar: Preordering Facilitated Restaurants List (1/3 width) -->
+        <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-height: 600px; overflow-y: auto; border-top: 4px solid #ff4757;">
+            <h3 style="margin: 0; color: #2d3748; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between; font-weight: bold;">
+                <span style="display: flex; align-items: center; gap: 6px;">🏪 Partner Diners</span>
+                <span id="restaurant-count" style="font-size: 12px; background: #ffe0e3; color: #ff4757; padding: 2px 8px; border-radius: 12px; font-weight: bold;">0</span>
+            </h3>
+            
+            <div id="route-filter-msg" style="font-size: 13px; color: #718096; margin: 0; display: none; background: #f0fdf4; padding: 10px; border-left: 4px solid #22c55e; border-radius: 4px;">
+                🔍 Filtering restaurants near your route...
+            </div>
+            
+            <div id="restaurants-sidebar-list" style="display: flex; flex-direction: column; gap: 12px;">
+                <p style="color: #718096; font-size: 14px; text-align: center; padding: 20px 0;">Loading preordering-facilitated restaurants...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🚗 LIVE TRIP TRACKING & COOKING PREP SYNC SIMULATOR -->
+    <div id="live-simulation-panel" style="display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border-top: 4px solid #3b82f6; margin-top: 15px; margin-bottom: 15px; flex-direction: column; gap: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+            <h3 style="margin: 0; color: #1e293b; font-size: 18px; display: flex; align-items: center; gap: 8px; font-weight: bold;">
+                <span>🚗 Live Preorder Sync & GPS Simulator</span>
+                <span id="sim-status-badge" style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 10px; border-radius: 12px; font-weight: bold;">IDLE</span>
+            </h3>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button id="start-sim-btn" style="margin-top: 0; padding: 8px 16px; background-color: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.2s;">
+                    ▶️ Start Trip Simulation
+                </button>
+                <button id="pause-sim-btn" style="margin-top: 0; padding: 8px 16px; background-color: #64748b; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.2s; display: none;">
+                    ⏸️ Pause Simulation
+                </button>
+                <button id="reset-sim-btn" style="margin-top: 0; padding: 8px 16px; background-color: #ef4444; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.2s; display: none;">
+                    🔄 Reset Trip
+                </button>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <label style="color: #64748b; font-size: 10px; font-weight: bold; text-transform: uppercase;">Tracking Preorder ID</label>
+                <div id="sim-order-id-display" style="font-family: monospace; font-size: 13px; font-weight: bold; color: #0f172a; margin-top: 4px; word-break: break-all;">-</div>
+            </div>
+            <div style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <label style="color: #64748b; font-size: 10px; font-weight: bold; text-transform: uppercase;">GPS Location Progress</label>
+                <div style="font-size: 14px; font-weight: bold; color: #0f172a; margin-top: 4px; display: flex; justify-content: space-between; align-items: center;">
+                    <span id="sim-distance-display">0% along route</span>
+                    <span id="sim-miles-display" style="font-size: 12px; color: #64748b;">-</span>
+                </div>
+                <div style="width: 100%; background-color: #cbd5e1; height: 6px; border-radius: 3px; margin-top: 8px; overflow: hidden;">
+                    <div id="sim-progress-bar" style="width: 0%; height: 100%; background-color: #3b82f6; transition: width 0.5s ease;"></div>
+                </div>
+            </div>
+            <div style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <label style="color: #64748b; font-size: 10px; font-weight: bold; text-transform: uppercase;">Current Drive ETA</label>
+                <div id="sim-eta-display" style="font-size: 18px; font-weight: bold; color: #ff4757; margin-top: 4px;">- mins</div>
+            </div>
+            <div style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <label style="color: #64748b; font-size: 10px; font-weight: bold; text-transform: uppercase;">Kitchen Synchronization</label>
+                <div id="sim-cooking-status-display" style="font-size: 14px; font-weight: bold; color: #d97706; margin-top: 4px;">Waiting for Fire Window</div>
+                <div id="sim-cooking-countdown-display" style="font-size: 11px; color: #64748b; margin-top: 2px;">-</div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; align-items: center; background: #eff6ff; padding: 12px; border-radius: 6px; border: 1px solid #bfdbfe;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 18px;">💡</span>
+                <span style="font-size: 13px; color: #1e3a8a; font-weight: 500;">Simulate dynamic highway conditions to see the cooking sync reschedule automatically!</span>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button id="sim-traffic-btn" style="margin-top: 0; padding: 6px 12px; background: #f59e0b; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.2s;">
+                    ⚠️ Add Traffic delay (+10m)
+                </button>
+                <button id="sim-clear-btn" style="margin-top: 0; padding: 6px 12px; background: #10b981; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.2s;">
+                    🚀 Clear Road Sprint (-5m)
+                </button>
+                <button id="sim-arrival-btn" style="margin-top: 0; padding: 6px 12px; background: #8b5cf6; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.2s;">
+                    📍 Trigger Arrival Geofence
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="menu-modal" style="display:none; position:fixed; top:50%; left:50%; transform: translate(-50%, -50%); width:95%; max-width:600px; height: 85vh; max-height: 700px; background:white; padding:25px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.15); z-index:1000; flex-direction: column; border-top: 6px solid #ff4757; box-sizing: border-box;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 15px;">
+        <h3 id="modal-restaurant-name" style="margin: 0; color: #1e293b; font-size: 20px; font-weight: bold;">Restaurant Menu</h3>
+        <span onclick="closeModal()" style="font-size: 24px; color: #94a3b8; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#ff4757'" onmouseout="this.style.color='#94a3b8'">×</span>
+    </div>
+    
+    <div id="menu-items-list" style="flex: 1; overflow-y: auto; padding-right: 5px; margin-bottom: 15px;"></div>
+    
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+        <label style="font-weight: 700; color: #475569; display: block; margin-bottom: 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Fulfillment Preference:</label>
+        <div style="display: flex; gap: 20px;">
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: #1e293b; cursor: pointer;">
+                <input type="radio" name="fulfillment" value="DINE_IN" checked style="width: 18px; height: 18px; accent-color: #ff4757;"> 🍽️ Dine-in Seating
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: #1e293b; cursor: pointer;">
+                <input type="radio" name="fulfillment" value="TAKEAWAY" style="width: 18px; height: 18px; accent-color: #ff4757;"> 🛍️ Roadside Pickup
+            </label>
+        </div>
+        
+        <div id="table-reservation-container" style="margin-top: 12px;">
+            <label style="font-weight: 700; color: #475569; display: block; margin-bottom: 5px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">🪑 Pre-Select Available Table:</label>
+            <select id="table-select" style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; background: white; cursor: pointer; color: #1e293b; font-weight: 500;"></select>
+            <p id="table-status-msg" style="margin: 5px 0 0 0; font-size: 12px; color: #64748b; font-weight: 500;"></p>
+        </div>
+    </div>
+    
+    <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 2px solid #f1f5f9; padding-top: 15px;">
+        <button onclick="closeModal()" style="margin: 0; padding: 10px 20px; background: #e2e8f0; color: #475569; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#cbd5e1'" onmouseout="this.style.background='#e2e8f0'">Close</button>
+        <button id="confirm-order-btn" style="margin: 0; padding: 10px 24px; background: #ff4757; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#e84118'" onmouseout="this.style.background='#ff4757'">Confirm Preorder</button>
+    </div>
+</div>
+
+<script>
+    // 🌟 FIX FOR GOOGLE MAPS AUTOCOMPLETE SUGGESTIONS SELECTION IN IFRAMES/TOUCH DEVICES
+    // Google Maps Autocomplete relies on 'mousedown' events on .pac-item to trigger selection.
+    // In iframe or touch-emulated environments, the input element may lose focus (blur) before
+    // the selection is registered, causing the suggestion dropdown to disappear without selection.
+    // Additionally, touch devices may not trigger 'mousedown' correctly.
+    
+    // Prevent input blur when clicking/tapping on suggestions
+    document.addEventListener('mousedown', function(e) {
+        if (e.target && e.target.closest('.pac-item')) {
+            e.preventDefault();
+        }
+    }, true);
+    
+    document.addEventListener('touchstart', function(e) {
+        if (e.target && e.target.closest('.pac-item')) {
+            e.preventDefault();
+            
+            // Programmatically dispatch a mousedown event for touch devices
+            const item = e.target.closest('.pac-item');
+            const mousedownEvent = new MouseEvent('mousedown', {
+                bubbles: true,
+                cancelable: true,
+                view: window
+            });
+            item.dispatchEvent(mousedownEvent);
+        }
+    }, true);
+
+    document.addEventListener('pointerdown', function(e) {
+        if (e.target && e.target.closest('.pac-item')) {
+            e.preventDefault();
+        }
+    }, true);
+
+    let map, directionsService, directionsRenderer;
+    let originAutocomplete, destinationAutocomplete;
+    let selectedRestaurantId = null;
+    const loggedInUserId = localStorage.getItem('traveler_user_id') || "mock-user-id";
+    let markers = [];
+    let allRestaurants = [];
+    let infoWindow = null;
+    let currentLocationLatLng = null;
+    let currentLocationMarker = null;
+
+    // =========================================================================
+    // 🚗 LIVE PREORDER GPS TRIP SIMULATOR CORE ENGINE
+    // =========================================================================
+    let simulationInterval = null;
+    let simPathPoints = []; 
+    let currentSimStepIndex = 0;
+    let simEtaMinutes = 0;
+    let simOrderData = null; 
+    let simCarMarker = null; 
+    let simOriginalEtaMinutes = 0; 
+    let simAddedDelayMinutes = 0;
+    let simRestaurantData = null;
+
+    // Reset simulator UI and values completely
+    function resetSimulatorUI() {
+        if (simulationInterval) {
+            clearInterval(simulationInterval);
+            simulationInterval = null;
+        }
+        if (simCarMarker) {
+            simCarMarker.setMap(null);
+            simCarMarker = null;
+        }
+        currentSimStepIndex = 0;
+        simAddedDelayMinutes = 0;
+        document.getElementById("start-sim-btn").style.display = "inline-block";
+        document.getElementById("pause-sim-btn").style.display = "none";
+        document.getElementById("reset-sim-btn").style.display = "none";
+        document.getElementById("sim-status-badge").textContent = "IDLE";
+        document.getElementById("sim-status-badge").style.backgroundColor = "#e0f2fe";
+        document.getElementById("sim-status-badge").style.color = "#0369a1";
+        document.getElementById("sim-progress-bar").style.width = "0%";
+        document.getElementById("sim-distance-display").textContent = "0% along route";
+        document.getElementById("sim-miles-display").textContent = "- miles remaining";
+        document.getElementById("sim-eta-display").textContent = "- mins";
+        document.getElementById("sim-cooking-status-display").textContent = "Waiting for Fire Window";
+        document.getElementById("sim-cooking-status-display").style.color = "#d97706";
+        document.getElementById("sim-cooking-countdown-display").textContent = "-";
+    }
+
+    // Initialize simulation from placed or active order
+    async function initSimulationFromOrder(orderId) {
+        resetSimulatorUI();
+        document.getElementById("live-simulation-panel").style.display = "flex";
+        document.getElementById("sim-order-id-display").textContent = `#${orderId.substring(0,8)}...`;
+        
+        try {
+            // Fetch single order details
+            const response = await fetch(`/api/orders/${orderId}`);
+            if (!response.ok) {
+                console.error("Failed to load order for simulation:", orderId);
+                return;
+            }
+            simOrderData = await response.json();
+            
+            // Find restaurant
+            simRestaurantData = allRestaurants.find(r => r.id === simOrderData.restaurant_id);
+            if (!simRestaurantData) {
+                // If not in allRestaurants, try standard refetching or use fallback mock data
+                await fetchRestaurants();
+                simRestaurantData = allRestaurants.find(r => r.id === simOrderData.restaurant_id) || {
+                    name: "Pitstop Highway Diner",
+                    average_prep_time: 15,
+                    latitude: 37.7749,
+                    longitude: -122.4194,
+                    address: "Highway 101, Exit 24"
+                };
+            }
+            
+            // If we don't have active directions on screen, try to trigger route mapping programmatically!
+            let activeDirections = directionsRenderer ? directionsRenderer.getDirections() : null;
+            if (!activeDirections || !activeDirections.routes || !activeDirections.routes[0]) {
+                // Use coordinates from database/current or fallback search
+                document.getElementById("origin-input").value = "San Francisco, CA";
+                document.getElementById("destination-input").value = simRestaurantData.address;
+                
+                if (directionsService) {
+                    directionsService.route({
+                        origin: "San Francisco, CA",
+                        destination: simRestaurantData.address,
+                        travelMode: google.maps.TravelMode.DRIVING
+                    }, (res, status) => {
+                        if (status === "OK") {
+                            if (directionsRenderer) directionsRenderer.setDirections(res);
+                            findRestaurantsAlongRoute(res.routes[0]);
+                            setTimeout(() => setupPathFromDirections(res.routes[0]), 500);
+                        }
+                    });
+                }
+            } else {
+                setupPathFromDirections(activeDirections.routes[0]);
+            }
+        } catch (e) {
+            console.error("Error setting up simulation tracking:", e);
+        }
+    }
+
+    // Extract path points and trim to closest restaurant location
+    function setupPathFromDirections(route) {
+        if (!route || !route.overview_path || !simRestaurantData) return;
+        
+        const fullPath = route.overview_path;
+        const restLatLng = new google.maps.LatLng(parseFloat(simRestaurantData.latitude), parseFloat(simRestaurantData.longitude));
+        
+        // Find index on path closest to restaurant
+        let closestIndex = 0;
+        let minDistance = Infinity;
+        for (let i = 0; i < fullPath.length; i++) {
+            const dist = google.maps.geometry.spherical.computeDistanceBetween(fullPath[i], restLatLng);
+            if (dist < minDistance) {
+                minDistance = dist;
+                closestIndex = i;
+            }
+        }
+        
+        // Slice path up to closest restaurant index so simulation stops at delivery point!
+        simPathPoints = fullPath.slice(0, closestIndex + 1);
+        if (simPathPoints.length < 2) {
+            simPathPoints = fullPath;
+        }
+        
+        // Set original ETA in minutes
+        simOriginalEtaMinutes = Math.round((route.legs[0]?.duration?.value || 900) / 60);
+        simEtaMinutes = simOriginalEtaMinutes;
+        
+        document.getElementById("sim-status-badge").textContent = "READY";
+        document.getElementById("sim-status-badge").style.backgroundColor = "#dcfce7";
+        document.getElementById("sim-status-badge").style.color = "#15803d";
+        document.getElementById("sim-distance-display").textContent = "0% along route";
+        document.getElementById("sim-miles-display").textContent = `${((route.legs[0]?.distance?.value || 50000) / 1609.34).toFixed(1)} miles remaining`;
+        document.getElementById("sim-eta-display").textContent = `${simEtaMinutes} mins`;
+        
+        // Show reset button
+        document.getElementById("reset-sim-btn").style.display = "inline-block";
+        
+        // Place initial car marker at index 0
+        if (simCarMarker) simCarMarker.setMap(null);
+        simCarMarker = new google.maps.Marker({
+            position: simPathPoints[0],
+            map: map,
+            title: "Simulated Traveler",
+            icon: {
+                url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+                scaledSize: new google.maps.Size(32, 32)
+            },
+            zIndex: 999
+        });
+        
+        if (map) {
+            map.panTo(simPathPoints[0]);
+            map.setZoom(13);
+        }
+        
+        // Calculate initial sync count countdown
+        updateSyncCountdown();
+    }
+
+    // Update synchronization status text & color dynamically
+    function updateSyncCountdown() {
+        if (!simRestaurantData || !simOrderData) return;
+        
+        const avgPrepTime = simRestaurantData.average_prep_time || 15;
+        const diff = simEtaMinutes - avgPrepTime;
+        const statusText = document.getElementById("sim-cooking-status-display");
+        const countdownText = document.getElementById("sim-cooking-countdown-display");
+        
+        if (simOrderData.order_status === "COMPLETED") {
+            statusText.textContent = "✅ Preorder Completed / Escrow Released";
+            statusText.style.color = "#16a34a";
+            countdownText.textContent = "Enjoy your fresh hot preorder!";
+            return;
+        }
+        
+        if (simOrderData.order_status === "PREPARING" || diff <= 0) {
+            statusText.textContent = "🔥 Cooking in Progress!";
+            statusText.style.color = "#dc2626";
+            
+            if (simEtaMinutes > 0) {
+                countdownText.textContent = `Food ready in ~${avgPrepTime} mins (arriving in ${simEtaMinutes} mins)`;
+            } else {
+                countdownText.textContent = "Traveler arrived! Food is fully prepared.";
+            }
+        } else {
+            statusText.textContent = "⏳ Waiting for Fire Window";
+            statusText.style.color = "#d97706";
+            countdownText.textContent = `Cooking starts in ${diff} mins (ETA ${simEtaMinutes}m > Prep ${avgPrepTime}m)`;
+        }
+    }
+
+    // Toggle trip simulation execution
+    function startSimulation() {
+        if (simPathPoints.length === 0) return;
+        
+        document.getElementById("start-sim-btn").style.display = "none";
+        document.getElementById("pause-sim-btn").style.display = "inline-block";
+        document.getElementById("sim-status-badge").textContent = "SIMULATING";
+        document.getElementById("sim-status-badge").style.backgroundColor = "#eff6ff";
+        document.getElementById("sim-status-badge").style.color = "#2563eb";
+        
+        if (simulationInterval) clearInterval(simulationInterval);
+        
+        // Simulation Tick Loop
+        simulationInterval = setInterval(async () => {
+            if (currentSimStepIndex >= simPathPoints.length - 1) {
+                // Auto arrived!
+                clearInterval(simulationInterval);
+                simulationInterval = null;
+                await triggerArrivalGeofence();
+                return;
+            }
+            
+            // Increment progress step
+            currentSimStepIndex = Math.min(simPathPoints.length - 1, currentSimStepIndex + 1);
+            
+            const currentPos = simPathPoints[currentSimStepIndex];
+            if (simCarMarker) simCarMarker.setPosition(currentPos);
+            if (map) map.panTo(currentPos);
+            
+            // Calculate progress stats
+            const percent = currentSimStepIndex / (simPathPoints.length - 1);
+            const percentStr = Math.round(percent * 100);
+            
+            const remainingOriginalEta = (1 - percent) * simOriginalEtaMinutes;
+            simEtaMinutes = Math.max(0, Math.round(remainingOriginalEta) + simAddedDelayMinutes);
+            
+            const totalMiles = (simPathPoints.length * 150 / 1609.34); 
+            const remainingMiles = Math.max(0, (1 - percent) * totalMiles).toFixed(1);
+            
+            // Update UI elements
+            document.getElementById("sim-progress-bar").style.width = `${percentStr}%`;
+            document.getElementById("sim-distance-display").textContent = `${percentStr}% along route`;
+            document.getElementById("sim-miles-display").textContent = `${remainingMiles} miles remaining`;
+            document.getElementById("sim-eta-display").textContent = `${simEtaMinutes} mins`;
+            
+            // Check if cooking triggers now
+            const avgPrepTime = simRestaurantData.average_prep_time || 15;
+            if (simEtaMinutes <= avgPrepTime && simOrderData.order_status === "PLACED") {
+                simOrderData.order_status = "PREPARING";
+                updateSyncCountdown();
+                // Play visual notify celebration
+                showCustomNotification("🔥 Cooking Sequence Initiated!", `
+                    <p style="color: #dc2626; font-weight: bold; font-size: 16px;">⏱️ Traveler has entered the auto-cook threshold!</p>
+                    <p>Remaining drive time is <strong>${simEtaMinutes} minutes</strong>, which matches the restaurant's prep speed of <strong>${avgPrepTime} minutes</strong>.</p>
+                    <p>The kitchen display has automatically received the fire signal to start cooking right now!</p>
+                `, true);
+            } else {
+                updateSyncCountdown();
+            }
+            
+            // Sync with backend every 4 steps
+            if (currentSimStepIndex % 4 === 0) {
+                await syncSimEtaWithBackend();
+            }
+        }, 1200);
+    }
+
+    // Send updated simulated drive times to backend API
+    async function syncSimEtaWithBackend() {
+        if (!simOrderData) return;
+        try {
+            const response = await fetch('/api/navigation/update-eta', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    order_id: simOrderData.id,
+                    updated_eta_minutes: simEtaMinutes
+                })
+            });
+            const data = await response.json();
+            
+            if (data.status === "EMERGENCY_HOLD_TRIGGERED") {
+                // Revert local cooking status
+                simOrderData.order_status = "PLACED";
+                updateSyncCountdown();
+                showCustomNotification("⚠️ Kitchen Hold Triggered!", `
+                    <p style="color: #d97706; font-weight: bold; font-size: 16px;">Kitchen preparation successfully paused!</p>
+                    <p>Because you simulated a major traffic delay (+25 mins ETA), the preorder sync system dynamically sent an emergency pause signal to the kitchen display, halting food preparation to prevent cold or spoiled food.</p>
+                `);
+            }
+        } catch (e) {
+            console.error("Failed to sync simulated ETA with backend:", e);
+        }
+    }
+
+    function pauseSimulation() {
+        if (simulationInterval) {
+            clearInterval(simulationInterval);
+            simulationInterval = null;
+        }
+        document.getElementById("start-sim-btn").style.display = "inline-block";
+        document.getElementById("pause-sim-btn").style.display = "none";
+        document.getElementById("sim-status-badge").textContent = "PAUSED";
+        document.getElementById("sim-status-badge").style.backgroundColor = "#fee2e2";
+        document.getElementById("sim-status-badge").style.color = "#991b1b";
+    }
+
+    function resetSimulation() {
+        resetSimulatorUI();
+        if (simOrderData) {
+            initSimulationFromOrder(simOrderData.id);
+        }
+    }
+
+    // Add Simulated Traffic Jams
+    async function addTrafficDelay() {
+        if (!simOrderData) return;
+        simAddedDelayMinutes += 10;
+        simEtaMinutes += 10;
+        document.getElementById("sim-eta-display").textContent = `${simEtaMinutes} mins`;
+        updateSyncCountdown();
+        
+        // Push instant sync to backend
+        await syncSimEtaWithBackend();
+    }
+
+    // Simulate Clear Roads Sprint
+    async function clearRoadSprint() {
+        if (!simOrderData) return;
+        simAddedDelayMinutes = Math.max(-simOriginalEtaMinutes, simAddedDelayMinutes - 5);
+        simEtaMinutes = Math.max(0, simEtaMinutes - 5);
+        document.getElementById("sim-eta-display").textContent = `${simEtaMinutes} mins`;
+        updateSyncCountdown();
+        
+        // Push instant sync to backend
+        await syncSimEtaWithBackend();
+    }
+
+    // Simulate direct arrival geofence pickup trigger
+    async function triggerArrivalGeofence() {
+        if (!simOrderData || !simRestaurantData) return;
+        pauseSimulation();
+        
+        // Set values directly to arrived
+        currentSimStepIndex = simPathPoints.length - 1;
+        simEtaMinutes = 0;
+        document.getElementById("sim-progress-bar").style.width = "100%";
+        document.getElementById("sim-distance-display").textContent = "100% arrived";
+        document.getElementById("sim-miles-display").textContent = "0 miles remaining";
+        document.getElementById("sim-eta-display").textContent = "0 mins";
+        if (simCarMarker) simCarMarker.setPosition(simPathPoints[simPathPoints.length - 1]);
+        
+        try {
+            // Force status preparing first if we arrived early without firing
+            if (simOrderData.order_status === "PLACED") {
+                await fetch(`/api/orders/${simOrderData.id}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: "PREPARING" })
+                });
+            }
+            
+            // Fulfill the transaction (geofenced pickup)
+            const response = await fetch('/api/orders/fulfill', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    order_id: simOrderData.id,
+                    current_lat: parseFloat(simRestaurantData.latitude),
+                    current_lng: parseFloat(simRestaurantData.longitude)
+                })
+            });
+            const data = await response.json();
+            
+            if (response.ok) {
+                simOrderData.order_status = "COMPLETED";
+                updateSyncCountdown();
+                
+                showCustomNotification("🎉 Preorder Picked Up & Escrow Released!", `
+                    <p style="color: #10b981; font-weight: bold; font-size: 18px;">✅ Geofence match validated! Transaction escrow released.</p>
+                    <p>The Traveler has physically arrived within the 200m geofence radius of <strong>${simRestaurantData.name}</strong>.</p>
+                    <p>The app automatically released the authorized escrow funds to the restaurant. Your food was handed over perfectly fresh!</p>
+                `, true);
+            } else {
+                showCustomNotification("Geofence Arrival Error", `<p>Unable to finalize pickup: ${data.error || "Coordinate mismatch"}</p>`);
+            }
+        } catch (e) {
+            console.error("Geofence arrival trigger failed:", e);
+        }
+    }
+
+    // Automatically check for existing tracked order on load
+    function checkActiveOrderTracker() {
+        const activeOrderId = localStorage.getItem('last_placed_order_id');
+        if (activeOrderId) {
+            initSimulationFromOrder(activeOrderId);
+        }
+    }
+
+    // Initialize traveler nav status
+    function renderTravelerNav() {
+        const navContainer = document.getElementById("nav-links-container");
+        if (!navContainer) return;
+        
+        const token = localStorage.getItem('traveler_jwt_token');
+        const userName = localStorage.getItem('traveler_user_name');
+        
+        if (token && userName) {
+            // Remove any existing traveler links first to prevent duplication
+            const existingUserEl = document.getElementById("nav-traveler-user");
+            if (existingUserEl) existingUserEl.remove();
+            
+            const userSpan = document.createElement("span");
+            userSpan.id = "nav-traveler-user";
+            userSpan.style.display = "flex";
+            userSpan.style.alignItems = "center";
+            userSpan.style.gap = "12px";
+            userSpan.innerHTML = `
+                <span style="font-size: 13px; font-weight: 600; color: #475569; background: #f1f5f9; padding: 4px 10px; border-radius: 12px; display: flex; align-items: center; gap: 4px; margin-left: 10px;">
+                    👤 ${userName}
+                </span>
+                <a href="#" onclick="logoutTraveler(); return false;" class="nav-link" style="color: #ef4444; font-weight: bold; font-size: 14px; text-decoration: none;">Sign Out</a>
+            `;
+            navContainer.appendChild(userSpan);
+        } else {
+            const existingUserEl = document.getElementById("nav-traveler-user");
+            if (existingUserEl) existingUserEl.remove();
+            
+            const loginLink = document.createElement("a");
+            loginLink.id = "nav-traveler-user";
+            loginLink.href = "login.html";
+            loginLink.className = "nav-link";
+            loginLink.style.color = "#ff4757";
+            loginLink.style.fontWeight = "bold";
+            loginLink.style.textDecoration = "none";
+            loginLink.style.fontSize = "14px";
+            loginLink.innerHTML = "🔑 Traveler Login";
+            navContainer.appendChild(loginLink);
+        }
+    }
+
+    window.logoutTraveler = function() {
+        localStorage.removeItem('traveler_jwt_token');
+        localStorage.removeItem('traveler_user_id');
+        localStorage.removeItem('traveler_user_name');
+        window.location.reload();
+    };
+
+    // Render navigation status immediately
+    renderTravelerNav();
+
+    // 🌟 CUSTOM ELEGANT NOTIFICATION MODAL SYSTEM
+    function showCustomNotification(title, htmlContent, isSuccess = false) {
+        let modal = document.getElementById("custom-notification-modal");
+        if (!modal) {
+            modal = document.createElement("div");
+            modal.id = "custom-notification-modal";
+            modal.style.position = "fixed";
+            modal.style.top = "0";
+            modal.style.left = "0";
+            modal.style.width = "100%";
+            modal.style.height = "100%";
+            modal.style.backgroundColor = "rgba(15, 23, 42, 0.85)"; // Slate-900 background with high contrast opacity
+            modal.style.zIndex = "99999";
+            modal.style.display = "flex";
+            modal.style.alignItems = "center";
+            modal.style.justifyContent = "center";
+            modal.style.fontFamily = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+            modal.style.backdropFilter = "blur(4px)";
+            document.body.appendChild(modal);
+        }
+        
+        const headerColor = isSuccess ? "#10b981" : "#ef4444";
+        const icon = isSuccess ? "✅" : "⚠️";
+        
+        modal.innerHTML = `
+            <div style="background: white; border-radius: 12px; max-width: 620px; width: 90%; padding: 30px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); border-top: 6px solid ${headerColor}; transform: translateY(0); transition: all 0.3s ease; max-height: 90vh; overflow-y: auto;">
+                <h3 style="margin-top: 0; color: ${headerColor}; font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <span>${icon}</span> ${title}
+                </h3>
+                <div style="color: #334155; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">
+                    ${htmlContent}
+                </div>
+                <div style="text-align: right;">
+                    <button onclick="document.getElementById('custom-notification-modal').style.display='none'" style="background: #1e293b; color: white; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                        Dismiss
+                    </button>
+                </div>
+            </div>
+        `;
+        modal.style.display = "flex";
+    }
+
+    // Intercept console.error to catch Google Maps API and Places API restrictions dynamically
+    const originalConsoleError = console.error;
+    console.error = function (...args) {
+        originalConsoleError.apply(console, args);
+        const errorMsg = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ');
+        
+        if (errorMsg.includes("ApiTargetBlockedMapError") || errorMsg.includes("ApiTargetBlocked") || errorMsg.includes("is not authorized to use this service or API")) {
+            showPlacesApiRestrictionError();
+        }
+    };
+
+    function showPlacesApiRestrictionError() {
+        const gcpLink = "https://console.cloud.google.com/apis/credentials";
+        showCustomNotification(
+            "Places API: Key Restriction Error",
+            `
+            <p>Google Maps reported an <strong>ApiTargetBlockedMapError</strong>.</p>
+            <p>Your Google Maps API Key has <strong>API restrictions</strong> enabled, but the <strong>Places API</strong> (and/or Directions API) is blocked or not added to the authorized list.</p>
+            
+            <strong style="display: block; margin-top: 15px; margin-bottom: 10px; color: #1e293b; font-size: 16px;">To solve this:</strong>
+            <ol style="margin-left: 0; padding-left: 20px; line-height: 1.8; color: #475569;">
+                <li style="margin-bottom: 8px;">Go to the <a href="${gcpLink}" target="_blank" style="color: #ef4444; text-decoration: underline; font-weight: 600;">Google Cloud Credentials Console</a>.</li>
+                <li style="margin-bottom: 8px;">Find and click on your Google Maps API Key under <strong>"API Keys"</strong>.</li>
+                <li style="margin-bottom: 8px;">Scroll down to the <strong>"API restrictions"</strong> section.</li>
+                <li style="margin-bottom: 8px;">If <strong>"Restrict key"</strong> is selected, make sure to add/check these APIs to the list of authorized APIs:
+                    <ul style="margin-top: 6px; list-style-type: circle; margin-left: 20px; font-weight: 500; color: #1e293b;">
+                        <li>Maps JavaScript API</li>
+                        <li>Places API (New)</li>
+                        <li>Places API</li>
+                        <li>Directions API</li>
+                        <li>Geocoding API</li>
+                    </ul>
+                </li>
+                <li style="margin-bottom: 8px;">Click <strong>"Save"</strong> at the bottom of the page.</li>
+                <li>Wait <strong>2 to 5 minutes</strong> for Google Cloud to propagate the restriction updates, then reload the page and try again!</li>
+            </ol>
+            `
+        );
+    }
+
+    // 🗺️ GOOGLE MAPS GLOBAL AUTHENTICATION FAILURE HANDLER (Catches RefererNotAllowedMapError)
+    window.gm_authFailure = function() {
+        const currentUrl = window.location.origin;
+        const gcpLink = "https://console.cloud.google.com/apis/credentials";
+        
+        showCustomNotification(
+            "Google Maps API: Referrer Restriction Error",
+            `
+            <p>Google Maps could not authorize this request due to a <strong>RefererNotAllowedMapError</strong>.</p>
+            <p>Your Google Maps API Key has referrer restrictions configured, but requests from this AI Studio preview app domain are not yet authorized.</p>
+            
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin: 18px 0; border-left: 4px solid #f59e0b;">
+                <strong style="color: #d97706; font-size: 12px; text-transform: uppercase; display: block; margin-bottom: 6px; font-weight: bold; tracking: 0.05em;">Your Site URL to Authorize:</strong>
+                <code style="background: #e2e8f0; padding: 6px 10px; border-radius: 4px; display: block; word-break: break-all; font-family: monospace; font-size: 13px; color: #1e293b;">
+                    ${currentUrl}/*
+                </code>
+            </div>
+            
+            <strong style="display: block; margin-bottom: 10px; color: #1e293b; font-size: 16px;">To solve this:</strong>
+            <ol style="margin-left: 0; padding-left: 20px; line-height: 1.8; color: #475569;">
+                <li style="margin-bottom: 8px;">Go to the <a href="${gcpLink}" target="_blank" style="color: #ef4444; text-decoration: underline; font-weight: 600;">Google Cloud Credentials Console</a>.</li>
+                <li style="margin-bottom: 8px;">Find and click on your Google Maps API Key under <strong>"API Keys"</strong>.</li>
+                <li style="margin-bottom: 8px;">In the <strong>"Key restrictions"</strong> settings, under <strong>"Application restrictions"</strong>:
+                    <ul style="margin-top: 6px; list-style-type: circle; margin-left: 20px;">
+                        <li>Either select <strong>"None"</strong> (easiest for development and sandbox testing).</li>
+                        <li>Or, under <strong>"Website restrictions"</strong>, add the authorized site URL pattern printed above: <br><code style="background: #f1f5f9; padding: 2px 6px; border-radius: 3px; font-size: 12px; font-family: monospace;">${currentUrl}/*</code></li>
+                    </ul>
+                </li>
+                <li style="margin-bottom: 8px;">Click <strong>"Save"</strong> at the bottom of the page.</li>
+                <li>Wait <strong>2 to 5 minutes</strong> for Google Cloud to propagate the restriction updates, then click plan route to reload the map.</li>
+            </ol>
+            `
+        );
+    };
+
+    window.handleGoogleMapsError = function () {
+        const currentUrl = window.location.origin;
+        showCustomNotification(
+            "Google Maps Load Error",
+            `
+            <p>Google Maps script failed to load. This can happen due to an invalid API key, missing billing, referrer restrictions, or disabled APIs.</p>
+            <p>Please check the following items in your <a href="https://console.cloud.google.com/" target="_blank" style="color: #ef4444; font-weight: bold; text-decoration: underline;">Google Cloud Console</a>:</p>
+            <ul style="margin-left: 0; padding-left: 20px; line-height: 1.8; color: #475569;">
+                <li>The <strong>Maps JavaScript API</strong> and <strong>Places API (New)</strong> must be enabled in your APIs dashboard.</li>
+                <li>Your Google Cloud billing account must be active and linked to the project.</li>
+                <li>Ensure the environment secret <code>GOOGLE_MAPS_API_KEY</code> is correctly configured in AI Studio.</li>
+                <li>Verify your website referrer rules accept requests originating from: <br><code style="background: #f1f5f9; padding: 2px 6px; border-radius: 3px; font-size: 12px; font-family: monospace;">${currentUrl}</code></li>
+            </ul>
+            `
+        );
+    };
+
+    async function loadGoogleMaps() {
+        try {
+            const response = await fetch("/api/config/google-maps-key");
+            const config = await response.json();
+
+            if (!response.ok || !config.apiKey) {
+                throw new Error(config.error || "Missing Google Maps API key.");
+            }
+
+            const script = document.createElement("script");
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(config.apiKey)}&libraries=places,geometry&callback=initMap&loading=async`;
+            script.async = true;
+            script.defer = true;
+            script.onerror = window.handleGoogleMapsError;
+            document.head.appendChild(script);
+        } catch (err) {
+            showCustomNotification(
+                "API Connection Failure",
+                `<p>Could not load the Google Maps API key from the local backend. Please ensure the server is fully running and the <code>GOOGLE_MAPS_API_KEY</code> environment variable is set in your .env configuration.</p>`
+            );
+        }
+    }
+
+    window.initMap = function () {
+        map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 5,
+            center: { lat: 39.8283, lng: -98.5795 },
+            mapTypeControl: false,
+            streetViewControl: false
+        });
+
+        infoWindow = new google.maps.InfoWindow();
+        google.maps.event.addListener(infoWindow, 'closeclick', () => {
+            infoWindow.activeRestaurantId = null;
+            infoWindow.activeMarker = null;
+        });
+
+        directionsService = new google.maps.DirectionsService();
+        directionsRenderer = new google.maps.DirectionsRenderer({
+            map: map,
+            polylineOptions: {
+                strokeColor: "#ff4757",
+                strokeWeight: 5
+            }
+        });
+
+        const originInput = document.getElementById("origin-input");
+        const destInput = document.getElementById("destination-input");
+
+        // Clear tracking if user manually changes standard text
+        originInput.addEventListener("input", () => {
+            currentLocationLatLng = null;
+        });
+
+        originAutocomplete = new google.maps.places.Autocomplete(originInput, {
+            fields: ["geometry", "place_id", "formatted_address", "name"]
+        });
+        destinationAutocomplete = new google.maps.places.Autocomplete(destInput, {
+            fields: ["geometry", "place_id", "formatted_address", "name"]
+        });
+
+        originAutocomplete.bindTo("bounds", map);
+        destinationAutocomplete.bindTo("bounds", map);
+
+        document.getElementById("find-route-btn").addEventListener("click", calculateAndDisplayRoute);
+
+        // Bind Simulator Control Event Listeners
+        document.getElementById("start-sim-btn").addEventListener("click", startSimulation);
+        document.getElementById("pause-sim-btn").addEventListener("click", pauseSimulation);
+        document.getElementById("reset-sim-btn").addEventListener("click", resetSimulation);
+        document.getElementById("sim-traffic-btn").addEventListener("click", addTrafficDelay);
+        document.getElementById("sim-clear-btn").addEventListener("click", clearRoadSprint);
+        document.getElementById("sim-arrival-btn").addEventListener("click", triggerArrivalGeofence);
+
+        // Current Location Setup
+        const locationBtn = document.getElementById("use-location-btn");
+        if (locationBtn) {
+            locationBtn.addEventListener("click", () => {
+                if (!navigator.geolocation) {
+                    showCustomNotification("Geolocation Error", "<p>Geolocation is not supported by your browser.</p>");
+                    return;
+                }
+
+                locationBtn.innerHTML = "⌛ Locating...";
+                locationBtn.disabled = true;
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        currentLocationLatLng = { lat, lng };
+
+                        if (currentLocationMarker) {
+                            currentLocationMarker.setMap(null);
+                        }
+
+                        currentLocationMarker = new google.maps.Marker({
+                            position: currentLocationLatLng,
+                            map: map,
+                            title: "My Location",
+                            icon: {
+                                url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+                                scaledSize: new google.maps.Size(28, 28)
+                            }
+                        });
+
+                        if (typeof google !== "undefined" && google.maps && google.maps.Geocoder) {
+                            const geocoder = new google.maps.Geocoder();
+                            geocoder.geocode({ location: currentLocationLatLng }, (results, status) => {
+                                if (status === "OK" && results[0]) {
+                                    document.getElementById("origin-input").value = results[0].formatted_address;
+                                } else {
+                                    document.getElementById("origin-input").value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+                                }
+                                locationBtn.innerHTML = "📍 Use My Location";
+                                locationBtn.disabled = false;
+                            });
+                        } else {
+                            document.getElementById("origin-input").value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+                            locationBtn.innerHTML = "📍 Use My Location";
+                            locationBtn.disabled = false;
+                        }
+
+                        map.panTo(currentLocationLatLng);
+                        map.setZoom(13);
+                    },
+                    (error) => {
+                        console.error("Geolocation error:", error);
+                        let errMsg = "Unable to retrieve your location.";
+                        if (error.code === 1) errMsg = "Location permission denied. Please enable location access in your browser settings.";
+                        else if (error.code === 2) errMsg = "Location position unavailable.";
+                        else if (error.code === 3) errMsg = "Location request timed out.";
+                        
+                        showCustomNotification("Location Error", `<p>${errMsg}</p>`);
+                        locationBtn.innerHTML = "📍 Use My Location";
+                        locationBtn.disabled = false;
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            });
+        }
+
+        // Speed Input Setup
+        const speedInput = document.getElementById("speed-input");
+        const speedVal = document.getElementById("speed-val");
+        if (speedInput && speedVal) {
+            speedInput.addEventListener("input", () => {
+                speedVal.textContent = `${speedInput.value} mph`;
+                const activeDirections = directionsRenderer.getDirections();
+                if (activeDirections && activeDirections.routes && activeDirections.routes[0]) {
+                    findRestaurantsAlongRoute(activeDirections.routes[0]);
+                }
+            });
+        }
+
+        // Fetch all preordering-facilitated partner diners on load
+        fetchRestaurants();
+    };
+
+    async function fetchRestaurants() {
+        try {
+            const response = await fetch('/api/restaurants');
+            if (!response.ok) throw new Error("Failed to fetch restaurants");
+            allRestaurants = await response.json();
+            
+            document.getElementById("restaurant-count").textContent = allRestaurants.length;
+            
+            renderRestaurantsList(allRestaurants);
+            renderRestaurantsMarkers(allRestaurants);
+            
+            // Resume tracking if there is an active preorder in progress
+            checkActiveOrderTracker();
+        } catch (e) {
+            console.error("Error loading restaurants:", e);
+            document.getElementById("restaurants-sidebar-list").innerHTML = `
+                <p style="color: #ef4444; font-size: 14px; text-align: center; padding: 20px 0;">
+                    ⚠️ Failed to load partner restaurants. Ensure the backend server is running.
+                </p>
+            `;
+        }
+    }
+
+    function renderRestaurantsMarkers(restaurantsToRender) {
+        markers.forEach(m => m.setMap(null));
+        markers = [];
+
+        if (!map) return;
+
+        const bounds = new google.maps.LatLngBounds();
+
+        restaurantsToRender.forEach(r => {
+            const pos = { lat: parseFloat(r.latitude), lng: parseFloat(r.longitude) };
+            bounds.extend(pos);
+
+            const marker = new google.maps.Marker({
+                position: pos,
+                map: map,
+                title: r.name,
+                icon: {
+                    url: "https://maps.google.com/mapfiles/ms/icons/restaurant.png",
+                    scaledSize: new google.maps.Size(40, 40)
+                }
+            });
+
+            marker.addListener("click", () => {
+                openRestaurantInfoWindow(r, marker);
+            });
+
+            marker.restaurantId = r.id;
+            markers.push(marker);
+        });
+
+        if (restaurantsToRender.length > 0) {
+            map.fitBounds(bounds);
+            const listener = google.maps.event.addListener(map, "idle", () => {
+                if (map.getZoom() > 14) map.setZoom(14);
+                google.maps.event.removeListener(listener);
+            });
+        }
+    }
+
+    function openRestaurantInfoWindow(r, marker) {
+        if (!infoWindow || !map) return;
+        
+        infoWindow.activeRestaurantId = r.id;
+        infoWindow.activeMarker = marker;
+
+        const speedMph = parseFloat(document.getElementById("speed-input").value) || 60;
+        const speedMps = (speedMph * 1609.34) / 3600;
+
+        let etaHtml = '';
+        if (r.routeDistanceMeters !== undefined && r.routeDistanceMeters !== null) {
+            const travelSeconds = r.routeDistanceMeters / speedMps;
+            const travelMinutes = Math.round(travelSeconds / 60);
+
+            const arrivalTime = new Date(Date.now() + travelSeconds * 1000);
+            const arrivalStr = arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const readyStatus = (r.average_prep_time || 15) <= travelMinutes 
+                ? `<span style="color: #10b981; font-weight: bold;">✅ Fresh on Arrival</span> (Cooks on road)`
+                : `<span style="color: #f59e0b; font-weight: bold;">⚠️ Ready ${r.average_prep_time - travelMinutes}m after arrival</span>`;
+
+            etaHtml = `
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px; margin: 10px 0; display: flex; flex-direction: column; gap: 4px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                        <span style="color: #166534; font-weight: 500;">🚗 Route Distance:</span>
+                        <span style="font-weight: bold; color: #14532d;">${(r.routeDistanceMeters / 1609.34).toFixed(1)} miles</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                        <span style="color: #166534; font-weight: 500;">⏱️ Drive Time (ETA):</span>
+                        <span style="font-weight: bold; color: #ff4757; font-size: 14px;">${travelMinutes} mins</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                        <span style="color: #166534; font-weight: 500;">🔔 Est. Arrival:</span>
+                        <span style="font-weight: bold; color: #14532d;">${arrivalStr}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                        <span style="color: #166534; font-weight: 500;">⏱️ Prep Duration:</span>
+                        <span style="font-weight: bold; color: #14532d;">${r.average_prep_time || 15} mins</span>
+                    </div>
+                </div>
+                <div style="font-size: 12px; margin-bottom: 12px; text-align: center;">
+                    ${readyStatus}
+                </div>
+            `;
+        } else {
+            etaHtml = `
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin: 10px 0; display: flex; flex-direction: column; gap: 4px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                        <span style="color: #475569; font-weight: 500;">⏱️ Prep Duration:</span>
+                        <span style="font-weight: bold; color: #1e293b;">${r.average_prep_time || 15} mins</span>
+                    </div>
+                    <p style="margin: 4px 0 0 0; font-size: 11px; color: #64748b; line-height: 1.3;">Plan a route to view exact drive times and automated kitchen synchronization.</p>
+                </div>
+            `;
+        }
+
+        const infoContent = `
+            <div style="font-family: system-ui, -apple-system, sans-serif; padding: 5px; min-width: 250px; max-width: 280px; box-sizing: border-box;">
+                <h3 style="margin: 0 0 5px 0; color: #1e293b; font-size: 15px; font-weight: bold; border-bottom: 2px solid #ff4757; padding-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
+                    <span>🏪 ${r.name}</span>
+                </h3>
+                <p style="margin: 5px 0; font-size: 12px; color: #64748b; line-height: 1.3;">📍 ${r.address}</p>
+                
+                ${etaHtml}
+                
+                <button onclick="openRestaurantMenu('${r.id}', '${r.name.replace(/'/g, "\\'")}')" 
+                        style="margin: 0; width: 100%; padding: 10px; background: #ff4757; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(255, 71, 87, 0.2); text-align: center; box-sizing: border-box; text-transform: uppercase; letter-spacing: 0.02em;">
+                    🛍️ Preorder Menu
+                </button>
+            </div>
+        `;
+
+        infoWindow.setContent(infoContent);
+        infoWindow.open(map, marker);
+    }
+
+    function refreshOpenInfoWindow() {
+        if (infoWindow && infoWindow.activeRestaurantId && infoWindow.activeMarker) {
+            const r = allRestaurants.find(item => item.id === infoWindow.activeRestaurantId);
+            if (r) {
+                openRestaurantInfoWindow(r, infoWindow.activeMarker);
+            }
+        }
+    }
+
+    function calculateDistanceToRoutePoint(path, targetLatLng) {
+        let minDistance = Infinity;
+        let closestPointIndex = 0;
+
+        for (let i = 0; i < path.length; i++) {
+            const dist = google.maps.geometry.spherical.computeDistanceBetween(targetLatLng, path[i]);
+            if (dist < minDistance) {
+                minDistance = dist;
+                closestPointIndex = i;
+            }
+        }
+
+        let cumulativeDistanceMeters = 0;
+        for (let i = 1; i <= closestPointIndex; i++) {
+            cumulativeDistanceMeters += google.maps.geometry.spherical.computeDistanceBetween(path[i-1], path[i]);
+        }
+
+        return cumulativeDistanceMeters;
+    }
+
+    function renderRestaurantsList(restaurantsToRender) {
+        const sidebar = document.getElementById("restaurants-sidebar-list");
+        if (restaurantsToRender.length === 0) {
+            sidebar.innerHTML = `
+                <p style="color: #718096; font-size: 14px; text-align: center; padding: 20px 0;">
+                    No preordering-facilitated restaurants found.
+                </p>
+            `;
+            return;
+        }
+
+        sidebar.innerHTML = restaurantsToRender.map(r => {
+            let badgeHtml = '';
+            if (r.isNearRoute) {
+                badgeHtml = `<span style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px; font-weight: bold; margin-left: 8px;">📍 On Route</span>`;
+            }
+
+            let etaHtml = '';
+            if (r.routeDistanceMeters !== undefined && r.routeDistanceMeters !== null) {
+                const speedMph = parseFloat(document.getElementById("speed-input").value) || 60;
+                const speedMps = (speedMph * 1609.34) / 3600;
+                const travelSeconds = r.routeDistanceMeters / speedMps;
+                const travelMinutes = Math.round(travelSeconds / 60);
+                
+                etaHtml = `
+                    <div style="font-size: 12px; color: #ff4757; font-weight: bold; background: #ffebeb; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; width: fit-content;">
+                        🚗 Drive Time: ${travelMinutes} mins (${(r.routeDistanceMeters / 1609.34).toFixed(1)} mi)
+                    </div>
+                `;
+            }
+
+            return `
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;" 
+                     onclick="focusOnRestaurant('${r.id}', ${r.latitude}, ${r.longitude}, '${r.name.replace(/'/g, "\\'")}')"
+                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.05)';" 
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                    <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                        <h4 style="margin: 0; color: #1e293b; font-size: 15px; font-weight: bold; display: flex; align-items: center; flex-wrap: wrap;">
+                            ${r.name} ${badgeHtml}
+                        </h4>
+                    </div>
+                    <p style="margin: 0; font-size: 13px; color: #64748b; display: flex; align-items: center; gap: 4px;">
+                        📍 ${r.address}
+                    </p>
+                    ${etaHtml}
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 5px; font-size: 12px;">
+                        <span style="color: #475569; font-weight: 500; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">
+                            ⏱️ ${r.average_prep_time || 15} mins prep
+                        </span>
+                        <button onclick="event.stopPropagation(); openRestaurantMenu('${r.id}', '${r.name.replace(/'/g, "\\'")}')" 
+                                style="margin-top: 0; padding: 6px 12px; background: #ff4757; color: white; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s;">
+                            Preorder Menu
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function focusOnRestaurant(id, lat, lng, name) {
+        if (!map) return;
+        map.panTo({ lat, lng });
+        map.setZoom(15);
+        
+        const marker = markers.find(m => m.restaurantId === id);
+        const r = allRestaurants.find(item => item.id === id);
+        if (marker && r) {
+            openRestaurantInfoWindow(r, marker);
+            marker.setAnimation(google.maps.Animation.BOUNCE);
+            setTimeout(() => marker.setAnimation(null), 1500);
+        }
+    }
+
+    function calculateAndDisplayRoute() {
+        const originPlace = originAutocomplete.getPlace();
+        const destinationPlace = destinationAutocomplete.getPlace();
+
+        let originQuery = document.getElementById("origin-input").value;
+        if (currentLocationLatLng && originQuery) {
+            originQuery = currentLocationLatLng;
+        } else if (originPlace && originPlace.geometry) {
+            originQuery = { placeId: originPlace.place_id };
+        }
+
+        const destQuery = destinationPlace && destinationPlace.geometry ? { placeId: destinationPlace.place_id } : document.getElementById("destination-input").value;
+
+        if (!originQuery || !destQuery) {
+            showCustomNotification("Missing Information", "<p>Please input both a starting point and a destination to plan your route.</p>");
+            return;
+        }
+
+        directionsService.route(
+            {
+                origin: originQuery,
+                destination: destQuery,
+                travelMode: google.maps.TravelMode.DRIVING,
+                provideRouteAlternatives: false
+            },
+            (response, status) => {
+                if (status === google.maps.DirectionsStatus.OK) {
+                    directionsRenderer.setDirections(response);
+                    findRestaurantsAlongRoute(response.routes[0]);
+                } else {
+                    showCustomNotification("Directions Request Failed", `<p>Directions request failed due to: <strong>${status}</strong>. Please verify the addresses entered.</p>`);
+                }
+            }
+        );
+    }
+
+    function findRestaurantsAlongRoute(route) {
+        if (!google.maps.geometry || !google.maps.geometry.spherical) {
+            console.warn("Google Maps Geometry library is missing. Falling back to simple bounds routing.");
+            allRestaurants.forEach(r => r.isNearRoute = true);
+            renderRestaurantsList(allRestaurants);
+            return;
+        }
+
+        const pathPoints = route.overview_path;
+        const THRESHOLD_METERS = 16000; // 10 miles
+
+        let foundNearRoute = false;
+
+        allRestaurants.forEach(r => {
+            const restLatLng = new google.maps.LatLng(parseFloat(r.latitude), parseFloat(r.longitude));
+            let minDistance = Infinity;
+            
+            for (let i = 0; i < pathPoints.length; i += Math.max(1, Math.floor(pathPoints.length / 150))) { 
+                const dist = google.maps.geometry.spherical.computeDistanceBetween(restLatLng, pathPoints[i]);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                }
+                if (dist < 1000) break;
+            }
+
+            r.isNearRoute = minDistance <= THRESHOLD_METERS;
+            if (r.isNearRoute) {
+                foundNearRoute = true;
+                r.routeDistanceMeters = calculateDistanceToRoutePoint(pathPoints, restLatLng);
+            } else {
+                r.routeDistanceMeters = null;
+            }
+        });
+
+        const filterMsg = document.getElementById("route-filter-msg");
+        if (foundNearRoute) {
+            isFilteredOnly = true; // Default to filtered view!
+
+            filterMsg.style.display = "block";
+            filterMsg.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>🔍 Showing only route-adjacent diners</span>
+                    <button onclick="toggleRouteFilter(false)" style="margin-top:0; padding:4px 8px; font-size:11px; background:#4a5568; color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">Show All</button>
+                </div>
+            `;
+            
+            markers.forEach(m => {
+                const rest = allRestaurants.find(r => r.id === m.restaurantId);
+                if (rest) {
+                    if (rest.isNearRoute) {
+                        m.setMap(map);
+                        m.setOpacity(1.0);
+                        m.setAnimation(google.maps.Animation.BOUNCE);
+                        setTimeout(() => m.setAnimation(null), 2000);
+                    } else {
+                        m.setMap(null); // Hide non-route markers completely!
+                    }
+                }
+            });
+        } else {
+            filterMsg.style.display = "block";
+            filterMsg.innerHTML = `
+                <span>ℹ️ No partner diners within 10 miles of this route. Showing all available.</span>
+            `;
+            markers.forEach(m => {
+                m.setMap(map);
+                m.setOpacity(1.0);
+            });
+        }
+
+        if (isFilteredOnly && foundNearRoute) {
+            const nearRouteRest = allRestaurants.filter(r => r.isNearRoute);
+            renderRestaurantsList(nearRouteRest);
+        } else {
+            renderRestaurantsList(allRestaurants);
+        }
+
+        refreshOpenInfoWindow();
+    }
+
+    let isFilteredOnly = false;
+    window.toggleRouteFilter = function(filterEnabled) {
+        isFilteredOnly = filterEnabled;
+        const filterMsg = document.getElementById("route-filter-msg");
+        
+        if (filterEnabled) {
+            const nearRouteRest = allRestaurants.filter(r => r.isNearRoute);
+            renderRestaurantsList(nearRouteRest);
+            
+            // Hide non-route markers from map
+            markers.forEach(m => {
+                const rest = allRestaurants.find(r => r.id === m.restaurantId);
+                if (rest) {
+                    if (rest.isNearRoute) {
+                        m.setMap(map);
+                        m.setOpacity(1.0);
+                    } else {
+                        m.setMap(null);
+                    }
+                }
+            });
+
+            filterMsg.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>🔍 Showing only route-adjacent diners</span>
+                    <button onclick="toggleRouteFilter(false)" style="margin-top:0; padding:4px 8px; font-size:11px; background:#4a5568; color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">Show All</button>
+                </div>
+            `;
+        } else {
+            renderRestaurantsList(allRestaurants);
+            
+            // Show all markers again with partial opacity for non-route ones
+            markers.forEach(m => {
+                m.setMap(map);
+                const rest = allRestaurants.find(r => r.id === m.restaurantId);
+                if (rest) {
+                    if (rest.isNearRoute) {
+                        m.setOpacity(1.0);
+                    } else {
+                        m.setOpacity(0.4);
+                    }
+                }
+            });
+
+            filterMsg.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>📍 Found restaurants along your route!</span>
+                    <button onclick="toggleRouteFilter(true)" style="margin-top:0; padding:4px 8px; font-size:11px; background:#3182ce; color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">Filter List</button>
+                </div>
+            `;
+        }
+    };
+
+    async function openRestaurantMenu(restaurantId, restaurantName) {
+        selectedRestaurantId = restaurantId;
+        document.getElementById("menu-modal").style.display = "flex";
+        document.getElementById("modal-restaurant-name").textContent = restaurantName;
+
+        // Reset radio buttons to Dine-In default
+        const dineInRadio = document.querySelector('input[name="fulfillment"][value="DINE_IN"]');
+        if (dineInRadio) dineInRadio.checked = true;
+        document.getElementById("table-reservation-container").style.display = "block";
+
+        // Setup radio change handler to show/hide table select container dynamically
+        const fulfillmentRadios = document.querySelectorAll('input[name="fulfillment"]');
+        fulfillmentRadios.forEach(radio => {
+            radio.onchange = () => {
+                const container = document.getElementById('table-reservation-container');
+                if (radio.value === 'DINE_IN') {
+                    container.style.display = 'block';
+                } else {
+                    container.style.display = 'none';
+                }
+            };
+        });
+
+        const list = document.getElementById("menu-items-list");
+        list.innerHTML = `<p style="color: #718096; font-size: 14px; text-align: center; padding: 10px 0;">Loading menu items...</p>`;
+
+        // Fetch and populate available tables for DINE_IN
+        const tableSelect = document.getElementById("table-select");
+        const tableStatusMsg = document.getElementById("table-status-msg");
+        tableSelect.innerHTML = `<option value="">Loading available seating...</option>`;
+        tableStatusMsg.textContent = "";
+
+        try {
+            const tableResp = await fetch(`/api/restaurants/${restaurantId}/tables`);
+            if (tableResp.ok) {
+                const tables = await tableResp.json();
+                const availableTables = tables.filter(t => t.is_available);
+                if (availableTables.length === 0) {
+                    tableSelect.innerHTML = `<option value="">⚠️ No tables currently available</option>`;
+                    tableStatusMsg.innerHTML = `<span style="color: #ef4444; font-weight: bold;">Warning: All dine-in seating is occupied!</span> You must select Pickup.`;
+                } else {
+                    tableSelect.innerHTML = availableTables.map(t => `
+                        <option value="${t.id}">Table ${t.table_number} (Capacity: ${t.capacity} guests)</option>
+                    `).join('');
+                    tableStatusMsg.innerHTML = `<span style="color: #10b981; font-weight: bold;">✓ ${availableTables.length} tables available.</span> Pre-select your seat above.`;
+                }
+            } else {
+                tableSelect.innerHTML = `<option value="">Failed to load tables</option>`;
+            }
+        } catch (tableErr) {
+            console.error("Error loading tables:", tableErr);
+            tableSelect.innerHTML = `<option value="">Failed to connect to table database</option>`;
+        }
+
+        try {
+            const response = await fetch(`/api/restaurants/${restaurantId}/menu`);
+            const menu = await response.json();
+
+            if (!response.ok) {
+                list.innerHTML = `<p style="color: #ef4444;">${menu.error || "Unable to load menu."}</p>`;
+                return;
+            }
+
+            if (menu.length === 0) {
+                list.innerHTML = `<p style="color: #718096; text-align: center; padding: 15px 0;">No menu items available at this restaurant yet.</p>`;
+                return;
+            }
+
+            list.innerHTML = menu.map(item => `
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid #f1f5f9;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" value="${item.id}" id="${item.id}" style="width: 18px; height: 18px; cursor: pointer;" ${item.is_available === false ? 'disabled' : ''}>
+                        <div>
+                            <label for="${item.id}" style="font-weight: 600; color: #1e293b; cursor: pointer; ${item.is_available === false ? 'text-decoration: line-through; color: #94a3b8;' : ''}">
+                                ${item.name}
+                            </label>
+                            <p style="margin: 2px 0 0 0; font-size: 12px; color: #64748b;">${item.description || 'Preorder delicious highway treats'}</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-weight: bold; color: #ff4757;">$${parseFloat(item.price).toFixed(2)}</span>
+                        ${item.is_available === false ? 
+                            '<span style="font-size: 11px; background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px; font-weight: bold;">Sold Out</span>' :
+                            `<input type="number" min="1" value="1" data-menu-item-id="${item.id}" style="width: 50px; padding: 5px; border: 1px solid #cbd5e0; border-radius: 4px; text-align: center;">`
+                        }
+                    </div>
+                </div>
+            `).join('');
+        } catch (err) {
+            list.innerHTML = "<p style='color: #ef4444;'>API connection failed. Ensure your backend server is running on port 3000.</p>";
+        }
+    }
+
+    document.getElementById("confirm-order-btn").addEventListener("click", async () => {
+        const selectedFulfillment = document.querySelector('input[name="fulfillment"]:checked').value;
+        const selectedItems = Array.from(document.querySelectorAll("#menu-items-list input[type='checkbox']:checked"));
+
+        if (selectedItems.length === 0) {
+            showCustomNotification("Empty Cart", "<p>Please select at least one menu item to place an order.</p>");
+            return;
+        }
+
+        let table_id = null;
+        if (selectedFulfillment === 'DINE_IN') {
+            const tableSelect = document.getElementById("table-select");
+            table_id = tableSelect ? tableSelect.value : null;
+            if (!table_id) {
+                showCustomNotification("Table Selection Required", "<p>Please select an available dine-in seating table before placing your preorder, or select Pickup instead.</p>");
+                return;
+            }
+        }
+
+        // Calculate initial ETA if available
+        let initial_eta = 15;
+        try {
+            const route = directionsRenderer.getDirections().routes[0];
+            if (route && route.legs && route.legs[0] && route.legs[0].duration) {
+                initial_eta = Math.round(route.legs[0].duration.value / 60);
+            }
+        } catch(e) {}
+
+        const orderPayload = {
+            user_id: loggedInUserId,
+            restaurant_id: selectedRestaurantId,
+            fulfillment_type: selectedFulfillment,
+            initial_eta_minutes: initial_eta,
+            table_id: table_id,
+            items: selectedItems.map(item => {
+                const quantityInput = document.querySelector(`input[data-menu-item-id="${item.value}"]`);
+
+                return {
+                    menu_item_id: item.value,
+                    quantity: Number(quantityInput.value)
+                };
+            })
+        };
+
+        try {
+            const token = localStorage.getItem('traveler_jwt_token');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) {
+                headers['Authorization'] = 'Bearer ' + token;
+            }
+            const response = await fetch('/api/orders/place', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(orderPayload)
+            });
+            const data = await response.json();
+            if (response.ok) {
+                let successMsg = `
+                <p style="color: #10b981; font-weight: bold; font-size: 16px;">⚡ Preorder placed and scheduled successfully!</p>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 8px 0; font-weight: bold; color: #475569;">Order ID:</td>
+                        <td style="padding: 8px 0; font-family: monospace; color: #1e293b;">${data.order_id}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 8px 0; font-weight: bold; color: #475569;">Fulfillment:</td>
+                        <td style="padding: 8px 0; font-weight: bold; color: #1e293b; text-transform: uppercase;">${selectedFulfillment}</td>
+                    </tr>
+                `;
+
+                if (selectedFulfillment === 'DINE_IN' && table_id) {
+                    const tableText = document.getElementById("table-select").options[document.getElementById("table-select").selectedIndex].text;
+                    successMsg += `
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 8px 0; font-weight: bold; color: #475569;">Reserved Seat:</td>
+                        <td style="padding: 8px 0; font-weight: bold; color: #3b82f6;">${tableText}</td>
+                    </tr>
+                    `;
+                }
+
+                successMsg += `
+                    <tr>
+                        <td style="padding: 8px 0; font-weight: bold; color: #475569;">Scheduled Fire Time:</td>
+                        <td style="padding: 8px 0; font-weight: bold; color: #1e293b;">${new Date(data.scheduled_fire_time).toLocaleTimeString()}</td>
+                    </tr>
+                </table>
+                <p style="margin-top: 15px; font-size: 13px; color: #64748b;">The cooking sequence will trigger automatically based on your real-time ETA to ensure fresh, hot delivery.</p>
+                `;
+
+                showCustomNotification(
+                    "Preorder Placed Successfully!",
+                    successMsg,
+                    true
+                );
+                closeModal();
+                // Store order ID in localStorage for simulation or tracking
+                localStorage.setItem('last_placed_order_id', data.order_id);
+                // Launch live simulation tracker immediately
+                initSimulationFromOrder(data.order_id);
+            } else {
+                showCustomNotification("Error Placing Preorder", `<p>Could not complete checkout: ${data.error || "Unknown error"}</p>`);
+            }
+        } catch (err) {
+            showCustomNotification("Network Connection Error", "<p>A connection error occurred while trying to place your preorder. Please try again.</p>");
+        }
+    });
+
+    function closeModal() {
+        document.getElementById("menu-modal").style.display = "none";
+    }
+</script>
+
+<!-- AI Assistant CSS Styles -->
+<style>
+    /* Floating AI Toggle FAB */
+    .ai-chat-toggle {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        width: 56px;
+        height: 56px;
+        background-color: #ff4757;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+        z-index: 10000;
+        border: none;
+        outline: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .ai-chat-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(255, 71, 87, 0.5);
+        background-color: #e84118;
+    }
+    .ai-chat-toggle svg {
+        width: 26px;
+        height: 26px;
+    }
+    
+    /* Collapsible Chat Box Drawer */
+    .ai-chat-container {
+        position: fixed;
+        bottom: 95px;
+        right: 25px;
+        width: 380px;
+        height: 520px;
+        max-height: calc(100vh - 120px);
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        border-top: 4px solid #ff4757;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translateY(20px);
+        opacity: 0;
+        pointer-events: none;
+        font-family: system-ui, -apple-system, sans-serif;
+    }
+    .ai-chat-container.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+    }
+    
+    /* Header Section */
+    .ai-chat-header {
+        background: #1e293b;
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .ai-chat-title {
+        font-weight: 700;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .ai-chat-close {
+        font-size: 20px;
+        color: #94a3b8;
+        cursor: pointer;
+        transition: color 0.2s;
+        background: none;
+        border: none;
+        padding: 0;
+    }
+    .ai-chat-close:hover {
+        color: #ff4757;
+    }
+    
+    /* Messages Stream */
+    .ai-chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: #f8fafc;
+    }
+    .ai-msg {
+        max-width: 85%;
+        padding: 10px 14px;
+        font-size: 13.5px;
+        line-height: 1.5;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .ai-msg.user {
+        background: #ff4757;
+        color: white;
+        align-self: flex-end;
+        border-radius: 16px 16px 2px 16px;
+    }
+    .ai-msg.bot {
+        background: white;
+        color: #1e293b;
+        align-self: flex-start;
+        border-radius: 16px 16px 16px 2px;
+        border: 1px solid #e2e8f0;
+    }
+    
+    /* Suggestion Chips Container */
+    .ai-chat-suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 10px 15px;
+        background: white;
+        border-top: 1px solid #f1f5f9;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    .ai-chip {
+        background: #f1f5f9;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 6px 10px;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid #e2e8f0;
+        display: inline-block;
+    }
+    .ai-chip:hover {
+        background: #ffebeb;
+        color: #ff4757;
+        border-color: #ffd1d5;
+    }
+    
+    /* Input Section */
+    .ai-chat-input-area {
+        padding: 12px 15px;
+        background: white;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .ai-chat-input {
+        flex: 1;
+        border: 1px solid #cbd5e1;
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-size: 13px;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .ai-chat-input:focus {
+        border-color: #ff4757;
+    }
+    .ai-chat-send {
+        background: #ff4757;
+        color: white;
+        border: none;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+        padding: 0;
+    }
+    .ai-chat-send:hover {
+        background: #e84118;
+    }
+</style>
+
+<!-- Floating AI Toggle FAB Button -->
+<button class="ai-chat-toggle" id="ai-toggle-btn" title="AI Travel & Food Assistant">
+    <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10a9.96 9.96 0 0 1-6.383-2.302l-3.324.95a1 1 0 0 1-1.235-1.235l.95-3.324A9.96 9.96 0 0 1 2 12 10 10 0 0 1 12 2zm0 2a8 8 0 1 0 5.132 14.135 1 1 0 0 1 .632.27l1.97.562-.563-1.97a1 1 0 0 1 .27-.632A8 8 0 0 0 20 12a8 8 0 0 0-8-8zm-1 3h2v2h-2V7zm0 4h2v6h-2v-6z"/>
+    </svg>
+</button>
+
+<!-- AI Assistant Collapsible Panel -->
+<div class="ai-chat-container" id="ai-chat-container">
+    <!-- Header -->
+    <div class="ai-chat-header">
+        <div class="ai-chat-title">
+            <span>🤖</span>
+            <div>
+                <div style="font-weight: 700; font-size: 14px; line-height: 1.2;">Highway Food Sync AI</div>
+                <div style="font-size: 10px; color: #94a3b8; font-weight: 500;">Dynamic Smart Concierge</div>
+            </div>
+        </div>
+        <button class="ai-chat-close" id="ai-close-btn">×</button>
+    </div>
+    
+    <!-- Messages Stream -->
+    <div class="ai-chat-messages" id="ai-messages-list">
+        <!-- Welcome Message -->
+        <div class="ai-msg bot">
+            👋 Welcome to <strong>Route Food Sync AI Concierge</strong>! 
+            <br><br>
+            I can help you analyze partner diners along your route, recommend specific items matching your cravings, and arrange table bookings perfectly synced to your driving times.
+            <br><br>
+            <em>Tap a suggestion chip below or chat with me to get started!</em>
+        </div>
+    </div>
+    
+    <!-- Suggestions list -->
+    <div class="ai-chat-suggestions">
+        <div class="ai-chip" onclick="handleChipClick('I want to plan a route from Hoboken to Garden State')">🗺️ Hoboken ➔ Garden State</div>
+        <div class="ai-chip" onclick="handleChipClick('What are the best diners along my planned route?')">🏪 Best Diners on Route</div>
+        <div class="ai-chip" onclick="handleChipClick('Are there vegetarian menu options available?')">🌱 Vegetarian Options</div>
+        <div class="ai-chip" onclick="handleChipClick('We are 4 guests. Where can we seat?')">🪑 Seating for 4 Guests</div>
+    </div>
+    
+    <!-- Input Form -->
+    <div class="ai-chat-input-area">
+        <input type="text" class="ai-chat-input" id="ai-chat-input-field" placeholder="Ask about route diners, menus, seating...">
+        <button class="ai-chat-send" id="ai-send-btn" title="Send message">
+            <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
+<!-- AI Integration Javascript Scripts -->
+<script>
+    const aiToggleBtn = document.getElementById("ai-toggle-btn");
+    const aiCloseBtn = document.getElementById("ai-close-btn");
+    const aiChatContainer = document.getElementById("ai-chat-container");
+    const aiSendBtn = document.getElementById("ai-send-btn");
+    const aiInputField = document.getElementById("ai-chat-input-field");
+    const aiMessagesList = document.getElementById("ai-messages-list");
+
+    let chatHistory = []; // Tracks multi-turn conversational context
+
+    // Toggle Chat Drawer Open/Close
+    aiToggleBtn.addEventListener("click", () => {
+        aiChatContainer.classList.toggle("open");
+        if (aiChatContainer.classList.contains("open")) {
+            aiInputField.focus();
+        }
+    });
+
+    aiCloseBtn.addEventListener("click", () => {
+        aiChatContainer.classList.remove("open");
+    });
+
+    // Handle suggestion chips tap
+    window.handleChipClick = function(text) {
+        aiInputField.value = text;
+        sendAiMessage();
+    };
+
+    // Handle Enter key on input
+    aiInputField.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            sendAiMessage();
+        }
+    });
+
+    aiSendBtn.addEventListener("click", sendAiMessage);
+
+    // Core Send Message Function
+    async function sendAiMessage() {
+        const text = aiInputField.value.trim();
+        if (!text) return;
+
+        // Clear input field
+        aiInputField.value = "";
+
+        // Append User message to UI
+        appendMessageBubble(text, 'user');
+
+        // Append typing placeholder
+        const typingId = appendMessageBubble('⌛ <em>Thinking about your roadtrip options...</em>', 'bot', true);
+
+        // Track user message in history
+        chatHistory.push({ role: 'user', text: text });
+
+        // Retrieve planned route if active
+        let activeRouteDetails = null;
+        try {
+            const directions = directionsRenderer.getDirections();
+            if (directions && directions.routes && directions.routes[0]) {
+                const leg = directions.routes[0].legs[0];
+                activeRouteDetails = {
+                    start_address: leg.start_address,
+                    end_address: leg.end_address,
+                    duration_text: leg.duration.text,
+                    distance_text: leg.distance.text,
+                    speed_setting: parseFloat(document.getElementById("speed-input").value) + " mph"
+                };
+            }
+        } catch (e) {}
+
+        // Format only relevant info of the current restaurants state to save payload size
+        const preparedRestaurantsList = allRestaurants.map(r => ({
+            id: r.id,
+            name: r.name,
+            address: r.address,
+            average_prep_time: r.average_prep_time,
+            isNearRoute: !!r.isNearRoute,
+            routeDistanceMeters: r.routeDistanceMeters
+        }));
+
+        try {
+            const response = await fetch('/api/ai-assistant', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: text,
+                    history: chatHistory.slice(-10), // Send last 10 messages for conversational context
+                    activeRoute: activeRouteDetails,
+                    activeRestaurants: preparedRestaurantsList
+                })
+            });
+
+            const data = await response.json();
+            
+            // Remove typing placeholder
+            removeMessageBubble(typingId);
+
+            if (response.ok && data.text) {
+                // Append AI reply to UI (and format custom markdown buttons)
+                appendMessageBubble(data.text, 'bot');
+                // Track AI message in history
+                chatHistory.push({ role: 'model', text: data.text });
+            } else {
+                appendMessageBubble(`⚠️ <strong>Connection limit or setup issue</strong>: ${data.error || "Unable to fetch AI response."}`, 'bot');
+            }
+        } catch (err) {
+            removeMessageBubble(typingId);
+            appendMessageBubble("❌ <strong>API connection failed</strong>. Please ensure the backend is fully started on port 3000.", 'bot');
+            console.error("AI Assistant request failed:", err);
+        }
+    }
+
+    // Append bubble helper
+    function appendMessageBubble(text, sender, isTypingPlaceholder = false) {
+        const id = 'msg-' + Date.now() + Math.random().toString(36).substr(2, 4);
+        const bubble = document.createElement("div");
+        bubble.className = `ai-msg ${sender}`;
+        bubble.id = id;
+        
+        if (sender === 'bot' && !isTypingPlaceholder) {
+            bubble.innerHTML = formatAiResponse(text);
+        } else {
+            bubble.innerHTML = text;
+        }
+
+        aiMessagesList.appendChild(bubble);
+        aiMessagesList.scrollTop = aiMessagesList.scrollHeight;
+        return id;
+    }
+
+    function removeMessageBubble(id) {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    }
+
+    // Markdown Parser & Action Injector
+    function formatAiResponse(text) {
+        // Escape HTML
+        let formatted = text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+
+        // Bold
+        formatted = formatted.replace(/\*\*(.*?)\*\"/g, '<strong>$1</strong>');
+        formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        // Match [Text](action:type:param1:param2...)
+        const actionRegex = /\[([^\]]+)\]\(action:([^)]+)\)/g;
+        formatted = formatted.replace(actionRegex, (match, btnText, actionData) => {
+            const parts = actionData.split(':');
+            const actionType = parts[0];
+            
+            let onClickAttr = '';
+            if (actionType === 'focus') {
+                const restId = parts[1];
+                onClickAttr = `focusOnRestaurantById('${restId}')`;
+            } else if (actionType === 'menu') {
+                const restId = parts[1];
+                onClickAttr = `openRestaurantMenuById('${restId}')`;
+            } else if (actionType === 'setroute') {
+                const origin = parts[1];
+                const dest = parts[2];
+                onClickAttr = `setRouteFromAi('${origin}', '${dest}')`;
+            }
+
+            if (onClickAttr) {
+                return `<button onclick="${onClickAttr}" style="margin: 4px 2px; padding: 6px 12px; font-size: 11px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 4px; border-bottom: 2px solid #2563eb;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">⚡ ${btnText}</button>`;
+            }
+            return match;
+        });
+
+        // Line breaks
+        formatted = formatted.replace(/\n/g, '<br>');
+
+        return formatted;
+    }
+
+    // Conversational Action Listeners
+    window.focusOnRestaurantById = function(restId) {
+        const r = allRestaurants.find(item => item.id === restId);
+        if (r) {
+            focusOnRestaurant(r.id, parseFloat(r.latitude), parseFloat(r.longitude), r.name);
+        } else {
+            showCustomNotification("Not Found", `<p>Diner with ID ${restId} could not be located.</p>`);
+        }
+    };
+
+    window.openRestaurantMenuById = function(restId) {
+        const r = allRestaurants.find(item => item.id === restId);
+        if (r) {
+            openRestaurantMenu(r.id, r.name);
+        } else {
+            showCustomNotification("Not Found", `<p>Diner menu could not be loaded.</p>`);
+        }
+    };
+
+    window.setRouteFromAi = function(origin, dest) {
+        document.getElementById("origin-input").value = origin;
+        document.getElementById("destination-input").value = dest;
+        calculateAndDisplayRoute();
+    };
+</script>
+<script>loadGoogleMaps();</script>
+</body>
+</html>

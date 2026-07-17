@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operations & Investor ROI Dashboard</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 20px; 
+            background-color: #0b0f19; 
+            color: #f1f5f9; 
+        }
+        
+        .nav-bar { 
+            background: #111827; 
+            padding: 15px 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3); 
+            margin-bottom: 25px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: 1300px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            width: 100%; 
+            box-sizing: border-box; 
+            border: 1px solid #1f2937;
+        }
+        .nav-logo { 
+            font-size: 18px; 
+            font-weight: bold; 
+            color: #ff4757; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            text-decoration: none; 
+        }
+        .nav-links { 
+            display: flex; 
+            gap: 20px; 
+            align-items: center; 
+        }
+        .nav-link { 
+            text-decoration: none; 
+            color: #9ca3af; 
+            font-weight: 600; 
+            font-size: 14px; 
+            transition: 0.2s; 
+            padding-bottom: 4px; 
+        }
+        .nav-link:hover { 
+            color: #ff4757; 
+        }
+        .nav-link.active { 
+            color: #ff4757; 
+            font-weight: bold; 
+            border-bottom: 2px solid #ff4757; 
+        }
+
+        .container { 
+            max-width: 1300px; 
+            margin: 0 auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+        }
+
+        /* Metrics grid */
+        .metrics-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+            gap: 20px; 
+        }
+        .metric-card { 
+            background: #111827; 
+            border: 1px solid #1f2937; 
+            padding: 20px; 
+            border-radius: 10px; 
+            position: relative; 
+            overflow: hidden; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(59, 130, 246, 0.1);
+        }
+        .metric-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+        .metric-blue::after { background-color: #3b82f6; }
+        .metric-emerald::after { background-color: #10b981; }
+        .metric-amber::after { background-color: #f59e0b; }
+        .metric-purple::after { background-color: #8b5cf6; }
+
+        .metric-label { 
+            font-size: 11px; 
+            font-weight: bold; 
+            color: #9ca3af; 
+            text-transform: uppercase; 
+            letter-spacing: 0.08em; 
+        }
+        .metric-value { 
+            font-size: 28px; 
+            font-weight: 800; 
+            color: #ffffff; 
+            margin-top: 8px; 
+            font-family: 'JetBrains Mono', 'Courier New', monospace; 
+        }
+        .metric-trend { 
+            font-size: 12px; 
+            margin-top: 6px; 
+            display: flex; 
+            align-items: center; 
+            gap: 4px; 
+        }
+        .trend-up { color: #10b981; }
+        .trend-down { color: #ef4444; }
+
+        /* Main layout split */
+        .dashboard-split { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 20px; 
+        }
+        @media (min-width: 1024px) {
+            .dashboard-split { grid-template-columns: 1.6fr 1.4fr; }
+        }
+
+        .panel { 
+            background: #111827; 
+            border: 1px solid #1f2937; 
+            border-radius: 10px; 
+            padding: 20px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+        }
+        .panel-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid #1f2937; 
+            padding-bottom: 15px; 
+            margin-bottom: 15px; 
+        }
+        .panel-title { 
+            font-size: 16px; 
+            font-weight: bold; 
+            margin: 0; 
+            color: #f3f4f6; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+
+        /* Real-time Ticker console */
+        .ticker-terminal { 
+            background-color: #030712; 
+            border: 1px solid #1f2937; 
+            border-radius: 6px; 
+            padding: 15px; 
+            height: 380px; 
+            overflow-y: auto; 
+            font-family: 'JetBrains Mono', 'Courier New', monospace; 
+            font-size: 12px; 
+            line-height: 1.6; 
+            color: #06b6d4; 
+        }
+        .ticker-line { 
+            margin-bottom: 10px; 
+            border-bottom: 1px dashed rgba(255,255,255,0.03); 
+            padding-bottom: 8px; 
+            word-break: break-all;
+        }
+        .ticker-time { color: #64748b; margin-right: 8px; }
+        .ticker-tag { 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-size: 10px; 
+            font-weight: bold; 
+            margin-right: 6px; 
+            text-transform: uppercase; 
+        }
+        .tag-sys { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .tag-gps { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .tag-cook { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .tag-escrow { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .tag-hold { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+
+        /* SVG Chart designs */
+        .chart-container { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+        }
+        .bar-chart-row { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            font-size: 12px; 
+        }
+        .bar-label { width: 80px; color: #9ca3af; font-weight: bold; text-align: right; }
+        .bar-wrapper { flex: 1; height: 16px; background-color: #1f2937; border-radius: 8px; overflow: hidden; position: relative; }
+        .bar-fill { height: 100%; border-radius: 8px; transition: width 0.8s ease; }
+        .bar-val { width: 50px; color: #ffffff; font-weight: bold; text-align: left; margin-left: 8px; font-family: monospace; }
+
+        .bar-blue { background: linear-gradient(90deg, #2563eb, #3b82f6); }
+        .bar-emerald { background: linear-gradient(90deg, #059669, #10b981); }
+        .bar-amber { background: linear-gradient(90deg, #d97706, #f59e0b); }
+
+        .diner-stats-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .stat-sub-box {
+            background-color: #1f2937;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .stat-sub-num {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-top: 4px;
+        }
+
+        .pulse-light {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px #10b981;
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <a href="index.html" class="nav-logo">🚗 Route & Preorder Food Sync</a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">🗺️ Route Map</a>
+            <a href="restaurant-signup.html" class="nav-link">🏪 Restaurant Sign-up</a>
+            <a href="kitchen.html" class="nav-link">🔥 Kitchen Display</a>
+            <a href="simulator.html" class="nav-link">💳 Webhook Simulator</a>
+            <a href="restaurant-admin.html" class="nav-link active">📈 Operations & ROI</a>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h1 style="margin: 0; font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                    <span>🛰️ Operations Control & ROI Analytics Center</span>
+                    <span class="pulse-light"></span>
+                </h1>
+                <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">Real-Time Traveler Preorder Sync, Dynamic Escrow Releases, and Environmental Metrics</p>
+            </div>
+            
+            <div style="background: #111827; padding: 6px 12px; border-radius: 6px; border: 1px solid #1f2937; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold; color: #9ca3af;">
+                <span>ACTIVE STREAM:</span>
+                <span style="color: #ff4757;" id="current-stream-name">Pitstop Highway Diner</span>
+            </div>
+        </div>
+
+        <!-- KPI CARDS GRID -->
+        <div class="metrics-grid">
+            <div class="metric-card metric-blue">
+                <span class="metric-label">💵 Total Network Volume</span>
+                <div class="metric-value" id="kpi-revenue">$245.50</div>
+                <div class="metric-trend trend-up">
+                    <span>▲ +$18.50 en-route</span>
+                </div>
+            </div>
+            
+            <div class="metric-card metric-emerald">
+                <span class="metric-label">🔒 Active Escrow Pool</span>
+                <div class="metric-value" id="kpi-escrow">$45.00</div>
+                <div class="metric-trend" style="color: #64748b;">
+                    <span>Secure Payment Authorizations</span>
+                </div>
+            </div>
+            
+            <div class="metric-card metric-amber">
+                <span class="metric-label">🎯 Logistics Sync Accuracy</span>
+                <div class="metric-value" id="kpi-accuracy">98.7%</div>
+                <div class="metric-trend trend-up">
+                    <span>Fresh & on-time handover</span>
+                </div>
+            </div>
+            
+            <div class="metric-card metric-purple">
+                <span class="metric-label">🌱 Carbon Emissions Saved</span>
+                <div class="metric-value" id="kpi-carbon">42.5 kg</div>
+                <div class="metric-trend trend-up">
+                    <span>Preventing vehicle idle times</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SPLIT PANEL VIEW -->
+        <div class="dashboard-split">
+            
+            <!-- LEFT PANEL: TERMINAL FEED -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <span>📟 Real-Time Logistics Feed & GPS Logs</span>
+                    </h3>
+                    <span style="font-size: 11px; font-weight: bold; background: rgba(6,182,212,0.1); color: #06b6d4; padding: 2px 10px; border-radius: 12px;" id="socket-connection-badge">Socket Connected</span>
+                </div>
+                
+                <div class="ticker-terminal" id="terminal-screen">
+                    <div class="ticker-line">
+                        <span class="ticker-time">01:00:15 UTC</span>
+                        <span class="ticker-tag tag-sys">System</span>
+                        <span>Operations Center initialized. Awaiting traveler route planning and preorders...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- RIGHT PANEL: ANALYTICS & ROI CHARTS -->
+            <div class="panel" style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <span>📊 Performance Diagnostics</span>
+                    </h3>
+                    <span style="font-size: 11px; font-weight: bold; background: rgba(16,185,129,0.1); color: #10b981; padding: 2px 10px; border-radius: 12px;">Investor Summary</span>
+                </div>
+
+                <!-- Chart 1: Holding Time Spoilage Mitigation -->
+                <div>
+                    <h4 style="margin: 0 0 12px 0; font-size: 13px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">⏱️ Food Holding / Spoilage Reduction</h4>
+                    <div class="chart-container">
+                        <div class="bar-chart-row">
+                            <span class="bar-label">Traditional</span>
+                            <div class="bar-wrapper">
+                                <div class="bar-fill bar-amber" style="width: 84%;"></div>
+                            </div>
+                            <span class="bar-val">25.0m</span>
+                        </div>
+                        <div class="bar-chart-row">
+                            <span class="bar-label">Our Sync</span>
+                            <div class="bar-wrapper">
+                                <div class="bar-fill bar-emerald" style="style-bar-glow; width: 6%;"></div>
+                            </div>
+                            <span class="bar-val">1.8m</span>
+                        </div>
+                    </div>
+                    <p style="margin: 8px 0 0 0; color: #64748b; font-size: 11px; line-height: 1.4;">
+                        Our real-time en-route syncing reduces food holding delays in the restaurant by over **92%**, keeping ingredients perfectly hot and preventing moisture/coagulation.
+                    </p>
+                </div>
+
+                <!-- Chart 2: Preorder Growth Trends -->
+                <div style="border-top: 1px solid #1f2937; padding-top: 15px;">
+                    <h4 style="margin: 0 0 12px 0; font-size: 13px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">📦 Weekly Preorder Efficiency</h4>
+                    <div class="chart-container">
+                        <div class="bar-chart-row">
+                            <span class="bar-label">Mon-Wed</span>
+                            <div class="bar-wrapper">
+                                <div class="bar-fill bar-blue" style="width: 45%;"></div>
+                            </div>
+                            <span class="bar-val">120 qty</span>
+                        </div>
+                        <div class="bar-chart-row">
+                            <span class="bar-label">Thu-Fri</span>
+                            <div class="bar-wrapper">
+                                <div class="bar-fill bar-blue" style="width: 78%;"></div>
+                            </div>
+                            <span class="bar-val">210 qty</span>
+                        </div>
+                        <div class="bar-chart-row">
+                            <span class="bar-label">Sat-Sun</span>
+                            <div class="bar-wrapper">
+                                <div class="bar-fill bar-emerald" style="width: 95%;"></div>
+                            </div>
+                            <span class="bar-val">265 qty</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Extra ROI Metrics -->
+                <div class="diner-stats-info" style="border-top: 1px solid #1f2937; padding-top: 15px;">
+                    <div class="stat-sub-box">
+                        <label style="font-size: 9px; color: #9ca3af; text-transform: uppercase; font-weight: bold;">Idling Avoided</label>
+                        <div class="stat-sub-num" id="stats-idling">14.2k sec</div>
+                    </div>
+                    <div class="stat-sub-box">
+                        <label style="font-size: 9px; color: #9ca3af; text-transform: uppercase; font-weight: bold;">Escrow SLA Rate</label>
+                        <div class="stat-sub-num">100.0%</div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        let socket;
+        let currentRestaurantId = "f82e4f22-3816-4243-9a15-e642b8c2a0c0"; // default diner
+        let baseRevenue = 245.50;
+        let currentEscrow = 45.00;
+        let baseCarbon = 42.5;
+        let idleSecs = 14230;
+
+        function addLogLine(tagClass, tagText, text) {
+            const screen = document.getElementById("terminal-screen");
+            if (!screen) return;
+            
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour12: false });
+            
+            const line = document.createElement("div");
+            line.className = "ticker-line";
+            line.innerHTML = `
+                <span class="ticker-time">${timeStr} UTC</span>
+                <span class="ticker-tag ${tagClass}">${tagText}</span>
+                <span>${text}</span>
+            `;
+            
+            screen.appendChild(line);
+            screen.scrollTop = screen.scrollHeight;
+        }
+
+        // Setup real-time listeners for simulation activity
+        if (typeof io !== 'undefined') {
+            socket = io(window.location.origin, { transports: ['websocket'] });
+
+            socket.on("connect", () => {
+                console.log("NOC Dashboard Socket Connected");
+                socket.emit("join_restaurant_room", currentRestaurantId);
+                addLogLine("tag-sys", "system", "Connected to socket dispatcher. Joined restaurant room f82e4f22...");
+            });
+
+            // Listen to route preorder notifications
+            socket.on("ORDER_PLACED", (data) => {
+                const orderAmount = parseFloat(data.total_amount || 18.50);
+                currentEscrow += orderAmount;
+                document.getElementById("kpi-escrow").textContent = `$${currentEscrow.toFixed(2)}`;
+                
+                addLogLine("tag-sys", "preorder", `Order #${data.order_id.substring(0,8)}... placed en-route! Authorization Escrow of $${orderAmount.toFixed(2)} securely locked in smart-wallet.`);
+            });
+
+            socket.on("ORDER_SCHEDULE_UPDATED", (data) => {
+                const eta = data.updated_eta_minutes;
+                const fire = data.scheduled_fire_time;
+                let fireStr = "-";
+                if (fire) {
+                    const fTime = new Date(fire);
+                    fireStr = fTime.toLocaleTimeString([], { hour12: false });
+                }
+                
+                addLogLine("tag-gps", "logistics", `GPS Route Sync updated for Order #${data.order_id.substring(0,8)}... Traveler ETA is ${eta} mins. Calculated optimal auto-fire time: ${fireStr} UTC.`);
+            });
+
+            socket.on("ORDER_ETA_UPDATED", (data) => {
+                const eta = data.updated_eta_minutes;
+                
+                // Dynamically simulate carbon reduction & idling ticking up
+                baseCarbon += 0.05;
+                idleSecs += 12;
+                document.getElementById("kpi-carbon").textContent = `${baseCarbon.toFixed(2)} kg`;
+                document.getElementById("stats-idling").textContent = `${(idleSecs/1000).toFixed(1)}k sec`;
+                
+                addLogLine("tag-gps", "tracking", `Traveler is moving en-route. Simulated GPS telemetry update: ETA now ${eta} mins.`);
+            });
+
+            socket.on("NEW_KITCHEN_FIRE_ORDER", (data) => {
+                addLogLine("tag-cook", "cooking", `🔥 TRAVELER CROSSED FIRE-THRESHOLD! Kitchen Live Display automatically fired prep sequence for Order #${data.order_id.substring(0,8)}...`);
+            });
+
+            socket.on("EMERGENCY_HOLD_ALERT", (data) => {
+                addLogLine("tag-hold", "emergency", `🚨 EMERGENCY TRAVEL HOLD: Traveler stuck in highway traffic detour! Automatically paused preparation on Order #${data.order_id.substring(0,8)}... to avoid cold, spoiled food.`);
+            });
+
+            socket.on("ORDER_FULFILLED", (data) => {
+                // Relocate escrow pool to finalized revenue
+                const resolvedVal = 45.00; // estimated order val
+                currentEscrow = Math.max(0, currentEscrow - resolvedVal);
+                baseRevenue += resolvedVal;
+                
+                document.getElementById("kpi-escrow").textContent = `$${currentEscrow.toFixed(2)}`;
+                document.getElementById("kpi-revenue").textContent = `$${baseRevenue.toFixed(2)}`;
+                
+                addLogLine("tag-escrow", "escrow", `🎉 GEOFENCE ENTRANCE MATCHED! Traveler has physically arrived inside restaurant's 200m radius. Verified double-signature: Escrow funds of $${resolvedVal.toFixed(2)} successfully released to Diner.`);
+            });
+        }
+    </script>
+</body>
+</html>
