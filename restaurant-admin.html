@@ -6,18 +6,21 @@
     <title>Operations & Investor ROI Dashboard</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             margin: 20px; 
-            background-color: #0b0f19; 
+            background-color: #090d16; 
             color: #f1f5f9; 
+            transition: background-color 0.3s ease;
         }
         
         .nav-bar { 
             background: #111827; 
             padding: 15px 30px; 
-            border-radius: 8px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3); 
+            border-radius: 10px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4); 
             margin-bottom: 25px; 
             display: flex; 
             justify-content: space-between; 
@@ -27,16 +30,18 @@
             margin-right: auto; 
             width: 100%; 
             box-sizing: border-box; 
-            border: 1px solid #1f2937;
+            border: 1px solid #1e293b;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .nav-logo { 
             font-size: 18px; 
-            font-weight: bold; 
+            font-weight: 700; 
             color: #ff4757; 
             display: flex; 
             align-items: center; 
             gap: 8px; 
             text-decoration: none; 
+            letter-spacing: -0.02em;
         }
         .nav-links { 
             display: flex; 
@@ -48,7 +53,7 @@
             color: #9ca3af; 
             font-weight: 600; 
             font-size: 14px; 
-            transition: 0.2s; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
             padding-bottom: 4px; 
         }
         .nav-link:hover { 
@@ -56,7 +61,7 @@
         }
         .nav-link.active { 
             color: #ff4757; 
-            font-weight: bold; 
+            font-weight: 700; 
             border-bottom: 2px solid #ff4757; 
         }
 
@@ -76,17 +81,18 @@
         }
         .metric-card { 
             background: #111827; 
-            border: 1px solid #1f2937; 
-            padding: 20px; 
+            border: 1px solid #1e293b; 
+            padding: 22px; 
             border-radius: 10px; 
             position: relative; 
             overflow: hidden; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .metric-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(59, 130, 246, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.3);
         }
         .metric-card::after {
             content: '';
@@ -103,8 +109,8 @@
 
         .metric-label { 
             font-size: 11px; 
-            font-weight: bold; 
-            color: #9ca3af; 
+            font-weight: 700; 
+            color: #94a3b8; 
             text-transform: uppercase; 
             letter-spacing: 0.08em; 
         }
@@ -114,6 +120,7 @@
             color: #ffffff; 
             margin-top: 8px; 
             font-family: 'JetBrains Mono', 'Courier New', monospace; 
+            font-variant-numeric: tabular-nums;
         }
         .metric-trend { 
             font-size: 12px; 
@@ -132,29 +139,30 @@
             gap: 20px; 
         }
         @media (min-width: 1024px) {
-            .dashboard-split { grid-template-columns: 1.6fr 1.4fr; }
+            .dashboard-split { grid-template-columns: 1.5fr 1.5fr; }
         }
 
         .panel { 
             background: #111827; 
-            border: 1px solid #1f2937; 
+            border: 1px solid #1e293b; 
             border-radius: 10px; 
-            padding: 20px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+            padding: 22px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .panel-header { 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            border-bottom: 1px solid #1f2937; 
+            border-bottom: 1px solid #1e293b; 
             padding-bottom: 15px; 
             margin-bottom: 15px; 
         }
         .panel-title { 
             font-size: 16px; 
-            font-weight: bold; 
+            font-weight: 700; 
             margin: 0; 
-            color: #f3f4f6; 
+            color: #ffffff; 
             display: flex; 
             align-items: center; 
             gap: 8px; 
@@ -163,8 +171,8 @@
         /* Real-time Ticker console */
         .ticker-terminal { 
             background-color: #030712; 
-            border: 1px solid #1f2937; 
-            border-radius: 6px; 
+            border: 1px solid #1e293b; 
+            border-radius: 8px; 
             padding: 15px; 
             height: 380px; 
             overflow-y: auto; 
@@ -179,7 +187,7 @@
             padding-bottom: 8px; 
             word-break: break-all;
         }
-        .ticker-time { color: #64748b; margin-right: 8px; }
+        .ticker-time { color: #475569; margin-right: 8px; }
         .ticker-tag { 
             padding: 2px 6px; 
             border-radius: 4px; 
@@ -188,11 +196,11 @@
             margin-right: 6px; 
             text-transform: uppercase; 
         }
-        .tag-sys { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
-        .tag-gps { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
-        .tag-cook { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-        .tag-escrow { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-        .tag-hold { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+        .tag-sys { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.25); }
+        .tag-gps { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.25); }
+        .tag-cook { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25); }
+        .tag-escrow { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25); }
+        .tag-hold { background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.25); }
 
         /* SVG Chart designs */
         .chart-container { 
@@ -206,10 +214,10 @@
             gap: 12px; 
             font-size: 12px; 
         }
-        .bar-label { width: 80px; color: #9ca3af; font-weight: bold; text-align: right; }
-        .bar-wrapper { flex: 1; height: 16px; background-color: #1f2937; border-radius: 8px; overflow: hidden; position: relative; }
+        .bar-label { width: 80px; color: #94a3b8; font-weight: 700; text-align: right; }
+        .bar-wrapper { flex: 1; height: 16px; background-color: #090d16; border: 1px solid #1e293b; border-radius: 8px; overflow: hidden; position: relative; }
         .bar-fill { height: 100%; border-radius: 8px; transition: width 0.8s ease; }
-        .bar-val { width: 50px; color: #ffffff; font-weight: bold; text-align: left; margin-left: 8px; font-family: monospace; }
+        .bar-val { width: 50px; color: #ffffff; font-weight: 700; text-align: left; margin-left: 8px; font-family: 'JetBrains Mono', monospace; }
 
         .bar-blue { background: linear-gradient(90deg, #2563eb, #3b82f6); }
         .bar-emerald { background: linear-gradient(90deg, #059669, #10b981); }
@@ -222,16 +230,23 @@
             margin-top: 15px;
         }
         .stat-sub-box {
-            background-color: #1f2937;
+            background-color: #090d16;
+            border: 1px solid #1e293b;
             padding: 12px;
-            border-radius: 6px;
+            border-radius: 8px;
             text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .stat-sub-box:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            background-color: #0f172a;
         }
         .stat-sub-num {
             font-size: 18px;
-            font-weight: bold;
+            font-weight: 700;
             color: #ffffff;
             margin-top: 4px;
+            font-family: 'JetBrains Mono', monospace;
         }
 
         .pulse-light {
@@ -271,10 +286,10 @@
                     <span>🛰️ Operations Control & ROI Analytics Center</span>
                     <span class="pulse-light"></span>
                 </h1>
-                <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">Real-Time Traveler Preorder Sync, Dynamic Escrow Releases, and Environmental Metrics</p>
+                <p style="margin: 5px 0 0 0; color: #94a3b8; font-size: 14px;">Real-Time Traveler Preorder Sync, Dynamic Escrow Releases, and Environmental Metrics</p>
             </div>
             
-            <div style="background: #111827; padding: 6px 12px; border-radius: 6px; border: 1px solid #1f2937; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold; color: #9ca3af;">
+            <div style="background: #111827; padding: 6px 12px; border-radius: 8px; border: 1px solid #1e293b; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold; color: #94a3b8;">
                 <span>ACTIVE STREAM:</span>
                 <span style="color: #ff4757;" id="current-stream-name">Pitstop Highway Diner</span>
             </div>
@@ -359,7 +374,7 @@
                         <div class="bar-chart-row">
                             <span class="bar-label">Our Sync</span>
                             <div class="bar-wrapper">
-                                <div class="bar-fill bar-emerald" style="style-bar-glow; width: 6%;"></div>
+                                <div class="bar-fill bar-emerald" style="width: 6%;"></div>
                             </div>
                             <span class="bar-val">1.8m</span>
                         </div>
@@ -370,7 +385,7 @@
                 </div>
 
                 <!-- Chart 2: Preorder Growth Trends -->
-                <div style="border-top: 1px solid #1f2937; padding-top: 15px;">
+                <div style="border-top: 1px solid #1e293b; padding-top: 15px;">
                     <h4 style="margin: 0 0 12px 0; font-size: 13px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">📦 Weekly Preorder Efficiency</h4>
                     <div class="chart-container">
                         <div class="bar-chart-row">
@@ -398,7 +413,7 @@
                 </div>
 
                 <!-- Extra ROI Metrics -->
-                <div class="diner-stats-info" style="border-top: 1px solid #1f2937; padding-top: 15px;">
+                <div class="diner-stats-info" style="border-top: 1px solid #1e293b; padding-top: 15px;">
                     <div class="stat-sub-box">
                         <label style="font-size: 9px; color: #9ca3af; text-transform: uppercase; font-weight: bold;">Idling Avoided</label>
                         <div class="stat-sub-num" id="stats-idling">14.2k sec</div>
@@ -442,6 +457,33 @@
             screen.scrollTop = screen.scrollHeight;
         }
 
+        async function fetchMetrics() {
+            try {
+                const response = await fetch('/api/investor/pitch-metrics');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.metrics) {
+                        const m = data.metrics;
+                        // Strip 'Rs.' if present and format as '$'
+                        const gmv = m.gross_merchandise_value || "Rs.245.50";
+                        const carbon = m.carbon_mitigation_index || "42.5 kg CO2";
+                        const escrowHolds = m.active_secure_escrow_holds || 0;
+
+                        // Normalize currency sign to dollar for visual alignment
+                        const rawVal = parseFloat(gmv.replace('Rs.', '')) || 245.50;
+                        baseRevenue = rawVal;
+                        currentEscrow = escrowHolds * 18.50; // Estimated dynamic locked pool
+
+                        document.getElementById("kpi-revenue").textContent = `$${baseRevenue.toFixed(2)}`;
+                        document.getElementById("kpi-escrow").textContent = `$${currentEscrow.toFixed(2)}`;
+                        document.getElementById("kpi-carbon").textContent = carbon.replace(' kg CO2', ' kg');
+                    }
+                }
+            } catch (err) {
+                console.error("Error loading pitch metrics:", err);
+            }
+        }
+
         // Setup real-time listeners for simulation activity
         if (typeof io !== 'undefined') {
             socket = io(window.location.origin, { transports: ['websocket'] });
@@ -450,6 +492,9 @@
                 console.log("NOC Dashboard Socket Connected");
                 socket.emit("join_restaurant_room", currentRestaurantId);
                 addLogLine("tag-sys", "system", "Connected to socket dispatcher. Joined restaurant room f82e4f22...");
+                
+                // Fetch dynamic backend database metrics on connect
+                fetchMetrics();
             });
 
             // Listen to route preorder notifications
@@ -503,6 +548,9 @@
                 document.getElementById("kpi-revenue").textContent = `$${baseRevenue.toFixed(2)}`;
                 
                 addLogLine("tag-escrow", "escrow", `🎉 GEOFENCE ENTRANCE MATCHED! Traveler has physically arrived inside restaurant's 200m radius. Verified double-signature: Escrow funds of $${resolvedVal.toFixed(2)} successfully released to Diner.`);
+                
+                // Refresh metrics from DB to ensure alignment
+                setTimeout(fetchMetrics, 1000);
             });
         }
     </script>

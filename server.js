@@ -1629,6 +1629,39 @@ app.get('/', (req, res) => {
 // START RUNNING THE INTEGRATED WEB SERVER
 const PORT = 3000; // Force exactly port 3000 as required by AI Studio constraints
 
+// =======================================================
+// 📊 INVESTOR LIVE SHOWCASE PERFORMANCE DIAGNOSTICS
+// =======================================================
+app.get('/api/investor/pitch-metrics', async (req, res) => {
+    try {
+        // Read directly from your live, lightweight file-backed data store
+        const dataRaw = await fs.promises.readFile(MOCK_DB_PATH, 'utf8');
+        const db = JSON.parse(dataRaw);
+        
+        const totalOrders = db.orders.length;
+        const completedOrders = db.orders.filter(o => o.order_status === 'COMPLETED').length;
+        const escrowLocked = db.orders.filter(o => o.escrow_status === 'HOLD').length;
+        
+        // Calculate dynamic valuation metrics on the fly
+        const totalVolume = db.orders.reduce((sum, o) => sum + (parseFloat(o.total_amount) || 0), 0);
+        const marketplaceRevenue = totalVolume * 0.10; // Your 10% platform cut
+        
+        res.json({
+            status: "HEALTHY",
+            metrics: {
+                total_network_traffic: totalOrders,
+                successful_fulfillments: completedOrders,
+                active_secure_escrow_holds: escrowLocked,
+                gross_merchandise_value: `Rs.${totalVolume.toFixed(2)}`,
+                platform_net_revenue: `Rs.${marketplaceRevenue.toFixed(2)}`,
+                carbon_mitigation_index: `${(completedOrders * 3.4).toFixed(1)} kg CO2`
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to gather real-time network analytics." });
+    }
+});
+
 // TEST ROUTE: Trigger a manual fire signal to a restaurant room
 app.get('/api/test/fire-order/:restaurant_id', (req, res) => {
     const { restaurant_id } = req.params;

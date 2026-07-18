@@ -5,63 +5,301 @@
     <title>Kitchen Display - Live Sync</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #2f3542; color: white; margin: 20px; }
-        .nav-bar { background: #1e222b; padding: 15px 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.15); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin-left: auto; margin-right: auto; width: 100%; box-sizing: border-box; }
-        .nav-logo { font-size: 18px; font-weight: bold; color: #ff4757; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: #090d16; 
+            color: #f1f5f9; 
+            margin: 20px; 
+            transition: background-color 0.3s ease;
+        }
+        
+        .nav-bar { 
+            background: #111827; 
+            padding: 15px 30px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4); 
+            margin-bottom: 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: 1200px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            width: 100%; 
+            box-sizing: border-box; 
+            border: 1px solid #1e293b;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .nav-logo { 
+            font-size: 18px; 
+            font-weight: 700; 
+            color: #ff4757; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            text-decoration: none; 
+            letter-spacing: -0.02em;
+        }
         .nav-links { display: flex; gap: 20px; align-items: center; }
-        .nav-link { text-decoration: none; color: #a4b0be; font-weight: 600; font-size: 14px; transition: 0.2s; padding-bottom: 4px; }
+        .nav-link { 
+            text-decoration: none; 
+            color: #9ca3af; 
+            font-weight: 600; 
+            font-size: 14px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            padding-bottom: 4px; 
+        }
         .nav-link:hover { color: #ff4757; }
-        .nav-link.active { color: #ff4757; font-weight: bold; border-bottom: 2px solid #ff4757; }
+        .nav-link.active { 
+            color: #ff4757; 
+            font-weight: 700; 
+            border-bottom: 2px solid #ff4757; 
+        }
         
         .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-        .order-card { background: #2f3542; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 5px solid #ffa502; display: flex; justify-content: space-between; align-items: center; }
-        .alert-active { background: #ff4757; border-left-color: #ffffff; animation: blink 1.5s infinite; }
-        @keyframes blink { 50% { opacity: 0.85; } }
+        
+        /* Assembly Matrix Card Layout */
+        .order-card { 
+            background: #111827; 
+            padding: 20px; 
+            margin-bottom: 12px; 
+            border-radius: 10px; 
+            border: 1px solid #1e293b;
+            border-left: 5px solid #ffa502; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            border-color: rgba(255, 165, 2, 0.4);
+        }
 
-        /* Partner Management Styles */
-        .auth-banner { background: #1e222b; border-left: 5px solid #2ed573; padding: 15px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; flex-wrap: wrap; gap: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .auth-banner.not-logged-in { border-left-color: #ffa502; }
-        .logout-btn { background: #ffa502; border: none; color: #2f3542; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .logout-btn:hover { background: #ff7f50; color: white; }
-        .login-btn { background: #2ed573; border: none; color: #2f3542; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; transition: 0.2s; }
-        .login-btn:hover { background: #26af5f; }
+        /* Pulsing Glow Gradient for Live Fire Cooking Cards */
+        .alert-active { 
+            background: linear-gradient(135deg, #111827 0%, #1c1116 100%) !important; 
+            border-left-color: #ff4757 !important; 
+            border-color: rgba(255, 71, 87, 0.3) rgba(255, 71, 87, 0.3) rgba(255, 71, 87, 0.3) #ff4757 !important;
+            animation: pulseGlow 2.5s infinite alternate ease-in-out !important; 
+        }
+        @keyframes pulseGlow { 
+            0% { 
+                box-shadow: 0 4px 15px rgba(255, 71, 87, 0.15); 
+                border-color: rgba(255, 71, 87, 0.2) rgba(255, 71, 87, 0.2) rgba(255, 71, 87, 0.2) #ff4757;
+            } 
+            100% { 
+                box-shadow: 0 4px 30px rgba(255, 71, 87, 0.4); 
+                border-color: rgba(255, 71, 87, 0.5) rgba(255, 71, 87, 0.5) rgba(255, 71, 87, 0.5) #ff4757;
+                background: linear-gradient(135deg, #111827 0%, #251219 100%) !important;
+            } 
+        }
+
+        /* High contrast neon quantities styling */
+        .neon-qty {
+            color: #ff4757;
+            background: rgba(255, 71, 87, 0.15);
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        /* Monospace and layout variables */
+        .mono-val {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Partner Management & Panels */
+        .auth-banner { 
+            background: #111827; 
+            border: 1px solid #1e293b;
+            border-left: 5px solid #10b981; 
+            padding: 15px 20px; 
+            border-radius: 10px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-size: 14px; 
+            flex-wrap: wrap; 
+            gap: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .auth-banner.not-logged-in { border-left-color: #f59e0b; }
+        
+        .logout-btn { 
+            background: #f59e0b; 
+            border: none; 
+            color: #090d16; 
+            padding: 8px 16px; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .logout-btn:hover { 
+            background: #d97706; 
+            color: white; 
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+        
+        .login-btn { 
+            background: #10b981; 
+            border: none; 
+            color: #090d16; 
+            padding: 8px 16px; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            text-decoration: none; 
+            display: inline-block; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .login-btn:hover { 
+            background: #059669; 
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
 
         .management-panel { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 10px; }
         @media (min-width: 768px) {
             .management-panel { grid-template-columns: 1fr 1fr; }
         }
 
-        .panel-card { background: #1e222b; border-radius: 8px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .panel-title { font-size: 16px; font-weight: bold; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #2f3542; padding-bottom: 10px; color: #ff4757; display: flex; justify-content: space-between; align-items: center; }
+        .panel-card { 
+            background: #111827; 
+            border: 1px solid #1e293b;
+            border-radius: 10px; 
+            padding: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .panel-title { 
+            font-size: 16px; 
+            font-weight: 700; 
+            margin-top: 0; 
+            margin-bottom: 15px; 
+            border-bottom: 1px solid #1e293b; 
+            padding-bottom: 12px; 
+            color: #ff4757; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
         
         .availability-list { display: flex; flex-direction: column; gap: 10px; max-height: 320px; overflow-y: auto; margin-bottom: 15px; padding-right: 5px; }
-        /* Style scrollbar */
         .availability-list::-webkit-scrollbar { width: 6px; }
-        .availability-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 3px; }
-        .availability-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+        .availability-list::-webkit-scrollbar-track { background: #090d16; border-radius: 3px; }
+        .availability-list::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+        .availability-list::-webkit-scrollbar-thumb:hover { background: #ff4757; }
 
-        .item-row { background: #2f3542; padding: 12px 15px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
-        .item-row:hover { background: #353b48; }
+        .item-row { 
+            background: #090d16; 
+            border: 1px solid #1e293b;
+            padding: 12px 15px; 
+            border-radius: 8px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .item-row:hover { 
+            background: #161f30; 
+            border-color: rgba(59, 130, 246, 0.3);
+        }
         .item-info { display: flex; flex-direction: column; gap: 2px; }
         .item-name { font-weight: 600; font-size: 14px; color: #ffffff; }
-        .item-meta { font-size: 12px; color: #a4b0be; }
+        .item-meta { font-size: 12px; color: #94a3b8; }
 
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; }
-        .badge-available { background: #2ed573; color: #1e222b; }
-        .badge-unavailable { background: #ff4757; color: white; }
+        .badge-available { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-unavailable { background: rgba(255, 71, 87, 0.15); color: #ff4757; border: 1px solid rgba(255, 71, 87, 0.3); }
 
-        .btn-action { background: #ff4757; border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-action:hover { background: #ff6b81; }
-        .btn-action.btn-secondary { background: #747d8c; }
-        .btn-action.btn-secondary:hover { background: #a4b0be; }
+        .btn-action { 
+            background: #ff4757; 
+            border: none; 
+            color: white; 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            font-size: 11px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .btn-action:hover { 
+            background: #e84118; 
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+        }
+        .btn-action.btn-secondary { background: #4b5563; }
+        .btn-action.btn-secondary:hover { 
+            background: #374151; 
+            box-shadow: 0 4px 12px rgba(75, 85, 99, 0.3);
+        }
 
-        .add-form { display: flex; gap: 10px; margin-top: 15px; background: #2f3542; padding: 12px; border-radius: 6px; flex-wrap: wrap; align-items: center; }
-        .form-input { padding: 8px 12px; border-radius: 4px; border: 1px solid #1e222b; font-size: 13px; background: #1e222b; color: white; flex: 1; min-width: 120px; outline: none; }
-        .form-input:focus { border-color: #ff4757; }
-        .form-btn { background: #2ed573; color: #1e222b; font-weight: bold; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; transition: background 0.2s; margin-left: auto; }
-        .form-btn:hover { background: #26af5f; }
+        .add-form { 
+            display: flex; 
+            gap: 10px; 
+            margin-top: 15px; 
+            background: #090d16; 
+            border: 1px solid #1e293b;
+            padding: 12px; 
+            border-radius: 8px; 
+            flex-wrap: wrap; 
+            align-items: center; 
+        }
+        .form-input { 
+            padding: 8px 12px; 
+            border-radius: 6px; 
+            border: 1px solid #1e293b; 
+            font-size: 13px; 
+            background: #111827; 
+            color: white; 
+            flex: 1; 
+            min-width: 120px; 
+            outline: none; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .form-input:focus { 
+            border-color: #ff4757; 
+            box-shadow: 0 0 0 2px rgba(255, 71, 87, 0.15);
+        }
+        .form-btn { 
+            background: #10b981; 
+            color: #090d16; 
+            font-weight: 700; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 13px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            margin-left: auto; 
+        }
+        .form-btn:hover { 
+            background: #059669; 
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
 
-        .lock-overlay { text-align: center; padding: 45px 20px; border: 2px dashed #3e4452; border-radius: 8px; margin-top: 10px; background: rgba(30, 34, 43, 0.4); }
+        .lock-overlay { 
+            text-align: center; 
+            padding: 45px 20px; 
+            border: 2px dashed #1e293b; 
+            border-radius: 8px; 
+            margin-top: 10px; 
+            background: rgba(17, 24, 39, 0.4); 
+            color: #94a3b8;
+        }
     </style>
 </head>
 <body>
@@ -480,7 +718,7 @@
             document.getElementById("order-count-badge").textContent = `${activeOrdersCount} Active Preorders`;
 
             if (ordersList.length === 0) {
-                listElement.innerHTML = `<p style="color: #a4b0be; text-align: center; margin: 30px 0; font-size: 14px;">📡 Listening for dispatch signals. No active or scheduled orders in queue.</p>`;
+                listElement.innerHTML = `<p style="color: #94a3b8; text-align: center; margin: 30px 0; font-size: 14px; font-family: 'JetBrains Mono', monospace;">📡 Listening for dispatch signals. No active or scheduled orders in queue.</p>`;
                 return;
             }
 
@@ -499,7 +737,7 @@
 
                 preparingOrders.forEach(o => {
                     const itemsHtml = o.items && o.items.length > 0
-                        ? o.items.map(item => `<div style="font-size: 13px; color: #f1f2f6; display: flex; justify-content: space-between;"><span>• ${escapeHtml(item.name)}</span> <span style="font-weight: bold; color: #a4b0be;">x${item.quantity}</span></div>`).join('')
+                        ? o.items.map(item => `<div style="font-size: 13px; color: #f1f2f6; display: flex; justify-content: space-between; align-items: center;"><span>• ${escapeHtml(item.name)}</span> <span class="neon-qty">x${item.quantity}</span></div>`).join('')
                         : `<div style="font-size: 12px; color: #747d8c;">No items detailed</div>`;
 
                     const tableBadgeHtml = (o.fulfillment_type === 'DINE_IN' && o.reserved_table_number)
@@ -507,7 +745,7 @@
                         : '';
 
                     html += `
-                        <div class="order-card alert-active" style="display: flex; flex-direction: column; gap: 12px; border-left: 5px solid #ff4757; background: #1e222b; padding: 15px; border-radius: 8px; box-sizing: border-box; width: 100%;">
+                        <div class="order-card alert-active" style="display: flex; flex-direction: column; gap: 12px; padding: 15px; box-sizing: border-box; width: 100%;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; width: 100%;">
                                 <div>
                                     <strong style="color: white; font-size: 15px;">ORDER ID: #${o.id.substring(0,8)}</strong>
@@ -526,7 +764,7 @@
                             </div>
 
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; flex-wrap: wrap; gap: 10px; width: 100%;">
-                                <span style="font-size: 12px; color: #ffa502; font-weight: bold; display: flex; align-items: center; gap: 4px;">
+                                <span style="font-size: 12px; color: #ff4757; font-weight: bold; display: flex; align-items: center; gap: 4px;">
                                     ⏱️ Kitchen preparing now...
                                 </span>
                                 <button class="btn-action" style="background: #2ed573; color: #1e222b;" onclick="updateOrderStatus('${o.id}', 'COMPLETED')">Mark Ready / Fulfill</button>
@@ -554,7 +792,7 @@
 
                 placedOrders.forEach(o => {
                     const itemsHtml = o.items && o.items.length > 0
-                        ? o.items.map(item => `<div style="font-size: 13px; color: #f1f2f6; display: flex; justify-content: space-between;"><span>• ${escapeHtml(item.name)}</span> <span style="font-weight: bold; color: #a4b0be;">x${item.quantity}</span></div>`).join('')
+                        ? o.items.map(item => `<div style="font-size: 13px; color: #f1f2f6; display: flex; justify-content: space-between; align-items: center;"><span>• ${escapeHtml(item.name)}</span> <span class="neon-qty">x${item.quantity}</span></div>`).join('')
                         : `<div style="font-size: 12px; color: #747d8c;">No items detailed</div>`;
 
                     const tableBadgeHtml = (o.fulfillment_type === 'DINE_IN' && o.reserved_table_number)
@@ -565,7 +803,7 @@
                     const fireTimeStr = fireTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
                     html += `
-                        <div style="display: flex; flex-direction: column; gap: 12px; border-left: 5px solid #ffa502; background: #1e222b; padding: 15px; border-radius: 8px; box-sizing: border-box; width: 100%;">
+                        <div class="order-card" style="display: flex; flex-direction: column; gap: 12px; padding: 15px; box-sizing: border-box; width: 100%;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; width: 100%;">
                                 <div>
                                     <strong style="color: #ffffff; font-size: 14px;">ORDER ID: #${o.id.substring(0,8)}</strong>
@@ -617,7 +855,7 @@
                         : '';
 
                     html += `
-                        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(30, 34, 43, 0.5); padding: 10px 15px; border-radius: 6px; border-left: 3px solid #2ed573; font-size: 13px; box-sizing: border-box; width: 100%;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(30, 34, 43, 0.5); padding: 10px 15px; border-radius: 6px; border-left: 3px solid #2ed573; font-size: 13px; box-sizing: border-box; width: 100%; border: 1px solid #1e293b;">
                             <div>
                                 <span style="font-weight: bold; color: #a4b0be;">#${o.id.substring(0,8)}</span>
                                 <span style="color: #747d8c; margin-left: 8px;">${o.fulfillment_type}${tableBadgeHtml}</span>

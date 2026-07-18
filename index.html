@@ -5,22 +5,196 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Route & Preorder Food Sync Map</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f7f9fa; }
-        .nav-bar { background: white; padding: 15px 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin-left: auto; margin-right: auto; width: 100%; box-sizing: border-box; }
-        .nav-logo { font-size: 18px; font-weight: bold; color: #ff4757; display: flex; align-items: center; gap: 8px; text-decoration: none; }
-        .nav-links { display: flex; gap: 20px; align-items: center; }
-        .nav-link { text-decoration: none; color: #555; font-weight: 600; font-size: 14px; transition: 0.2s; padding-bottom: 4px; }
-        .nav-link:hover { color: #ff4757; }
-        .nav-link.active { color: #ff4757; font-weight: bold; border-bottom: 2px solid #ff4757; }
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         
+        body { 
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            margin: 20px; 
+            background-color: #090d16; 
+            color: #f1f5f9;
+            transition: background-color 0.3s ease;
+        }
+        
+        /* 1. Global Navigation Bar */
+        .nav-bar { 
+            background: #111827; 
+            padding: 15px 30px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); 
+            margin-bottom: 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: 1200px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            width: 100%; 
+            box-sizing: border-box;
+            border: 1px solid #1e293b;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .nav-logo { 
+            font-size: 18px; 
+            font-weight: 700; 
+            color: #ff4757; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+        .nav-link { 
+            text-decoration: none; 
+            color: #9ca3af; 
+            font-weight: 600; 
+            font-size: 14px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            padding-bottom: 4px; 
+        }
+        .nav-link:hover { color: #ff4757; }
+        .nav-link.active { 
+            color: #ff4757; 
+            font-weight: 700; 
+            border-bottom: 2px solid #ff4757; 
+        }
+        
+        /* 2. Controls and Layout */
         .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
-        .controls { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; gap: 15px; align-items: center; }
-        .input-group { display: flex; flex-direction: column; gap: 5px; flex: 1; }
-        label { font-size: 12px; font-weight: bold; color: #555; text-transform: uppercase; }
-        input { padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-        button { padding: 12px 24px; background-color: #ff4757; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 17px; transition: 0.2s; }
-        button:hover { background-color: #e84118; }
-        #map { height: 600px; width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .controls { 
+            background: #111827; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); 
+            display: flex; 
+            gap: 15px; 
+            align-items: center;
+            border: 1px solid #1e293b;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .input-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+        label { 
+            font-size: 11px; 
+            font-weight: 700; 
+            color: #94a3b8; 
+            text-transform: uppercase; 
+            letter-spacing: 0.08em;
+        }
+        input { 
+            padding: 12px; 
+            border: 1px solid #1e293b; 
+            border-radius: 8px; 
+            font-size: 14px; 
+            background: #090d16;
+            color: #ffffff;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        input:focus {
+            border-color: #ff4757;
+            box-shadow: 0 0 0 2px rgba(255, 71, 87, 0.15);
+        }
+        button { 
+            padding: 12px 24px; 
+            background-color: #ff4757; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            font-size: 14px; 
+            margin-top: 17px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.02em;
+        }
+        button:hover { 
+            background-color: #e84118;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+        }
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        #map { 
+            height: 600px; 
+            width: 100%; 
+            border-radius: 10px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); 
+            border: 1px solid #1e293b;
+        }
+
+        /* 3. High-tech Custom Components */
+        /* Custom styled scrolls */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #090d16; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ff4757; }
+
+        /* Partner card custom animations & interactions */
+        .partner-card {
+            background: #111827;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            padding: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .partner-card:hover {
+            transform: translateY(-3px) scale(1.02);
+            border-color: rgba(255, 71, 87, 0.4);
+            box-shadow: 0 8px 25px rgba(255, 71, 87, 0.15);
+            background: #161f30;
+        }
+        .partner-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: #3b82f6;
+            transition: background-color 0.3s;
+        }
+        .partner-card:hover::before {
+            background: #ff4757;
+        }
+
+        /* Monospace values for numeric stats */
+        .mono-val {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        /* Smooth progress bar animations */
+        #sim-progress-bar {
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+        #sim-progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background-image: linear-gradient(
+                -45deg, 
+                rgba(255, 255, 255, .2) 25%, 
+                transparent 25%, 
+                transparent 50%, 
+                rgba(255, 255, 255, .2) 50%, 
+                rgba(255, 255, 255, .2) 75%, 
+                transparent 75%, 
+                transparent
+            );
+            background-size: 50px 50px;
+            animation: moveProgress 2s linear infinite;
+        }
+        @keyframes moveProgress {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 50px; }
+        }
     </style>
 </head>
 <body>
@@ -74,81 +248,89 @@
         </div>
         
         <!-- Sidebar: Preordering Facilitated Restaurants List (1/3 width) -->
-        <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-height: 600px; overflow-y: auto; border-top: 4px solid #ff4757;">
-            <h3 style="margin: 0; color: #2d3748; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between; font-weight: bold;">
-                <span style="display: flex; align-items: center; gap: 6px;">🏪 Partner Diners</span>
-                <span id="restaurant-count" style="font-size: 12px; background: #ffe0e3; color: #ff4757; padding: 2px 8px; border-radius: 12px; font-weight: bold;">0</span>
-            </h3>
+        <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; background: #111827; border: 1px solid #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); max-height: 600px; overflow-y: auto; border-top: 4px solid #ff4757;">
+            <div style="display: flex; flex-direction: column; gap: 2px; border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 4px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                    <h3 style="margin: 0; color: #ffffff; font-size: 18px; display: flex; align-items: center; gap: 8px; font-weight: 700;">
+                        <span>🏪 Partner Diners</span>
+                    </h3>
+                    <span id="restaurant-count" style="font-size: 12px; background: rgba(255, 71, 87, 0.15); color: #ff4757; border: 1px solid rgba(255, 71, 87, 0.3); padding: 2px 8px; border-radius: 12px; font-weight: 700;">0</span>
+                </div>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.1em; font-weight: bold; margin-top: 2px;">🛰️ IN-FLIGHT COMMAND CENTER</span>
+            </div>
             
-            <div id="route-filter-msg" style="font-size: 13px; color: #718096; margin: 0; display: none; background: #f0fdf4; padding: 10px; border-left: 4px solid #22c55e; border-radius: 4px;">
+            <div id="route-filter-msg" style="font-size: 13px; color: #10b981; margin: 0; display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-left: 4px solid #10b981; padding: 10px; border-radius: 6px;">
                 🔍 Filtering restaurants near your route...
             </div>
             
             <div id="restaurants-sidebar-list" style="display: flex; flex-direction: column; gap: 12px;">
-                <p style="color: #718096; font-size: 14px; text-align: center; padding: 20px 0;">Loading preordering-facilitated restaurants...</p>
+                <p style="color: #94a3b8; font-size: 14px; text-align: center; padding: 20px 0;">Loading preordering-facilitated restaurants...</p>
             </div>
         </div>
     </div>
 
     <!-- 🚗 LIVE TRIP TRACKING & COOKING PREP SYNC SIMULATOR -->
-    <div id="live-simulation-panel" style="display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border-top: 4px solid #3b82f6; margin-top: 15px; margin-bottom: 15px; flex-direction: column; gap: 15px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
-            <h3 style="margin: 0; color: #1e293b; font-size: 18px; display: flex; align-items: center; gap: 8px; font-weight: bold;">
-                <span>🚗 Live Preorder Sync & GPS Simulator</span>
-                <span id="sim-status-badge" style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 10px; border-radius: 12px; font-weight: bold;">IDLE</span>
-            </h3>
+    <div id="live-simulation-panel" style="display: none; background: #111827; padding: 20px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); border: 1px solid #1e293b; border-top: 4px solid #3b82f6; margin-top: 15px; margin-bottom: 15px; flex-direction: column; gap: 15px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <h3 style="margin: 0; color: #ffffff; font-size: 18px; display: flex; align-items: center; gap: 8px; font-weight: 700;">
+                    <span>🚗 Live Preorder Sync & GPS Simulator</span>
+                    <span id="sim-status-badge" style="font-size: 11px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); padding: 2px 10px; border-radius: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace;">IDLE</span>
+                </h3>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #10b981; text-transform: uppercase; letter-spacing: 0.1em; font-weight: bold;">🛰️ LIVE TRUCK & DISPATCH NETWORK ACTIVE</span>
+            </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button id="start-sim-btn" style="margin-top: 0; padding: 8px 16px; background-color: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.2s;">
+                <button id="start-sim-btn" style="margin-top: 0; padding: 8px 16px; background-color: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 13px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
                     ▶️ Start Trip Simulation
                 </button>
-                <button id="pause-sim-btn" style="margin-top: 0; padding: 8px 16px; background-color: #64748b; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.2s; display: none;">
+                <button id="pause-sim-btn" style="margin-top: 0; padding: 8px 16px; background-color: #4b5563; color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 13px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: none;">
                     ⏸️ Pause Simulation
                 </button>
-                <button id="reset-sim-btn" style="margin-top: 0; padding: 8px 16px; background-color: #ef4444; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.2s; display: none;">
+                <button id="reset-sim-btn" style="margin-top: 0; padding: 8px 16px; background-color: #ef4444; color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 13px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: none;">
                     🔄 Reset Trip
                 </button>
             </div>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-            <div style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                <label style="color: #64748b; font-size: 10px; font-weight: bold; text-transform: uppercase;">Tracking Preorder ID</label>
-                <div id="sim-order-id-display" style="font-family: monospace; font-size: 13px; font-weight: bold; color: #0f172a; margin-top: 4px; word-break: break-all;">-</div>
+            <div style="background: #090d16; padding: 14px; border-radius: 8px; border: 1px solid #1e293b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+                <label style="color: #94a3b8; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Tracking Preorder ID</label>
+                <div id="sim-order-id-display" class="mono-val" style="font-size: 13px; font-weight: bold; color: #ffffff; margin-top: 6px; word-break: break-all;">-</div>
             </div>
-            <div style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                <label style="color: #64748b; font-size: 10px; font-weight: bold; text-transform: uppercase;">GPS Location Progress</label>
-                <div style="font-size: 14px; font-weight: bold; color: #0f172a; margin-top: 4px; display: flex; justify-content: space-between; align-items: center;">
-                    <span id="sim-distance-display">0% along route</span>
-                    <span id="sim-miles-display" style="font-size: 12px; color: #64748b;">-</span>
+            <div style="background: #090d16; padding: 14px; border-radius: 8px; border: 1px solid #1e293b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+                <label style="color: #94a3b8; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">GPS Location Progress</label>
+                <div style="font-size: 14px; font-weight: bold; color: #ffffff; margin-top: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <span id="sim-distance-display" class="mono-val" style="font-size: 13px;">0% along route</span>
+                    <span id="sim-miles-display" class="mono-val" style="font-size: 12px; color: #94a3b8;">-</span>
                 </div>
-                <div style="width: 100%; background-color: #cbd5e1; height: 6px; border-radius: 3px; margin-top: 8px; overflow: hidden;">
+                <div style="width: 100%; background-color: #1e293b; height: 6px; border-radius: 3px; margin-top: 8px; overflow: hidden;">
                     <div id="sim-progress-bar" style="width: 0%; height: 100%; background-color: #3b82f6; transition: width 0.5s ease;"></div>
                 </div>
             </div>
-            <div style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                <label style="color: #64748b; font-size: 10px; font-weight: bold; text-transform: uppercase;">Current Drive ETA</label>
-                <div id="sim-eta-display" style="font-size: 18px; font-weight: bold; color: #ff4757; margin-top: 4px;">- mins</div>
+            <div style="background: #090d16; padding: 14px; border-radius: 8px; border: 1px solid #1e293b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+                <label style="color: #94a3b8; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Current Drive ETA</label>
+                <div id="sim-eta-display" class="mono-val" style="font-size: 20px; font-weight: 700; color: #ff4757; margin-top: 4px;">- mins</div>
             </div>
-            <div style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                <label style="color: #64748b; font-size: 10px; font-weight: bold; text-transform: uppercase;">Kitchen Synchronization</label>
-                <div id="sim-cooking-status-display" style="font-size: 14px; font-weight: bold; color: #d97706; margin-top: 4px;">Waiting for Fire Window</div>
-                <div id="sim-cooking-countdown-display" style="font-size: 11px; color: #64748b; margin-top: 2px;">-</div>
+            <div style="background: #090d16; padding: 14px; border-radius: 8px; border: 1px solid #1e293b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+                <label style="color: #94a3b8; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Kitchen Synchronization</label>
+                <div id="sim-cooking-status-display" style="font-size: 14px; font-weight: 700; color: #f59e0b; margin-top: 6px;">Waiting for Fire Window</div>
+                <div id="sim-cooking-countdown-display" style="font-size: 11px; color: #94a3b8; margin-top: 4px; font-family: 'JetBrains Mono', monospace;">-</div>
             </div>
         </div>
 
-        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; align-items: center; background: #eff6ff; padding: 12px; border-radius: 6px; border: 1px solid #bfdbfe;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; align-items: center; background: rgba(59, 130, 246, 0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.15);">
             <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 18px;">💡</span>
-                <span style="font-size: 13px; color: #1e3a8a; font-weight: 500;">Simulate dynamic highway conditions to see the cooking sync reschedule automatically!</span>
+                <span style="font-size: 13px; color: #93c5fd; font-weight: 500;">Simulate dynamic highway conditions to see the cooking sync reschedule automatically!</span>
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button id="sim-traffic-btn" style="margin-top: 0; padding: 6px 12px; background: #f59e0b; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.2s;">
+                <button id="sim-traffic-btn" style="margin-top: 0; padding: 6px 12px; background: #f59e0b; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
                     ⚠️ Add Traffic delay (+10m)
                 </button>
-                <button id="sim-clear-btn" style="margin-top: 0; padding: 6px 12px; background: #10b981; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.2s;">
+                <button id="sim-clear-btn" style="margin-top: 0; padding: 6px 12px; background: #10b981; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
                     🚀 Clear Road Sprint (-5m)
                 </button>
-                <button id="sim-arrival-btn" style="margin-top: 0; padding: 6px 12px; background: #8b5cf6; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.2s;">
+                <button id="sim-arrival-btn" style="margin-top: 0; padding: 6px 12px; background: #8b5cf6; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
                     📍 Trigger Arrival Geofence
                 </button>
             </div>
@@ -156,35 +338,35 @@
     </div>
 </div>
 
-<div id="menu-modal" style="display:none; position:fixed; top:50%; left:50%; transform: translate(-50%, -50%); width:95%; max-width:600px; height: 85vh; max-height: 700px; background:white; padding:25px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.15); z-index:1000; flex-direction: column; border-top: 6px solid #ff4757; box-sizing: border-box;">
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 15px;">
-        <h3 id="modal-restaurant-name" style="margin: 0; color: #1e293b; font-size: 20px; font-weight: bold;">Restaurant Menu</h3>
-        <span onclick="closeModal()" style="font-size: 24px; color: #94a3b8; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#ff4757'" onmouseout="this.style.color='#94a3b8'">×</span>
+<div id="menu-modal" style="display:none; position:fixed; top:50%; left:50%; transform: translate(-50%, -50%); width:95%; max-width:600px; height: 85vh; max-height: 700px; background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding:25px; border-radius:12px; box-shadow:0 15px 35px rgba(0,0,0,0.5); z-index:1000; flex-direction: column; border: 1px solid rgba(255, 71, 87, 0.2); border-top: 6px solid #ff4757; box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: #ffffff;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 15px;">
+        <h3 id="modal-restaurant-name" style="margin: 0; color: #ffffff; font-size: 20px; font-weight: bold;">Restaurant Menu</h3>
+        <span onclick="closeModal()" style="font-size: 24px; color: #94a3b8; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.color='#ff4757'" onmouseout="this.style.color='#94a3b8'">×</span>
     </div>
     
     <div id="menu-items-list" style="flex: 1; overflow-y: auto; padding-right: 5px; margin-bottom: 15px;"></div>
     
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-        <label style="font-weight: 700; color: #475569; display: block; margin-bottom: 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Fulfillment Preference:</label>
+    <div style="background: #090d16; border: 1px solid #1e293b; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+        <label style="font-weight: 700; color: #94a3b8; display: block; margin-bottom: 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Fulfillment Preference:</label>
         <div style="display: flex; gap: 20px;">
-            <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: #1e293b; cursor: pointer;">
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: #ffffff; cursor: pointer;">
                 <input type="radio" name="fulfillment" value="DINE_IN" checked style="width: 18px; height: 18px; accent-color: #ff4757;"> 🍽️ Dine-in Seating
             </label>
-            <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: #1e293b; cursor: pointer;">
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: #ffffff; cursor: pointer;">
                 <input type="radio" name="fulfillment" value="TAKEAWAY" style="width: 18px; height: 18px; accent-color: #ff4757;"> 🛍️ Roadside Pickup
             </label>
         </div>
         
         <div id="table-reservation-container" style="margin-top: 12px;">
-            <label style="font-weight: 700; color: #475569; display: block; margin-bottom: 5px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">🪑 Pre-Select Available Table:</label>
-            <select id="table-select" style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; background: white; cursor: pointer; color: #1e293b; font-weight: 500;"></select>
-            <p id="table-status-msg" style="margin: 5px 0 0 0; font-size: 12px; color: #64748b; font-weight: 500;"></p>
+            <label style="font-weight: 700; color: #94a3b8; display: block; margin-bottom: 5px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">🪑 Pre-Select Available Table:</label>
+            <select id="table-select" style="width: 100%; padding: 10px; border: 1px solid #1e293b; border-radius: 6px; font-size: 14px; background: #090d16; cursor: pointer; color: #ffffff; font-weight: 500; outline: none;"></select>
+            <p id="table-status-msg" style="margin: 5px 0 0 0; font-size: 12px; color: #94a3b8; font-weight: 500;"></p>
         </div>
     </div>
     
-    <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 2px solid #f1f5f9; padding-top: 15px;">
-        <button onclick="closeModal()" style="margin: 0; padding: 10px 20px; background: #e2e8f0; color: #475569; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#cbd5e1'" onmouseout="this.style.background='#e2e8f0'">Close</button>
-        <button id="confirm-order-btn" style="margin: 0; padding: 10px 24px; background: #ff4757; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#e84118'" onmouseout="this.style.background='#ff4757'">Confirm Preorder</button>
+    <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #1e293b; padding-top: 15px;">
+        <button onclick="closeModal()" style="margin: 0; padding: 10px 20px; background: #1f2937; color: #cbd5e1; border: 1px solid #374151; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.background='#374151'; this.style.color='#ffffff';" onmouseout="this.style.background='#1f2937'; this.style.color='#cbd5e1';">Close</button>
+        <button id="confirm-order-btn" style="margin: 0; padding: 10px 24px; background: #ff4757; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.background='#e84118'; this.style.boxShadow='0 4px 12px rgba(255, 71, 87, 0.3)';" onmouseout="this.style.background='#ff4757'; this.style.boxShadow='none';">Confirm Preorder</button>
     </div>
 </div>
 
@@ -862,7 +1044,87 @@
             zoom: 5,
             center: { lat: 39.8283, lng: -98.5795 },
             mapTypeControl: false,
-            streetViewControl: false
+            streetViewControl: false,
+            styles: [
+                { elementType: "geometry", stylers: [{ color: "#090d16" }] },
+                { elementType: "labels.text.stroke", stylers: [{ color: "#090d16" }] },
+                { elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
+                {
+                    featureType: "administrative.locality",
+                    elementType: "labels.text.fill",
+                    stylers: [{ color: "#cbd5e1" }],
+                },
+                {
+                    featureType: "poi",
+                    elementType: "labels.text.fill",
+                    stylers: [{ color: "#94a3b8" }],
+                },
+                {
+                    featureType: "poi.park",
+                    elementType: "geometry",
+                    stylers: [{ color: "#111827" }],
+                },
+                {
+                    featureType: "poi.park",
+                    elementType: "labels.text.fill",
+                    stylers: [{ color: "#1e293b" }],
+                },
+                {
+                    featureType: "road",
+                    elementType: "geometry",
+                    stylers: [{ color: "#1e293b" }],
+                },
+                {
+                    featureType: "road",
+                    elementType: "geometry.stroke",
+                    stylers: [{ color: "#0f172a" }],
+                },
+                {
+                    featureType: "road",
+                    elementType: "labels.text.fill",
+                    stylers: [{ color: "#64748b" }],
+                },
+                {
+                    featureType: "road.highway",
+                    elementType: "geometry",
+                    stylers: [{ color: "#1f2937" }],
+                },
+                {
+                    featureType: "road.highway",
+                    elementType: "geometry.stroke",
+                    stylers: [{ color: "#111827" }],
+                },
+                {
+                    featureType: "road.highway",
+                    elementType: "labels.text.fill",
+                    stylers: [{ color: "#e2e8f0" }],
+                },
+                {
+                    featureType: "transit",
+                    elementType: "geometry",
+                    stylers: [{ color: "#1e293b" }],
+                },
+                {
+                    featureType: "transit.station",
+                    elementType: "labels.text.fill",
+                    stylers: [{ color: "#94a3b8" }],
+                },
+                {
+                    featureType: "water",
+                    elementType: "geometry",
+                    stylers: [{ color: "#040712" }],
+                },
+                {
+                    featureType: "water",
+                    elementType: "labels.text.fill",
+                    stylers: [{ color: "#475569" }],
+                },
+                {
+                    featureType: "water",
+                    elementType: "labels.text.stroke",
+                    stylers: [{ color: "#040712" }],
+                }
+            ]
         });
 
         infoWindow = new google.maps.InfoWindow();
@@ -1175,7 +1437,7 @@
         const sidebar = document.getElementById("restaurants-sidebar-list");
         if (restaurantsToRender.length === 0) {
             sidebar.innerHTML = `
-                <p style="color: #718096; font-size: 14px; text-align: center; padding: 20px 0;">
+                <p style="color: #94a3b8; font-size: 14px; text-align: center; padding: 20px 0;">
                     No preordering-facilitated restaurants found.
                 </p>
             `;
@@ -1185,7 +1447,7 @@
         sidebar.innerHTML = restaurantsToRender.map(r => {
             let badgeHtml = '';
             if (r.isNearRoute) {
-                badgeHtml = `<span style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px; font-weight: bold; margin-left: 8px;">📍 On Route</span>`;
+                badgeHtml = `<span style="font-size: 11px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); padding: 2px 8px; border-radius: 12px; font-weight: 700; margin-left: 8px;">📍 On Route</span>`;
             }
 
             let etaHtml = '';
@@ -1196,32 +1458,30 @@
                 const travelMinutes = Math.round(travelSeconds / 60);
                 
                 etaHtml = `
-                    <div style="font-size: 12px; color: #ff4757; font-weight: bold; background: #ffebeb; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; width: fit-content;">
+                    <div style="font-size: 12px; color: #ff4757; font-weight: bold; background: rgba(255, 71, 87, 0.1); border: 1px solid rgba(255, 71, 87, 0.2); padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; width: fit-content; font-family: 'JetBrains Mono', monospace;">
                         🚗 Drive Time: ${travelMinutes} mins (${(r.routeDistanceMeters / 1609.34).toFixed(1)} mi)
                     </div>
                 `;
             }
 
             return `
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;" 
-                     onclick="focusOnRestaurant('${r.id}', ${r.latitude}, ${r.longitude}, '${r.name.replace(/'/g, "\\'")}')"
-                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.05)';" 
-                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <div class="partner-card" 
+                     onclick="focusOnRestaurant('${r.id}', ${r.latitude}, ${r.longitude}, '${r.name.replace(/'/g, "\\'")}')">
                     <div style="display: flex; align-items: flex-start; justify-content: space-between;">
-                        <h4 style="margin: 0; color: #1e293b; font-size: 15px; font-weight: bold; display: flex; align-items: center; flex-wrap: wrap;">
+                        <h4 style="margin: 0; color: #ffffff; font-size: 15px; font-weight: bold; display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
                             ${r.name} ${badgeHtml}
                         </h4>
                     </div>
-                    <p style="margin: 0; font-size: 13px; color: #64748b; display: flex; align-items: center; gap: 4px;">
+                    <p style="margin: 0; font-size: 13px; color: #94a3b8; display: flex; align-items: center; gap: 4px;">
                         📍 ${r.address}
                     </p>
                     ${etaHtml}
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 5px; font-size: 12px;">
-                        <span style="color: #475569; font-weight: 500; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">
+                        <span class="mono-val" style="color: #60a5fa; font-weight: bold; background: rgba(59, 130, 246, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(59, 130, 246, 0.15);">
                             ⏱️ ${r.average_prep_time || 15} mins prep
                         </span>
                         <button onclick="event.stopPropagation(); openRestaurantMenu('${r.id}', '${r.name.replace(/'/g, "\\'")}')" 
-                                style="margin-top: 0; padding: 6px 12px; background: #ff4757; color: white; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s;">
+                                style="margin-top: 0; padding: 6px 12px; background: #ff4757; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
                             Preorder Menu
                         </button>
                     </div>
