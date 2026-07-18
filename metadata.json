@@ -2,7 +2,8 @@
   "name": "Route-Based Preorder Food Sync",
   "description": "An interactive route-based preorder system that syncs cooking timing with traveler live route and location.",
   "requestFramePermissions": [
-    "geolocation"
+    "geolocation",
+    "microphone"
   ],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

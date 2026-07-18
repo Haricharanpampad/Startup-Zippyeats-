@@ -225,6 +225,8 @@
 
     let map, directionsService, directionsRenderer;
     let originAutocomplete, destinationAutocomplete;
+    let selectedOriginPlace = null;
+    let selectedDestPlace = null;
     let selectedRestaurantId = null;
     const loggedInUserId = localStorage.getItem('traveler_user_id') || "mock-user-id";
     let markers = [];
@@ -305,20 +307,45 @@
             // If we don't have active directions on screen, try to trigger route mapping programmatically!
             let activeDirections = directionsRenderer ? directionsRenderer.getDirections() : null;
             if (!activeDirections || !activeDirections.routes || !activeDirections.routes[0]) {
-                // Use coordinates from database/current or fallback search
-                document.getElementById("origin-input").value = "San Francisco, CA";
-                document.getElementById("destination-input").value = simRestaurantData.address;
+                // Dynamically select a nearby regional origin to prevent cross-country routing failures (e.g., ZERO_RESULTS)
+                let originQuery = "Trenton, NJ";
+                if (parseFloat(simRestaurantData.latitude) < 39) {
+                    originQuery = "San Jose, CA";
+                }
+                
+                document.getElementById("origin-input").value = originQuery;
+                document.getElementById("destination-input").value = simRestaurantData.name + " (" + simRestaurantData.address + ")";
                 
                 if (directionsService) {
                     directionsService.route({
-                        origin: "San Francisco, CA",
-                        destination: simRestaurantData.address,
+                        origin: originQuery,
+                        destination: { lat: parseFloat(simRestaurantData.latitude), lng: parseFloat(simRestaurantData.longitude) },
                         travelMode: google.maps.TravelMode.DRIVING
                     }, (res, status) => {
                         if (status === "OK") {
                             if (directionsRenderer) directionsRenderer.setDirections(res);
                             findRestaurantsAlongRoute(res.routes[0]);
                             setTimeout(() => setupPathFromDirections(res.routes[0]), 500);
+                        } else {
+                            console.warn("Simulation directions setup with " + originQuery + " failed with status: " + status + ". Trying dynamic coordinate offset fallback.");
+                            // Fallback: calculate a small, localized route ending exactly at the diner coordinates
+                            const restLat = parseFloat(simRestaurantData.latitude);
+                            const restLng = parseFloat(simRestaurantData.longitude);
+                            document.getElementById("origin-input").value = (restLat - 0.25).toFixed(4) + ", " + (restLng - 0.25).toFixed(4);
+                            
+                            directionsService.route({
+                                origin: { lat: restLat - 0.25, lng: restLng - 0.25 },
+                                destination: { lat: restLat, lng: restLng },
+                                travelMode: google.maps.TravelMode.DRIVING
+                            }, (fallbackRes, fallbackStatus) => {
+                                if (fallbackStatus === "OK") {
+                                    if (directionsRenderer) directionsRenderer.setDirections(fallbackRes);
+                                    findRestaurantsAlongRoute(fallbackRes.routes[0]);
+                                    setTimeout(() => setupPathFromDirections(fallbackRes.routes[0]), 500);
+                                } else {
+                                    showCustomNotification("Simulation Route Error", `<p>Could not calculate a route to the restaurant: <strong>${fallbackStatus}</strong></p>`);
+                                }
+                            });
                         }
                     });
                 }
@@ -859,6 +886,10 @@
         // Clear tracking if user manually changes standard text
         originInput.addEventListener("input", () => {
             currentLocationLatLng = null;
+            selectedOriginPlace = null;
+        });
+        destInput.addEventListener("input", () => {
+            selectedDestPlace = null;
         });
 
         originAutocomplete = new google.maps.places.Autocomplete(originInput, {
@@ -870,6 +901,13 @@
 
         originAutocomplete.bindTo("bounds", map);
         destinationAutocomplete.bindTo("bounds", map);
+
+        originAutocomplete.addListener("place_changed", () => {
+            selectedOriginPlace = originAutocomplete.getPlace();
+        });
+        destinationAutocomplete.addListener("place_changed", () => {
+            selectedDestPlace = destinationAutocomplete.getPlace();
+        });
 
         document.getElementById("find-route-btn").addEventListener("click", calculateAndDisplayRoute);
 
@@ -1207,21 +1245,47 @@
     }
 
     function calculateAndDisplayRoute() {
-        const originPlace = originAutocomplete.getPlace();
-        const destinationPlace = destinationAutocomplete.getPlace();
+        const originInputVal = document.getElementById("origin-input").value.trim();
+        const destInputVal = document.getElementById("destination-input").value.trim();
 
-        let originQuery = document.getElementById("origin-input").value;
-        if (currentLocationLatLng && originQuery) {
-            originQuery = currentLocationLatLng;
-        } else if (originPlace && originPlace.geometry) {
-            originQuery = { placeId: originPlace.place_id };
-        }
-
-        const destQuery = destinationPlace && destinationPlace.geometry ? { placeId: destinationPlace.place_id } : document.getElementById("destination-input").value;
-
-        if (!originQuery || !destQuery) {
+        if (!originInputVal || !destInputVal) {
             showCustomNotification("Missing Information", "<p>Please input both a starting point and a destination to plan your route.</p>");
             return;
+        }
+
+        // Try to match with known partner restaurants to use exact coordinates and prevent geocoding issues
+        const matchedOriginRestaurant = allRestaurants.find(r => 
+            originInputVal.toLowerCase().includes(r.name.toLowerCase()) || 
+            r.name.toLowerCase().includes(originInputVal.toLowerCase()) ||
+            originInputVal.toLowerCase().includes(r.address.toLowerCase()) ||
+            r.address.toLowerCase().includes(originInputVal.toLowerCase())
+        );
+
+        const matchedDestRestaurant = allRestaurants.find(r => 
+            destInputVal.toLowerCase().includes(r.name.toLowerCase()) || 
+            r.name.toLowerCase().includes(destInputVal.toLowerCase()) ||
+            destInputVal.toLowerCase().includes(r.address.toLowerCase()) ||
+            r.address.toLowerCase().includes(destInputVal.toLowerCase())
+        );
+
+        let originQuery;
+        if (currentLocationLatLng && originInputVal) {
+            originQuery = currentLocationLatLng;
+        } else if (matchedOriginRestaurant) {
+            originQuery = { lat: parseFloat(matchedOriginRestaurant.latitude), lng: parseFloat(matchedOriginRestaurant.longitude) };
+        } else if (selectedOriginPlace && selectedOriginPlace.geometry) {
+            originQuery = { placeId: selectedOriginPlace.place_id };
+        } else {
+            originQuery = originInputVal;
+        }
+
+        let destQuery;
+        if (matchedDestRestaurant) {
+            destQuery = { lat: parseFloat(matchedDestRestaurant.latitude), lng: parseFloat(matchedDestRestaurant.longitude) };
+        } else if (selectedDestPlace && selectedDestPlace.geometry) {
+            destQuery = { placeId: selectedDestPlace.place_id };
+        } else {
+            destQuery = destInputVal;
         }
 
         directionsService.route(
@@ -1767,6 +1831,36 @@
     .ai-chat-send:hover {
         background: #e84118;
     }
+    
+    /* Microphone FAB Style */
+    .ai-chat-mic {
+        background: none;
+        border: none;
+        color: #64748b;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 0;
+    }
+    .ai-chat-mic:hover {
+        background: #f1f5f9;
+        color: #ef4444;
+    }
+    .ai-chat-mic.listening {
+        background-color: #ef4444 !important;
+        color: white !important;
+        animation: pulse-mic 1.5s infinite;
+    }
+    @keyframes pulse-mic {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+        70% { transform: scale(1.15); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
 </style>
 
 <!-- Floating AI Toggle FAB Button -->
@@ -1787,7 +1881,15 @@
                 <div style="font-size: 10px; color: #94a3b8; font-weight: 500;">Dynamic Smart Concierge</div>
             </div>
         </div>
-        <button class="ai-chat-close" id="ai-close-btn">×</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <!-- Mute/Unmute Text-To-Speech Button -->
+            <button id="ai-voice-toggle" title="Toggle AI Voice Response (Muted)" style="background: none; border: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 50%; transition: all 0.2s; outline: none;">
+                <svg id="ai-voice-icon" style="width:18px; height:18px; fill:currentColor;" viewBox="0 0 24 24">
+                    <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.03c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+                </svg>
+            </button>
+            <button class="ai-chat-close" id="ai-close-btn" style="line-height:1; font-size:24px;">×</button>
+        </div>
     </div>
     
     <!-- Messages Stream -->
@@ -1798,7 +1900,7 @@
             <br><br>
             I can help you analyze partner diners along your route, recommend specific items matching your cravings, and arrange table bookings perfectly synced to your driving times.
             <br><br>
-            <em>Tap a suggestion chip below or chat with me to get started!</em>
+            <em>Tap the 🎙️ mic button to speak, or toggle the 🔊 speaker button to hear me read back route details!</em>
         </div>
     </div>
     
@@ -1810,8 +1912,13 @@
         <div class="ai-chip" onclick="handleChipClick('We are 4 guests. Where can we seat?')">🪑 Seating for 4 Guests</div>
     </div>
     
-    <!-- Input Form -->
+    <!-- Input Form with Microphone Button -->
     <div class="ai-chat-input-area">
+        <button class="ai-chat-mic" id="ai-mic-btn" title="Speak to Voice Assistant">
+            <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
+            </svg>
+        </button>
         <input type="text" class="ai-chat-input" id="ai-chat-input-field" placeholder="Ask about route diners, menus, seating...">
         <button class="ai-chat-send" id="ai-send-btn" title="Send message">
             <svg style="width:16px; height:16px; fill:currentColor;" viewBox="0 0 24 24">
@@ -1829,8 +1936,14 @@
     const aiSendBtn = document.getElementById("ai-send-btn");
     const aiInputField = document.getElementById("ai-chat-input-field");
     const aiMessagesList = document.getElementById("ai-messages-list");
+    const aiMicBtn = document.getElementById("ai-mic-btn");
+    const aiVoiceToggle = document.getElementById("ai-voice-toggle");
+    const aiVoiceIcon = document.getElementById("ai-voice-icon");
 
     let chatHistory = []; // Tracks multi-turn conversational context
+    let isVoiceMuted = true; // Voice reads back responses if false
+    let recognition = null;
+    let isListening = false;
 
     // Toggle Chat Drawer Open/Close
     aiToggleBtn.addEventListener("click", () => {
@@ -1842,6 +1955,10 @@
 
     aiCloseBtn.addEventListener("click", () => {
         aiChatContainer.classList.remove("open");
+        stopListening();
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
     });
 
     // Handle suggestion chips tap
@@ -1924,6 +2041,9 @@
                 appendMessageBubble(data.text, 'bot');
                 // Track AI message in history
                 chatHistory.push({ role: 'model', text: data.text });
+                
+                // Speak response text if TTS is active
+                speakText(data.text);
             } else {
                 appendMessageBubble(`⚠️ <strong>Connection limit or setup issue</strong>: ${data.error || "Unable to fetch AI response."}`, 'bot');
             }
@@ -2020,10 +2140,131 @@
     };
 
     window.setRouteFromAi = function(origin, dest) {
+        currentLocationLatLng = null;
+        selectedOriginPlace = null;
+        selectedDestPlace = null;
         document.getElementById("origin-input").value = origin;
         document.getElementById("destination-input").value = dest;
         calculateAndDisplayRoute();
     };
+
+    // AI Voice Assistance Implementations (STT & TTS)
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false; // single phrase
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+            isListening = true;
+            aiMicBtn.classList.add("listening");
+            aiInputField.placeholder = "Listening...";
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            aiInputField.value = transcript;
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech recognition error:", event.error);
+            if (event.error === 'not-allowed') {
+                appendMessageBubble("🎙️ <em>Microphone permission denied. Please allow microphone access in your browser settings to use voice input.</em>", 'bot');
+            }
+            stopListening();
+        };
+
+        recognition.onend = () => {
+            stopListening();
+            // Auto-submit recognized text
+            if (aiInputField.value.trim().length > 0) {
+                sendAiMessage();
+            }
+        };
+    } else {
+        // Soft fallback for unsupported browsers
+        aiMicBtn.title = "Voice Input is not supported in this browser";
+        aiMicBtn.style.opacity = "0.5";
+    }
+
+    function stopListening() {
+        isListening = false;
+        aiMicBtn.classList.remove("listening");
+        aiInputField.placeholder = "Ask about route diners, menus, seating...";
+        if (recognition) {
+            try {
+                recognition.stop();
+            } catch (e) {}
+        }
+    }
+
+    aiMicBtn.addEventListener("click", () => {
+        if (!SpeechRecognition) {
+            showCustomNotification("Unsupported Feature", "<p>Speech Recognition is not supported by your current browser. Please try Google Chrome or Safari.</p>");
+            return;
+        }
+        if (isListening) {
+            stopListening();
+        } else {
+            try {
+                recognition.start();
+            } catch (e) {
+                console.error("Failed to start speech recognition", e);
+            }
+        }
+    });
+
+    // Audio Icon SVG paths
+    const mutedIconSvg = `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.03c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>`;
+    const activeIconSvg = `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>`;
+
+    aiVoiceToggle.addEventListener("click", () => {
+        isVoiceMuted = !isVoiceMuted;
+        if (isVoiceMuted) {
+            aiVoiceIcon.innerHTML = mutedIconSvg;
+            aiVoiceToggle.title = "Toggle AI Voice Response (Muted)";
+            aiVoiceToggle.style.color = "#94a3b8";
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        } else {
+            aiVoiceIcon.innerHTML = activeIconSvg;
+            aiVoiceToggle.title = "Toggle AI Voice Response (Active)";
+            aiVoiceToggle.style.color = "#ff4757";
+            speakText("Voice assistance enabled!");
+        }
+    });
+
+    function speakText(text) {
+        if (!('speechSynthesis' in window)) return;
+        
+        window.speechSynthesis.cancel();
+        if (isVoiceMuted) return;
+
+        // Strip HTML, markdown formatting, and links to read text naturally
+        let cleanedText = text
+            .replace(/<[^>]*>/g, '') // strip HTML tags
+            .replace(/\[([^\]]+)\]\(action:[^)]+\)/g, '$1') // replace action links with the label text only
+            .replace(/\*\*/g, '') // remove markdown bold marks
+            .trim();
+
+        const utterance = new SpeechSynthesisUtterance(cleanedText);
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+
+        // Use preferred English voices if possible
+        const voices = window.speechSynthesis.getVoices();
+        const preferredVoice = voices.find(v => 
+            v.lang.startsWith('en') && (v.name.includes('Google') || v.name.includes('Natural'))
+        );
+        if (preferredVoice) {
+            utterance.voice = preferredVoice;
+        }
+
+        window.speechSynthesis.speak(utterance);
+    }
 </script>
 <script>loadGoogleMaps();</script>
 </body>
