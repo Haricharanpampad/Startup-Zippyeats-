@@ -317,21 +317,40 @@ class MockPool {
         
         if (normalizedSql.includes('INSERT INTO orders')) {
             let user_id, restaurant_id, total_amount, fulfillment_type, current_driver_eta, scheduled_fire_time, table_id = null;
-            if (params.length === 8) {
-                [user_id, restaurant_id, total_amount, fulfillment_type, current_driver_eta, scheduled_fire_time, , table_id] = params;
-            } else if (params.length === 7) {
-                if (params[6] === 'PLACED') {
-                    [user_id, restaurant_id, total_amount, fulfillment_type, current_driver_eta, scheduled_fire_time] = params;
-                } else {
-                    [user_id, restaurant_id, total_amount, fulfillment_type, current_driver_eta, scheduled_fire_time, table_id] = params;
-                }
+            let escrow_status = 'HOLD';
+            let is_demo = false;
+            let id = 'order-' + Date.now();
+
+            if (normalizedSql.includes('is_demo')) {
+                // Special insert during live demo or simulator:
+                // INSERT INTO orders (id, user_id, restaurant_id, total_amount, fulfillment_type, current_driver_eta, scheduled_fire_time, order_status, escrow_status, is_demo, table_id)
+                [id, user_id, restaurant_id, total_amount, fulfillment_type, current_driver_eta, scheduled_fire_time, , escrow_status, is_demo, table_id] = params;
             } else {
-                [user_id, restaurant_id, total_amount, fulfillment_type, current_driver_eta, scheduled_fire_time] = params;
+                if (params.length === 8) {
+                    [user_id, restaurant_id, total_amount, fulfillment_type, current_driver_eta, scheduled_fire_time, , table_id] = params;
+                } else if (params.length === 7) {
+                    if (params[6] === 'PLACED') {
+                        [user_id, restaurant_id, total_amount, fulfillment_type, current_driver_eta, scheduled_fire_time] = params;
+                    } else {
+                        [user_id, restaurant_id, total_amount, fulfillment_type, current_driver_eta, scheduled_fire_time, table_id] = params;
+                    }
+                } else {
+                    [user_id, restaurant_id, total_amount, fulfillment_type, current_driver_eta, scheduled_fire_time] = params;
+                }
             }
-            const id = 'order-' + Date.now();
+            
             const newOrder = {
-                id, user_id, restaurant_id, total_amount, fulfillment_type,
-                current_driver_eta: new Date(current_driver_eta), scheduled_fire_time: new Date(scheduled_fire_time), order_status: 'PLACED',
+                id, 
+                user_id, 
+                restaurant_id, 
+                total_amount: parseFloat(total_amount), 
+                fulfillment_type,
+                current_driver_eta: new Date(current_driver_eta), 
+                scheduled_fire_time: new Date(scheduled_fire_time), 
+                order_status: 'PLACED',
+                escrow_status: escrow_status || 'HOLD',
+                is_demo: !!is_demo,
+                created_at: new Date(),
                 table_id: table_id
             };
             orders.push(newOrder);
@@ -497,6 +516,27 @@ class MockPool {
             }
             return { rows: [] };
         }
+
+        if (normalizedSql.includes("DELETE FROM orders WHERE is_demo =") || normalizedSql.includes("is_demo = TRUE") || normalizedSql.includes("is_demo = true")) {
+            const demoOrderIds = orders.filter(o => o.is_demo).map(o => o.id);
+            for (let i = orders.length - 1; i >= 0; i--) {
+                if (orders[i].is_demo) {
+                    orders.splice(i, 1);
+                }
+            }
+            for (let i = order_items.length - 1; i >= 0; i--) {
+                if (demoOrderIds.includes(order_items[i].order_id)) {
+                    order_items.splice(i, 1);
+                }
+            }
+            saveMockDb();
+            return { rows: [] };
+        }
+
+        if (normalizedSql.includes("DELETE FROM order_items WHERE order_id IN")) {
+            // Handled together in delete orders or standard cascade
+            return { rows: [] };
+        }
         
         console.log('Mocked Unmatched query:', sql);
         return { rows: [] };
@@ -624,6 +664,17 @@ async function ensureDbSchema() {
         if (escrowCheck.rows.length === 0) {
             await pool.query(`ALTER TABLE orders ADD COLUMN escrow_status VARCHAR(50);`);
             console.log("Added 'escrow_status' column to 'orders' table.");
+        }
+
+        // Ensure is_demo column exists in orders
+        const demoColumnCheck = await pool.query(`
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name='orders' AND column_name='is_demo';
+        `);
+        if (demoColumnCheck.rows.length === 0) {
+            await pool.query(`ALTER TABLE orders ADD COLUMN is_demo BOOLEAN DEFAULT FALSE;`);
+            console.log("Added 'is_demo' column to 'orders' table.");
         }
 
         // 3. Auto-Seed Tables if empty
@@ -1760,6 +1811,261 @@ Example formatting:
     } catch (error) {
         console.error("AI Assistant execution failed:", error);
         res.status(500).json({ error: "AI Assistant was unable to process your request." });
+    }
+});
+
+function broadcastDemoStats() {
+    try {
+        const activeDemoOrders = orders.filter(o => o.is_demo && (o.order_status === 'PLACED' || o.order_status === 'PREPARING'));
+        const uniqueRests = new Set(activeDemoOrders.map(o => o.restaurant_id));
+        
+        // GMV processed in last 60s:
+        const now = Date.now();
+        const demoOrdersLast60s = orders.filter(o => o.is_demo && (now - new Date(o.created_at || Date.now()).getTime() < 60000));
+        const gmv60s = demoOrdersLast60s.reduce((sum, o) => sum + parseFloat(o.total_amount || 0), 0);
+        
+        io.emit('DEMO_STATS_UPDATE', {
+            active_travelers: activeDemoOrders.length,
+            engaged_restaurants: uniqueRests.size,
+            gmv_60s: gmv60s
+        });
+    } catch (err) {
+        console.error("Error broadcasting demo stats:", err);
+    }
+}
+
+app.post('/api/demo/launch-network-demo', async (req, res) => {
+    try {
+        // Let's generate 18 to 28 virtual travelers
+        const count = Math.floor(Math.random() * 11) + 18; // 18-28
+        
+        // Grab restaurants and menu items
+        const dbRestaurants = restaurants; // in memory
+        if (dbRestaurants.length === 0) {
+            return res.status(400).json({ error: "No partner restaurants seeded yet." });
+        }
+        
+        const travelerNames = [
+            "Rohan Sharma", "Priya Patel", "Vikram Singh", "Ananya Reddy", 
+            "Amit Verma", "Neha Gupta", "Sanjay Rao", "Deepika Sen", 
+            "Arjun Nair", "Kavita Rao", "Karan Malhotra", "Sneha Joshi",
+            "Rahul Dravid", "Aditi Rao", "Vijay Kumar", "Riya Sen",
+            "Abhishek Roy", "Meera Nair", "Rajesh Patel", "Sunita Nair"
+        ];
+
+        // We will schedule order insertions staggered over ~30-45 seconds
+        for (let i = 0; i < count; i++) {
+            const delay = i * 1500; // Place an order every 1.5 seconds
+            
+            setTimeout(async () => {
+                try {
+                    const travelerName = travelerNames[Math.floor(Math.random() * travelerNames.length)] + ` (${Math.floor(Math.random() * 900 + 100)})`;
+                    const restaurant = dbRestaurants[Math.floor(Math.random() * dbRestaurants.length)];
+                    
+                    // Filter menu items for this restaurant
+                    const items = menu_items.filter(mi => mi.restaurant_id === restaurant.id);
+                    if (items.length === 0) return;
+                    
+                    // Pick 1-2 random items
+                    const numItems = Math.floor(Math.random() * 2) + 1;
+                    const selectedItems = [];
+                    let totalAmount = 0;
+                    
+                    for (let j = 0; j < numItems; j++) {
+                        const item = items[Math.floor(Math.random() * items.length)];
+                        if (!selectedItems.some(si => si.menu_item_id === item.id)) {
+                            const quantity = Math.floor(Math.random() * 2) + 1;
+                            selectedItems.push({
+                                menu_item_id: item.id,
+                                name: item.name,
+                                quantity: quantity,
+                                price: item.price
+                            });
+                            totalAmount += item.price * quantity;
+                        }
+                    }
+                    
+                    const initial_eta_minutes = Math.floor(Math.random() * 36) + 5; // 5-40 mins
+                    const fulfillment_type = Math.random() < 0.7 ? 'DINE_IN' : 'PICKUP';
+                    const orderId = 'order-demo-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+                    
+                    const currentTime = new Date();
+                    const driverArrivalTimestamp = new Date(currentTime.getTime() + initial_eta_minutes * 60 * 1000);
+                    const scheduledFireTimestamp = new Date(driverArrivalTimestamp.getTime() - restaurant.average_prep_time * 60 * 1000);
+                    
+                    // Construct demo order object
+                    const newOrder = {
+                        id: orderId,
+                        user_id: 'mock-user-id',
+                        restaurant_id: restaurant.id,
+                        total_amount: parseFloat(totalAmount.toFixed(2)),
+                        fulfillment_type: fulfillment_type,
+                        current_driver_eta: driverArrivalTimestamp,
+                        scheduled_fire_time: scheduledFireTimestamp,
+                        order_status: 'PLACED',
+                        escrow_status: 'HOLD',
+                        is_demo: true,
+                        created_at: new Date(),
+                        table_id: fulfillment_type === 'DINE_IN' ? (tables.find(t => t.restaurant_id === restaurant.id && t.is_available)?.id || null) : null
+                    };
+                    
+                    // Push to memory
+                    orders.push(newOrder);
+                    
+                    // Insert order items into memory
+                    selectedItems.forEach(item => {
+                        order_items.push({
+                            order_id: orderId,
+                            menu_item_id: item.menu_item_id,
+                            quantity: item.quantity,
+                            price_at_purchase: item.price
+                        });
+                    });
+                    
+                    // Insert into DB if Postgres is connected
+                    if (process.env.DATABASE_URL && !isLocalhostDb) {
+                        try {
+                            await pool.query(
+                                `INSERT INTO orders (id, user_id, restaurant_id, total_amount, fulfillment_type, current_driver_eta, scheduled_fire_time, order_status, escrow_status, is_demo, table_id)
+                                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+                                [orderId, 'mock-user-id', restaurant.id, newOrder.total_amount, fulfillment_type, driverArrivalTimestamp, scheduledFireTimestamp, 'PLACED', 'HOLD', true, newOrder.table_id]
+                            );
+                            
+                            for (const item of selectedItems) {
+                                await pool.query(
+                                    `INSERT INTO order_items (order_id, menu_item_id, quantity, price_at_purchase)
+                                     VALUES ($1, $2, $3, $4)`,
+                                    [orderId, item.menu_item_id, item.quantity, item.price]
+                                );
+                            }
+                        } catch (pgErr) {
+                            console.error("PG Insertion failed for demo order, using memory fallback:", pgErr.message);
+                        }
+                    }
+                    
+                    saveMockDb();
+                    
+                    // 1. Emit ORDER_PLACED
+                    io.emit('ORDER_PLACED', {
+                        order_id: orderId,
+                        restaurant_id: restaurant.id,
+                        restaurant_name: restaurant.name,
+                        total_amount: newOrder.total_amount,
+                        scheduled_fire_time: scheduledFireTimestamp,
+                        status: 'PLACED'
+                    });
+                    
+                    broadcastDemoStats();
+                    
+                    // 2. Schedule Schedule Update (3s)
+                    setTimeout(() => {
+                        io.emit('ORDER_SCHEDULE_UPDATED', {
+                            order_id: orderId,
+                            updated_eta_minutes: initial_eta_minutes,
+                            scheduled_fire_time: scheduledFireTimestamp
+                        });
+                    }, 3000);
+                    
+                    // 3. Schedule Failsafe random alert (6s)
+                    if (Math.random() < 0.2) {
+                        setTimeout(() => {
+                            io.emit('ORDER_FAILSAFE_ACTIVE', {
+                                order_id: orderId
+                            });
+                        }, 6000);
+                    }
+                    
+                    // 4. Schedule ETA Update (9s)
+                    setTimeout(() => {
+                        io.emit('ORDER_ETA_UPDATED', {
+                            order_id: orderId,
+                            updated_eta_minutes: Math.max(3, initial_eta_minutes - 2)
+                        });
+                    }, 9000);
+                    
+                    // 5. Schedule Kitchen Fire (15s)
+                    setTimeout(() => {
+                        newOrder.order_status = 'PREPARING';
+                        saveMockDb();
+                        
+                        io.to(restaurant.id).emit('NEW_KITCHEN_FIRE_ORDER', {
+                            order_id: orderId,
+                            type: fulfillment_type,
+                            total: newOrder.total_amount
+                        });
+                        io.emit('NEW_KITCHEN_FIRE_ORDER', {
+                            order_id: orderId,
+                            type: fulfillment_type,
+                            total: newOrder.total_amount
+                        });
+                        
+                        broadcastDemoStats();
+                    }, 15000);
+                    
+                    // 6. Schedule Fulfill (30s)
+                    setTimeout(() => {
+                        newOrder.order_status = 'COMPLETED';
+                        newOrder.escrow_status = 'RELEASED';
+                        saveMockDb();
+                        
+                        io.emit('ORDER_FULFILLED', {
+                            order_id: orderId,
+                            total_amount: newOrder.total_amount,
+                            restaurant_id: restaurant.id
+                        });
+                        
+                        broadcastDemoStats();
+                    }, 30000);
+                    
+                } catch (err) {
+                    console.error("Error running individual demo order timer:", err);
+                }
+            }, delay);
+        }
+        
+        res.json({ success: true, message: `Successfully launched simulation of ${count} virtual travelers!` });
+        
+    } catch (error) {
+        console.error("Failed to launch network demo:", error);
+        res.status(500).json({ error: "Failed to initiate live network simulation." });
+    }
+});
+
+app.post('/api/demo/reset-demo-data', async (req, res) => {
+    try {
+        // 1. Delete from PostgreSQL if active
+        if (process.env.DATABASE_URL && !isLocalhostDb) {
+            try {
+                await pool.query('DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE is_demo = TRUE)');
+                await pool.query('DELETE FROM orders WHERE is_demo = TRUE');
+            } catch (pgErr) {
+                console.error("PG Demo Reset failed, falling back to memory:", pgErr.message);
+            }
+        }
+        
+        // 2. Delete from memory lists
+        const demoOrderIds = orders.filter(o => o.is_demo).map(o => o.id);
+        for (let i = orders.length - 1; i >= 0; i--) {
+            if (orders[i].is_demo) {
+                orders.splice(i, 1);
+            }
+        }
+        for (let i = order_items.length - 1; i >= 0; i--) {
+            if (demoOrderIds.includes(order_items[i].order_id)) {
+                order_items.splice(i, 1);
+            }
+        }
+        
+        saveMockDb();
+        
+        // Emit general reset event so client screens refresh stats and reload charts
+        io.emit('DEMO_DATA_RESET');
+        broadcastDemoStats();
+        
+        res.json({ success: true, message: "Demo data cleared successfully. Dashboard is back to baseline." });
+    } catch (error) {
+        console.error("Reset Demo Data Error:", error);
+        res.status(500).json({ error: "Failed to clear demo records." });
     }
 });
 

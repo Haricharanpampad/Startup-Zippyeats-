@@ -11,7 +11,8 @@
         body { 
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             margin: 20px; 
-            background-color: #05070c; 
+            background-color: #030308; 
+            background-image: radial-gradient(circle at 50% 50%, #0a0c1f 0%, #020205 100%);
             color: #f1f5f9; 
             transition: background-color 0.3s ease;
         }
@@ -442,19 +443,233 @@
             border: 1px solid rgba(245, 158, 11, 0.2);
         }
 
+        /* Narrow Cyberpunk Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #04050a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f0ff;
+            box-shadow: 0 0 10px #00f0ff;
+        }
+
+        /* Nav logo and layout HUD glow */
+        .nav-bar {
+            background: #070815 !important;
+            border: 1px solid rgba(0, 240, 255, 0.25) !important;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1) !important;
+        }
+        .nav-logo {
+            color: #00f0ff !important;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5) !important;
+        }
+        .nav-link.active {
+            color: #00f0ff !important;
+            border-bottom: 2px solid #00f0ff !important;
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.6) !important;
+        }
+
+        /* Metric HUD style overrides */
+        .metric-card {
+            background: #080916 !important;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.7) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        .metric-card::after {
+            transition: all 0.3s ease !important;
+        }
+
+        .metric-blue::after { background: #00f0ff !important; }
+        .metric-blue { border-color: rgba(0, 240, 255, 0.15) !important; }
+        .metric-blue:hover {
+            border-color: #00f0ff !important;
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.18) !important;
+            transform: translateY(-2px) !important;
+        }
+
+        .metric-emerald::after { background: #39ff14 !important; }
+        .metric-emerald { border-color: rgba(57, 255, 20, 0.15) !important; }
+        .metric-emerald:hover {
+            border-color: #39ff14 !important;
+            box-shadow: 0 0 25px rgba(57, 255, 20, 0.18) !important;
+            transform: translateY(-2px) !important;
+        }
+
+        .metric-amber::after { background: #ffaa00 !important; }
+        .metric-amber { border-color: rgba(255, 170, 0, 0.15) !important; }
+        .metric-amber:hover {
+            border-color: #ffaa00 !important;
+            box-shadow: 0 0 25px rgba(255, 170, 0, 0.18) !important;
+            transform: translateY(-2px) !important;
+        }
+
+        .metric-purple::after { background: #ff007f !important; }
+        .metric-purple { border-color: rgba(255, 0, 127, 0.15) !important; }
+        .metric-purple:hover {
+            border-color: #ff007f !important;
+            box-shadow: 0 0 25px rgba(255, 0, 127, 0.18) !important;
+            transform: translateY(-2px) !important;
+        }
+
+        .metric-blue .metric-value { color: #00f0ff !important; text-shadow: 0 0 10px rgba(0, 240, 255, 0.4) !important; }
+        .metric-emerald .metric-value { color: #39ff14 !important; text-shadow: 0 0 10px rgba(57, 255, 20, 0.4) !important; }
+        .metric-amber .metric-value { color: #ffaa00 !important; text-shadow: 0 0 10px rgba(255, 170, 0, 0.4) !important; }
+        .metric-purple .metric-value { color: #ff007f !important; text-shadow: 0 0 10px rgba(255, 0, 127, 0.4) !important; }
+
+        /* Panels and Chart Panels */
+        .stock-chart-panel {
+            background: #080916 !important;
+            border: 1px solid rgba(0, 240, 255, 0.15) !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6) !important;
+            transition: all 0.3s ease !important;
+        }
+        .stock-chart-panel:hover {
+            border-color: rgba(0, 240, 255, 0.4) !important;
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.08) !important;
+        }
+        .chart-price-display {
+            color: #39ff14 !important;
+            text-shadow: 0 0 15px rgba(57, 255, 20, 0.5) !important;
+        }
+        .chart-selectors {
+            background: #030408 !important;
+            border: 1px solid rgba(0, 240, 255, 0.2) !important;
+        }
+        .chart-select-btn.active {
+            background: rgba(0, 240, 255, 0.15) !important;
+            color: #00f0ff !important;
+            border: 1px solid rgba(0, 240, 255, 0.3) !important;
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.6) !important;
+        }
+        .chart-svg-container {
+            background: #020306 !important;
+            border: 1px solid rgba(0, 240, 255, 0.15) !important;
+        }
+        .chart-grid-line {
+            stroke: #0a0e1c !important;
+        }
+        .chart-main-path {
+            stroke: #39ff14 !important;
+            filter: drop-shadow(0px 0px 8px rgba(57, 255, 20, 0.8)) !important;
+        }
+        .chart-hover-line {
+            stroke: rgba(0, 240, 255, 0.4) !important;
+        }
+        .chart-hover-dot {
+            fill: #39ff14 !important;
+            filter: drop-shadow(0px 0px 10px rgba(57, 255, 20, 1)) !important;
+        }
+
+        .panel {
+            background: #080916 !important;
+            border: 1px solid rgba(255, 0, 127, 0.15) !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6) !important;
+            transition: all 0.3s ease !important;
+        }
+        .panel:hover {
+            border-color: rgba(255, 0, 127, 0.35) !important;
+            box-shadow: 0 0 25px rgba(255, 0, 127, 0.08) !important;
+        }
+        .panel-header {
+            border-bottom: 1px solid rgba(255, 0, 127, 0.2) !important;
+        }
+        .panel-title {
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.2) !important;
+        }
+
+        /* Cyber tab buttons style */
+        .tab-btn {
+            background: #030409 !important;
+            border: 1px solid rgba(255, 0, 127, 0.2) !important;
+            font-size: 11px !important;
+            font-weight: 800 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+        }
+        .tab-btn:hover {
+            color: #ffffff !important;
+            border-color: rgba(255, 0, 127, 0.5) !important;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.2) !important;
+        }
+        .tab-btn.active {
+            background: #ff007f !important;
+            border-color: #ff007f !important;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.5) !important;
+            text-shadow: 0 0 5px #ffffff !important;
+        }
+
+        /* Sliders */
+        .calculator-slider {
+            background: #04050a !important;
+            border: 1px solid rgba(0, 240, 255, 0.15) !important;
+        }
+        .calculator-slider::-webkit-slider-thumb {
+            background: #00f0ff !important;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 1) !important;
+        }
+        .calculator-slider::-webkit-slider-thumb:hover {
+            box-shadow: 0 0 15px rgba(0, 240, 255, 1) !important;
+        }
+
+        /* Terminal styling overrides */
+        .ticker-terminal {
+            background-color: #020204 !important;
+            border: 1px solid rgba(0, 240, 255, 0.15) !important;
+            color: #00f0ff !important;
+        }
+        .ticker-line {
+            border-bottom: 1px dashed rgba(0, 240, 255, 0.05) !important;
+        }
+        .ticker-time {
+            color: #41506b !important;
+        }
+        .tag-sys { background: rgba(0, 240, 255, 0.15) !important; color: #00f0ff !important; border: 1px solid rgba(0, 240, 255, 0.25) !important; }
+        .tag-gps { background: rgba(245, 158, 11, 0.15) !important; color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.25) !important; }
+        .tag-cook { background: rgba(239, 68, 68, 0.15) !important; color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25) !important; }
+        .tag-escrow { background: rgba(57, 255, 20, 0.15) !important; color: #39ff14; border: 1px solid rgba(57, 255, 20, 0.25) !important; }
+        .tag-hold { background: rgba(167, 139, 250, 0.15) !important; color: #c084fc; border: 1px solid rgba(167, 139, 250, 0.25) !important; }
+
+        /* Ledger table row overrides */
+        .transaction-row {
+            background: #030409 !important;
+            border: 1px solid rgba(255, 0, 127, 0.15) !important;
+        }
+        .transaction-row:hover {
+            border-color: #ff007f !important;
+            background: #07040d !important;
+            box-shadow: 0 0 12px rgba(255, 0, 127, 0.15) !important;
+        }
+        .badge-released {
+            background: rgba(57, 255, 20, 0.12) !important;
+            color: #39ff14 !important;
+            border: 1px solid rgba(57, 255, 20, 0.2) !important;
+        }
+        .badge-escrow {
+            background: rgba(0, 240, 255, 0.12) !important;
+            color: #00f0ff !important;
+            border: 1px solid rgba(0, 240, 255, 0.2) !important;
+        }
+
         .pulse-light {
             width: 8px;
             height: 8px;
-            background-color: #10b981;
+            background-color: #39ff14;
             border-radius: 50%;
             display: inline-block;
-            box-shadow: 0 0 8px #10b981;
+            box-shadow: 0 0 10px #39ff14;
             animation: pulse-glow 2s infinite;
         }
         @keyframes pulse-glow {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(57, 255, 20, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); }
         }
     </style>
 </head>
@@ -475,16 +690,51 @@
         
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
             <div>
-                <h1 style="margin: 0; font-size: 26px; font-weight: 800; display: flex; align-items: center; gap: 10px; letter-spacing: -0.02em;">
+                <h1 style="margin: 0; font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 10px; letter-spacing: -0.02em; color: #ffffff; text-transform: uppercase; text-shadow: 0 0 10px rgba(0, 240, 255, 0.25);">
                     <span>📈 Web App Revenue & Investor ROI Dashboard</span>
                     <span class="pulse-light"></span>
                 </h1>
-                <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 14px;">An investor-ready overview tracking gross sales volume, platform monetization cuts, and secured escrow funds generated from our traveler preorder system.</p>
+                <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 13px;">An investor-ready overview tracking gross sales volume, platform monetization cuts, and secured escrow funds generated from our traveler preorder system.</p>
             </div>
             
-            <div style="background: #0d121f; padding: 8px 14px; border-radius: 8px; border: 1px solid #1e293b; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold; color: #94a3b8;">
+            <div style="background: #080916; padding: 10px 16px; border-radius: 8px; border: 1px solid rgba(0, 240, 255, 0.25); display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: bold; color: #00f0ff; box-shadow: 0 0 10px rgba(0, 240, 255, 0.1); font-family: 'JetBrains Mono', monospace;">
                 <span style="color: #64748b;">LIVE DATA FEED:</span>
-                <span style="color: #ff4757;" id="current-stream-name">Pitstop Highway Diner</span>
+                <span style="color: #ff007f;" id="current-stream-name">Pitstop Highway Diner</span>
+            </div>
+        </div>
+
+        <!-- Investor Live Network Demo Mode controls card -->
+        <div style="background: #080916; border: 1px solid #39ff14; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 0 20px rgba(57, 255, 20, 0.12); border-left: 6px solid #39ff14;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 24px; filter: drop-shadow(0 0 5px #39ff14);">🚀</span>
+                    <div>
+                        <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px; text-shadow: 0 0 5px rgba(255,255,255,0.1);">
+                            Investor Live Network Demo Mode
+                        </h3>
+                        <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 12px; line-height: 1.4;">With one click, simulate a massive active nationwide corridor containing dozens of en-route travelers placing orders dynamically.</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button id="launch-demo-btn" style="background: linear-gradient(135deg, #39ff14 0%, #059669 100%); color: #000000; border: none; padding: 10px 20px; border-radius: 8px; font-size: 12px; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 0 15px rgba(57, 255, 20, 0.4); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); text-transform: uppercase; letter-spacing: 0.05em;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 0 25px rgba(57, 255, 20, 0.7)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 0 15px rgba(57, 255, 20, 0.4)';">
+                        🚀 Launch Live Network Demo
+                    </button>
+                    <button id="reset-demo-btn" style="background: #030409; color: #ff007f; border: 1px solid rgba(255, 0, 127, 0.3); padding: 10px 20px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.05em;" onmouseover="this.style.background='rgba(255,0,127,0.1)'; this.style.borderColor='#ff007f'; this.style.boxShadow='0 0 12px rgba(255, 0, 127, 0.3)';" onmouseout="this.style.background='#030409'; this.style.borderColor='rgba(255, 0, 127, 0.3)'; this.style.boxShadow='none';">
+                        🗑️ Reset Demo Data
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Live Active Travelers Banner -->
+            <div id="demo-status-banner" style="display: none; background: rgba(57, 255, 20, 0.05); border: 1px solid rgba(57, 255, 20, 0.2); border-radius: 8px; padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #39ff14; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: inset 0 0 10px rgba(57, 255, 20, 0.05);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="display: inline-block; width: 8px; height: 8px; background-color: #39ff14; border-radius: 50%; box-shadow: 0 0 12px #39ff14; animation: pulse-glow 1.5s infinite;"></span>
+                    <span style="font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">MARKETPLACE STATUS:</span>
+                    <span id="demo-banner-text">🟢 LIVE: 0 active travelers • 0 restaurants engaged • ₹0.00 GMV processed in last 60s</span>
+                </div>
+                <div style="font-size: 10px; color: #64748b; font-weight: bold; background: rgba(0,0,0,0.4); padding: 3px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05);" id="demo-progress-pct">
+                    PROVISIONING VIRTUAL TRAVELERS...
+                </div>
             </div>
         </div>
 
@@ -967,6 +1217,43 @@
             screen.scrollTop = screen.scrollHeight;
         }
 
+        // Elegant smooth count-up visual animation for numbers (to attract investors)
+        function animateCountUp(elementId, targetValue, durationMs = 1200, isCurrency = true) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            let startVal = parseFloat(el.textContent.replace('₹', '').replace(/,/g, '')) || 0;
+            if (startVal === targetValue) {
+                if (isCurrency) {
+                    el.textContent = '₹' + targetValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                } else {
+                    el.textContent = targetValue.toLocaleString('en-IN');
+                }
+                return;
+            }
+            let startTime = null;
+
+            function step(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = Math.min((timestamp - startTime) / durationMs, 1);
+                const currentVal = startVal + (targetValue - startVal) * progress;
+                if (isCurrency) {
+                    el.textContent = '₹' + currentVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                } else {
+                    el.textContent = Math.floor(currentVal).toLocaleString('en-IN');
+                }
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    if (isCurrency) {
+                        el.textContent = '₹' + targetValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    } else {
+                        el.textContent = targetValue.toLocaleString('en-IN');
+                    }
+                }
+            }
+            window.requestAnimationFrame(step);
+        }
+
         // Fetch metrics from live lightweight database file
         async function fetchMetrics() {
             try {
@@ -975,21 +1262,23 @@
                     const data = await response.json();
                     if (data && data.metrics) {
                         const m = data.metrics;
-                        const gmv = m.gross_merchandise_value || "Rs.9085.46";
-                        const netInc = m.platform_net_revenue || "Rs.908.55";
+                        const gmv = m.gross_merchandise_value || "Rs.0.00";
+                        const netInc = m.platform_net_revenue || "Rs.0.00";
                         const escrowHolds = m.active_secure_escrow_holds || 0;
 
                         // Parse out raw values
-                        const rawGMV = parseFloat(gmv.replace('Rs.', '').replace('₹', '')) || 9085.46;
-                        const rawNet = parseFloat(netInc.replace('Rs.', '').replace('₹', '')) || 908.55;
+                        const parsedGMV = parseFloat(gmv.replace('Rs.', '').replace('₹', ''));
+                        const rawGMV = isNaN(parsedGMV) ? 0.00 : parsedGMV;
+                        const parsedNet = parseFloat(netInc.replace('Rs.', '').replace('₹', ''));
+                        const rawNet = isNaN(parsedNet) ? 0.00 : parsedNet;
 
                         baseRevenue = rawGMV;
-                        currentEscrow = escrowHolds > 0 ? escrowHolds * 24.55 : 74.00;
+                        currentEscrow = escrowHolds > 0 ? escrowHolds * 24.55 : 0.00;
 
-                        // Sync top metrics UI
-                        document.getElementById("kpi-revenue").textContent = `₹${baseRevenue.toFixed(2)}`;
-                        document.getElementById("kpi-net-income").textContent = `₹${rawNet.toFixed(2)}`;
-                        document.getElementById("kpi-escrow").textContent = `₹${currentEscrow.toFixed(2)}`;
+                        // Sync top metrics UI with smooth animation
+                        animateCountUp("kpi-revenue", baseRevenue);
+                        animateCountUp("kpi-net-income", rawNet);
+                        animateCountUp("kpi-escrow", currentEscrow);
                         
                         // Dynamically scale chart final points to align with DB
                         chartData["ALL"].values[chartData["ALL"].values.length - 1] = baseRevenue;
@@ -1012,6 +1301,68 @@
             drawVectorChart();
             fetchMetrics();
 
+            // Set up Interactive Demo Actions
+            const launchDemoBtn = document.getElementById("launch-demo-btn");
+            const resetDemoBtn = document.getElementById("reset-demo-btn");
+
+            if (launchDemoBtn) {
+                launchDemoBtn.addEventListener("click", async () => {
+                    launchDemoBtn.disabled = true;
+                    launchDemoBtn.innerHTML = "⚡ Generating Corridor...";
+                    launchDemoBtn.style.opacity = "0.7";
+                    
+                    try {
+                        const response = await fetch('/api/demo/launch-network-demo', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        const result = await response.json();
+                        
+                        if (response.ok) {
+                            addLogLine("tag-sys", "system", "🚀 SIMULATION COMMITTED: Provisioning 15-30 virtual travelers along active transit pathways.");
+                            const banner = document.getElementById("demo-status-banner");
+                            if (banner) banner.style.display = "flex";
+                        } else {
+                            alert("Error: " + (result.error || "Failed to launch simulation."));
+                        }
+                    } catch (err) {
+                        console.error("Failed to launch demo:", err);
+                    } finally {
+                        setTimeout(() => {
+                            launchDemoBtn.disabled = false;
+                            launchDemoBtn.innerHTML = "🚀 Launch Live Network Demo";
+                            launchDemoBtn.style.opacity = "1";
+                        }, 4000);
+                    }
+                });
+            }
+
+            if (resetDemoBtn) {
+                resetDemoBtn.addEventListener("click", async () => {
+                    if (!confirm("Are you sure you want to clear all active simulated demo data? This will purge the live corridor.")) return;
+                    
+                    try {
+                        const response = await fetch('/api/demo/reset-demo-data', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        if (response.ok) {
+                            addLogLine("tag-sys", "system", "🗑️ RESET COMPLETE: Purged all simulated traveler routes and escrow payments from the ledger.");
+                            const banner = document.getElementById("demo-status-banner");
+                            if (banner) banner.style.display = "none";
+                            
+                            // Re-fetch clean baseline metrics
+                            fetchMetrics();
+                        } else {
+                            const result = await response.json();
+                            alert("Error resetting data: " + (result.error || "Failed."));
+                        }
+                    } catch (err) {
+                        console.error("Error resetting data:", err);
+                    }
+                });
+            }
+
             // Setup real-time listeners for active simulator activity
             if (typeof io !== 'undefined') {
                 socket = io(window.location.origin, { transports: ['websocket'] });
@@ -1022,16 +1373,42 @@
                     fetchMetrics();
                 });
 
+                // Listen to demo statistics broadcasts
+                socket.on("DEMO_STATS_UPDATE", (data) => {
+                    const banner = document.getElementById("demo-status-banner");
+                    if (banner) {
+                        banner.style.display = "flex";
+                        const activeCount = data.active_travelers || 0;
+                        const engagedCount = data.engaged_restaurants || 0;
+                        const gmv60 = data.gmv_60s || 0;
+                        
+                        document.getElementById("demo-banner-text").textContent = `🟢 LIVE: ${activeCount} active travelers • ${engagedCount} partner restaurants engaged • ₹${gmv60.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} GMV processed in last 60s`;
+                        
+                        const progressPct = document.getElementById("demo-progress-pct");
+                        if (progressPct) {
+                            if (activeCount > 0) {
+                                progressPct.textContent = "SIMULATING ACTIVE CORRIDOR";
+                                progressPct.style.color = "#39ff14";
+                                progressPct.style.borderColor = "rgba(57, 255, 20, 0.3)";
+                            } else {
+                                progressPct.textContent = "SIMULATION IDLE";
+                                progressPct.style.color = "#64748b";
+                                progressPct.style.borderColor = "rgba(255,255,255,0.05)";
+                            }
+                        }
+                    }
+                });
+
                 // Listen to route preorder placement (Secure payment in transit)
                 socket.on("ORDER_PLACED", (data) => {
                     const orderAmount = parseFloat(data.total_amount || 24.55);
                     currentEscrow += orderAmount;
-                    document.getElementById("kpi-escrow").textContent = `₹${currentEscrow.toFixed(2)}`;
+                    animateCountUp("kpi-escrow", currentEscrow);
                     
                     // Push live transacted receipt
                     const newTx = {
                         id: `order-${data.order_id.substring(0,8)}`,
-                        diner: document.getElementById("current-stream-name").textContent || "Pitstop Highway Diner",
+                        diner: data.restaurant_name || "Pitstop Highway Diner",
                         amount: orderAmount,
                         status: "Escrow Locked",
                         time: "Just now"
@@ -1072,9 +1449,9 @@
                     currentEscrow = Math.max(0, currentEscrow - resolvedVal);
                     baseRevenue += resolvedVal;
                     
-                    document.getElementById("kpi-escrow").textContent = `₹${currentEscrow.toFixed(2)}`;
-                    document.getElementById("kpi-revenue").textContent = `₹${baseRevenue.toFixed(2)}`;
-                    document.getElementById("kpi-net-income").textContent = `₹${(baseRevenue * 0.10).toFixed(2)}`;
+                    animateCountUp("kpi-escrow", currentEscrow);
+                    animateCountUp("kpi-revenue", baseRevenue);
+                    animateCountUp("kpi-net-income", baseRevenue * 0.10);
 
                     // Find and release matching transaction in the local array
                     const matchTx = recentTransactions.find(t => t.id.includes(data.order_id.substring(0,8)));

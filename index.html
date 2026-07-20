@@ -10,17 +10,34 @@
         body { 
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             margin: 20px; 
-            background-color: #090d16; 
+            background-color: #030308; 
+            background-image: radial-gradient(circle at 50% 50%, #0a0c1f 0%, #020205 100%);
             color: #f1f5f9;
             transition: background-color 0.3s ease;
         }
         
+        /* Narrow Cyberpunk Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #04050a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f0ff;
+            box-shadow: 0 0 10px #00f0ff;
+        }
+
         /* 1. Global Navigation Bar */
         .nav-bar { 
-            background: #111827; 
+            background: #070815 !important; 
             padding: 15px 30px; 
             border-radius: 10px; 
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); 
             margin-bottom: 20px; 
             display: flex; 
             justify-content: space-between; 
@@ -30,18 +47,20 @@
             margin-right: auto; 
             width: 100%; 
             box-sizing: border-box;
-            border: 1px solid #1e293b;
+            border: 1px solid rgba(0, 240, 255, 0.25) !important;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1) !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .nav-logo { 
             font-size: 18px; 
             font-weight: 700; 
-            color: #ff4757; 
+            color: #00f0ff !important; 
             display: flex; 
             align-items: center; 
             gap: 8px; 
             text-decoration: none;
             letter-spacing: -0.02em;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5) !important;
         }
         .nav-links { display: flex; gap: 20px; align-items: center; }
         .nav-link { 
@@ -52,25 +71,29 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
             padding-bottom: 4px; 
         }
-        .nav-link:hover { color: #ff4757; }
+        .nav-link:hover { color: #00f0ff !important; text-shadow: 0 0 8px rgba(0, 240, 255, 0.6) !important; }
         .nav-link.active { 
-            color: #ff4757; 
+            color: #00f0ff !important; 
             font-weight: 700; 
-            border-bottom: 2px solid #ff4757; 
+            border-bottom: 2px solid #00f0ff !important; 
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.6) !important;
         }
         
         /* 2. Controls and Layout */
         .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
         .controls { 
-            background: #111827; 
+            background: #080916 !important; 
             padding: 20px; 
             border-radius: 10px; 
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); 
             display: flex; 
             gap: 15px; 
             align-items: center;
-            border: 1px solid #1e293b;
+            border: 1px solid rgba(0, 240, 255, 0.15) !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6) !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .controls:hover {
+            border-color: rgba(0, 240, 255, 0.35) !important;
         }
         .input-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
         label { 
@@ -82,21 +105,21 @@
         }
         input { 
             padding: 12px; 
-            border: 1px solid #1e293b; 
+            border: 1px solid rgba(0, 240, 255, 0.15) !important; 
             border-radius: 8px; 
             font-size: 14px; 
-            background: #090d16;
+            background: #020306 !important;
             color: #ffffff;
             outline: none;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         input:focus {
-            border-color: #ff4757;
-            box-shadow: 0 0 0 2px rgba(255, 71, 87, 0.15);
+            border-color: #00f0ff !important;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3) !important;
         }
-        button { 
+        button:not(.iw-btn):not([class*="gm-"]):not([class*="ai-"]) { 
             padding: 12px 24px; 
-            background-color: #ff4757; 
+            background-color: #ff007f !important; 
             color: white; 
             border: none; 
             border-radius: 8px; 
@@ -106,13 +129,15 @@
             margin-top: 17px; 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             letter-spacing: 0.02em;
+            text-shadow: 0 0 5px #ffffff !important;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4) !important;
         }
-        button:hover { 
-            background-color: #e84118;
+        button:not(.iw-btn):not([class*="gm-"]):not([class*="ai-"]):hover { 
+            background-color: #ff3399 !important;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+            box-shadow: 0 0 25px rgba(255, 0, 127, 0.7) !important;
         }
-        button:active {
+        button:not(.iw-btn):not([class*="gm-"]):not([class*="ai-"]):active {
             transform: translateY(1px);
         }
         
@@ -126,15 +151,15 @@
 
         /* 3. High-tech Custom Components */
         /* Custom styled scrolls */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #090d16; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #ff4757; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #04050a; }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00f0ff; box-shadow: 0 0 8px #00f0ff; }
 
         /* Partner card custom animations & interactions */
         .partner-card {
-            background: #111827;
-            border: 1px solid #1e293b;
+            background: #080916;
+            border: 1px solid rgba(0, 240, 255, 0.15);
             border-radius: 8px;
             padding: 14px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -144,9 +169,9 @@
         }
         .partner-card:hover {
             transform: translateY(-3px) scale(1.02);
-            border-color: rgba(255, 71, 87, 0.4);
-            box-shadow: 0 8px 25px rgba(255, 71, 87, 0.15);
-            background: #161f30;
+            border-color: rgba(0, 240, 255, 0.5);
+            box-shadow: 0 8px 25px rgba(0, 240, 255, 0.2);
+            background: #0d0f28;
         }
         .partner-card::before {
             content: '';
@@ -159,7 +184,7 @@
             transition: background-color 0.3s;
         }
         .partner-card:hover::before {
-            background: #ff4757;
+            background: #00f0ff;
         }
 
         /* Monospace values for numeric stats */
@@ -194,6 +219,33 @@
         @keyframes moveProgress {
             0% { background-position: 0 0; }
             100% { background-position: 50px 50px; }
+        }
+
+        /* 4. Custom Google Maps InfoWindow Overrides to make standard popups invisible/borderless and small */
+        .gm-style-iw-c {
+            background: transparent !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            max-width: 190px !important;
+            min-width: 190px !important;
+        }
+        .gm-style-iw-d {
+            overflow: visible !important;
+            max-height: none !important;
+            max-width: 190px !important;
+            min-width: 190px !important;
+            padding: 0 !important;
+        }
+        .gm-style-iw-t::after {
+            background: transparent !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
+        .gm-ui-hover-effect {
+            display: none !important;
         }
     </style>
 </head>
@@ -241,12 +293,12 @@
     </div>
 
     <!-- Route Selection Container (shown after planning route) -->
-    <div id="route-selector-container" style="display: none; background: #111827; border: 1px solid #1e293b; padding: 15px; border-radius: 10px; margin-top: 15px; margin-bottom: 15px; border-left: 4px solid #3b82f6; transition: all 0.3s ease-in-out;">
+    <div id="route-selector-container" style="display: none; background: #080916; border: 1px solid rgba(0, 240, 255, 0.25); padding: 15px; border-radius: 10px; margin-top: 15px; margin-bottom: 15px; border-left: 4px solid #00f0ff; box-shadow: 0 0 15px rgba(0, 240, 255, 0.1); transition: all 0.3s ease-in-out;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
             <h4 style="margin: 0; color: #ffffff; font-size: 14px; display: flex; align-items: center; gap: 6px; font-weight: 700;">
                 <span>🗺️ Alternate Routes Available</span>
             </h4>
-            <span style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace;">👉 Tap/click route on map or select a route below:</span>
+            <span style="font-size: 11px; color: #00f0ff; font-family: 'JetBrains Mono', monospace; text-shadow: 0 0 5px rgba(0, 240, 255, 0.2);">👉 Tap/click route on map or select a route below:</span>
         </div>
         <div id="route-options-list" style="display: flex; gap: 12px; flex-wrap: wrap;">
             <!-- Rendered dynamically -->
@@ -256,23 +308,36 @@
     <!-- Map & Sidebar Side-by-Side Container -->
     <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px; margin-bottom: 30px;">
         <!-- Map (2/3 width on wide screens) -->
-        <div style="flex: 2; min-width: 300px; display: flex; flex-direction: column;">
-            <div id="map"></div>
+        <div style="flex: 2; min-width: 300px; display: flex; flex-direction: column; position: relative;">
+            <div id="map" style="border: 1px solid rgba(0, 240, 255, 0.25); box-shadow: 0 0 20px rgba(0, 240, 255, 0.15); border-radius: 10px; height: 600px; width: 100%;"></div>
+            
+            <!-- Map Theme Selector Controls -->
+            <div style="position: absolute; top: 12px; right: 12px; z-index: 10; display: flex; gap: 6px; background: rgba(8, 9, 22, 0.95); border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 8px; padding: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-family: 'Plus Jakarta Sans', sans-serif;">
+                <button id="map-theme-dark-btn" onclick="setMapTheme('dark')" style="background: rgba(0, 240, 255, 0.2); border: 1px solid #00f0ff; color: #00f0ff; font-size: 11px; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s; display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.05em; text-shadow: 0 0 3px rgba(0,240,255,0.4);">
+                    🌙 Dark
+                </button>
+                <button id="map-theme-light-btn" onclick="setMapTheme('light')" style="background: transparent; border: 1px solid rgba(148, 163, 184, 0.3); color: #94a3b8; font-size: 11px; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s; display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.05em;">
+                    ☀️ Light
+                </button>
+                <button id="map-theme-satellite-btn" onclick="setMapTheme('satellite')" style="background: transparent; border: 1px solid rgba(148, 163, 184, 0.3); color: #94a3b8; font-size: 11px; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s; display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.05em;">
+                    🛰️ Satellite
+                </button>
+            </div>
         </div>
         
         <!-- Sidebar: Preordering Facilitated Restaurants List (1/3 width) -->
-        <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; background: #111827; border: 1px solid #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); max-height: 600px; overflow-y: auto; border-top: 4px solid #ff4757;">
-            <div style="display: flex; flex-direction: column; gap: 2px; border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 4px;">
+        <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; background: #080916; border: 1px solid rgba(0, 240, 255, 0.2); padding: 20px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); max-height: 600px; overflow-y: auto; border-top: 4px solid #00f0ff;">
+            <div style="display: flex; flex-direction: column; gap: 2px; border-bottom: 1px solid rgba(0, 240, 255, 0.15); padding-bottom: 12px; margin-bottom: 4px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
                     <h3 style="margin: 0; color: #ffffff; font-size: 18px; display: flex; align-items: center; gap: 8px; font-weight: 700;">
                         <span>🏪 Partner Diners</span>
                     </h3>
-                    <span id="restaurant-count" style="font-size: 12px; background: rgba(255, 71, 87, 0.15); color: #ff4757; border: 1px solid rgba(255, 71, 87, 0.3); padding: 2px 8px; border-radius: 12px; font-weight: 700;">0</span>
+                    <span id="restaurant-count" style="font-size: 12px; background: rgba(0, 240, 255, 0.15); color: #00f0ff; border: 1px solid rgba(0, 240, 255, 0.3); padding: 2px 8px; border-radius: 12px; font-weight: 700; text-shadow: 0 0 5px rgba(0, 240, 255, 0.5);">0</span>
                 </div>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.1em; font-weight: bold; margin-top: 2px;">🛰️ IN-FLIGHT COMMAND CENTER</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #39ff14; text-transform: uppercase; letter-spacing: 0.1em; font-weight: bold; margin-top: 2px; text-shadow: 0 0 4px rgba(57, 255, 20, 0.4);">🛰️ IN-FLIGHT COMMAND CENTER</span>
             </div>
             
-            <div id="route-filter-msg" style="font-size: 13px; color: #10b981; margin: 0; display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-left: 4px solid #10b981; padding: 10px; border-radius: 6px;">
+            <div id="route-filter-msg" style="font-size: 13px; color: #39ff14; margin: 0; display: none; background: rgba(57, 255, 20, 0.1); border: 1px solid rgba(57, 255, 20, 0.2); border-left: 4px solid #39ff14; padding: 10px; border-radius: 6px;">
                 🔍 Filtering restaurants near your route...
             </div>
             
@@ -283,17 +348,17 @@
     </div>
 
     <!-- 🚗 LIVE TRIP TRACKING & COOKING PREP SYNC SIMULATOR -->
-    <div id="live-simulation-panel" style="display: none; background: #111827; padding: 20px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); border: 1px solid #1e293b; border-top: 4px solid #3b82f6; margin-top: 15px; margin-bottom: 15px; flex-direction: column; gap: 15px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+    <div id="live-simulation-panel" style="display: none; background: #080916; padding: 20px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid rgba(255, 0, 127, 0.2); border-top: 4px solid #ff007f; margin-top: 15px; margin-bottom: 15px; flex-direction: column; gap: 15px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 0, 127, 0.15); padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
             <div style="display: flex; flex-direction: column; gap: 2px;">
                 <h3 style="margin: 0; color: #ffffff; font-size: 18px; display: flex; align-items: center; gap: 8px; font-weight: 700;">
                     <span>🚗 Live Preorder Sync & GPS Simulator</span>
-                    <span id="sim-status-badge" style="font-size: 11px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); padding: 2px 10px; border-radius: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace;">IDLE</span>
+                    <span id="sim-status-badge" style="font-size: 11px; background: rgba(0, 240, 255, 0.15); color: #00f0ff; border: 1px solid rgba(0, 240, 255, 0.3); padding: 2px 10px; border-radius: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace; text-shadow: 0 0 5px rgba(0, 240, 255, 0.5);">IDLE</span>
                 </h3>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #10b981; text-transform: uppercase; letter-spacing: 0.1em; font-weight: bold;">🛰️ LIVE TRUCK & DISPATCH NETWORK ACTIVE</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #39ff14; text-transform: uppercase; letter-spacing: 0.1em; font-weight: bold; text-shadow: 0 0 5px rgba(57, 255, 20, 0.4);">🛰️ LIVE TRUCK & DISPATCH NETWORK ACTIVE</span>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button id="start-sim-btn" style="margin-top: 0; padding: 8px 16px; background-color: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 13px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+                <button id="start-sim-btn" style="margin-top: 0; padding: 8px 16px; background-color: #ff007f !important; color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 13px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 10px rgba(255,0,127,0.4) !important;">
                     ▶️ Start Trip Simulation
                 </button>
                 <button id="pause-sim-btn" style="margin-top: 0; padding: 8px 16px; background-color: #4b5563; color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 13px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: none;">
@@ -350,19 +415,19 @@
         </div>
 
         <!-- 🛍️ CUSTOMER PREORDERED FOOD DETAILS & CHECKOUT CARD -->
-        <div id="sim-preorder-details-card" style="display: none; background: #090d16; border: 1px solid #1e293b; border-radius: 8px; padding: 16px; margin-top: 5px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 12px;">
-                <h4 style="margin: 0; color: #ff4757; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+        <div id="sim-preorder-details-card" style="display: none; background: #080916; border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 8px; padding: 16px; margin-top: 5px; box-shadow: 0 0 15px rgba(0, 240, 255, 0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 240, 255, 0.15); padding-bottom: 8px; margin-bottom: 12px;">
+                <h4 style="margin: 0; color: #00f0ff; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; text-shadow: 0 0 5px rgba(0, 240, 255, 0.3);">
                     <span>🛍️ Customer Preordered Food Details</span>
                 </h4>
-                <span id="sim-order-fulfillment-badge" style="font-size: 10px; background: #1e293b; color: #94a3b8; padding: 2px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase;">-</span>
+                <span id="sim-order-fulfillment-badge" style="font-size: 10px; background: rgba(0, 240, 255, 0.1); color: #00f0ff; border: 1px solid rgba(0, 240, 255, 0.2); padding: 2px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase;">-</span>
             </div>
             
             <div id="sim-preorder-items-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
                 <!-- Dynamically rendered items -->
             </div>
             
-            <div style="display: flex; justify-content: space-between; align-items: center; background: #111827; padding: 10px 14px; border-radius: 6px; border: 1px solid #1e293b;">
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #050610; padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(0, 240, 255, 0.15);">
                 <div style="display: flex; flex-direction: column; gap: 2px;">
                     <span style="font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; font-weight: bold;">Seating / Handover</span>
                     <span id="sim-order-location-detail" style="font-size: 13px; color: #ffffff; font-weight: 600;">-</span>
@@ -472,6 +537,9 @@
     let infoWindow = null;
     let currentLocationLatLng = null;
     let currentLocationMarker = null;
+    let routeStartMarker = null;
+    let routeEndMarker = null;
+    let currentMapTheme = 'dark';
 
     // =========================================================================
     // 🚗 LIVE PREORDER GPS TRIP SIMULATOR CORE ENGINE
@@ -827,13 +895,27 @@
         
         // Place initial car marker at index 0
         if (simCarMarker) simCarMarker.setMap(null);
+        
+        let initialHeading = 0;
+        if (simPathPoints.length >= 2) {
+            if (typeof google !== "undefined" && google.maps && google.maps.geometry && google.maps.geometry.spherical) {
+                initialHeading = google.maps.geometry.spherical.computeHeading(simPathPoints[0], simPathPoints[1]);
+            }
+        }
+
         simCarMarker = new google.maps.Marker({
             position: simPathPoints[0],
             map: map,
             title: "Simulated Traveler",
             icon: {
-                url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-                scaledSize: new google.maps.Size(32, 32)
+                path: 'M 0,-18 L 10,12 L 0,5 L -10,12 Z',
+                fillColor: '#39ff14', // Electric green navigation arrow
+                fillOpacity: 1,
+                strokeColor: '#ffffff',
+                strokeWeight: 1.5,
+                scale: 1.3,
+                rotation: initialHeading || 0,
+                anchor: new google.maps.Point(0, 0)
             },
             zIndex: 999
         });
@@ -905,7 +987,31 @@
             currentSimStepIndex = Math.min(simPathPoints.length - 1, currentSimStepIndex + 1);
             
             const currentPos = simPathPoints[currentSimStepIndex];
-            if (simCarMarker) simCarMarker.setPosition(currentPos);
+            if (simCarMarker) {
+                simCarMarker.setPosition(currentPos);
+                
+                // Rotate simulated traveler arrow dynamically in the direction of travel
+                if (currentSimStepIndex < simPathPoints.length - 1) {
+                    const nextPos = simPathPoints[currentSimStepIndex + 1];
+                    let heading = 0;
+                    if (typeof google !== "undefined" && google.maps && google.maps.geometry && google.maps.geometry.spherical) {
+                        heading = google.maps.geometry.spherical.computeHeading(currentPos, nextPos);
+                    } else {
+                        const lat1 = currentPos.lat();
+                        const lng1 = currentPos.lng();
+                        const lat2 = nextPos.lat();
+                        const lng2 = nextPos.lng();
+                        const dy = lat2 - lat1;
+                        const dx = Math.cos(Math.PI / 180 * lat1) * (lng2 - lng1);
+                        heading = Math.atan2(dx, dy) * 180 / Math.PI;
+                    }
+                    const icon = simCarMarker.getIcon();
+                    if (icon) {
+                        icon.rotation = heading;
+                        simCarMarker.setIcon(icon);
+                    }
+                }
+            }
             if (map) map.panTo(currentPos);
             
             // Calculate progress stats
@@ -1264,6 +1370,14 @@
         );
     };
 
+    window.closeInfoWindow = function() {
+        if (infoWindow) {
+            infoWindow.close();
+            infoWindow.activeRestaurantId = null;
+            infoWindow.activeMarker = null;
+        }
+    };
+
     async function loadGoogleMaps() {
         try {
             const response = await fetch("/api/config/google-maps-key");
@@ -1287,92 +1401,290 @@
         }
     }
 
+    const darkMapStyle = [
+        { elementType: "geometry", stylers: [{ color: "#090d16" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#090d16" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
+        {
+            featureType: "administrative.locality",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#cbd5e1" }],
+        },
+        {
+            featureType: "poi",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#94a3b8" }],
+        },
+        {
+            featureType: "poi.park",
+            elementType: "geometry",
+            stylers: [{ color: "#111827" }],
+        },
+        {
+            featureType: "poi.park",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#1e293b" }],
+        },
+        {
+            featureType: "road",
+            elementType: "geometry",
+            stylers: [{ color: "#1e293b" }],
+        },
+        {
+            featureType: "road",
+            elementType: "geometry.stroke",
+            stylers: [{ color: "#0f172a" }],
+        },
+        {
+            featureType: "road",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#64748b" }],
+        },
+        {
+            featureType: "road.highway",
+            elementType: "geometry",
+            stylers: [{ color: "#1f2937" }],
+        },
+        {
+            featureType: "road.highway",
+            elementType: "geometry.stroke",
+            stylers: [{ color: "#111827" }],
+        },
+        {
+            featureType: "road.highway",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#e2e8f0" }],
+        },
+        {
+            featureType: "transit",
+            elementType: "geometry",
+            stylers: [{ color: "#1e293b" }],
+        },
+        {
+            featureType: "transit.station",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#94a3b8" }],
+        },
+        {
+            featureType: "water",
+            elementType: "geometry",
+            stylers: [{ color: "#040712" }],
+        },
+        {
+            featureType: "water",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#475569" }],
+        },
+        {
+            featureType: "water",
+            elementType: "labels.text.stroke",
+            stylers: [{ color: "#040712" }],
+        }
+    ];
+
+    const lightMapStyle = [
+        { elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
+        { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#f5f5f5" }] },
+        {
+            featureType: "administrative.land_parcel",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#bdbdbd" }]
+        },
+        {
+            featureType: "poi",
+            elementType: "geometry",
+            stylers: [{ color: "#eeeeee" }]
+        },
+        {
+            featureType: "poi",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#757575" }]
+        },
+        {
+            featureType: "poi.park",
+            elementType: "geometry",
+            stylers: [{ color: "#e5e5e5" }]
+        },
+        {
+            featureType: "poi.park",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#9e9e9e" }]
+        },
+        {
+            featureType: "road",
+            elementType: "geometry",
+            stylers: [{ color: "#ffffff" }]
+        },
+        {
+            featureType: "road.arterial",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#757575" }]
+        },
+        {
+            featureType: "road.highway",
+            elementType: "geometry",
+            stylers: [{ color: "#dadada" }]
+        },
+        {
+            featureType: "road.highway",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#616161" }]
+        },
+        {
+            featureType: "road.local",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#9e9e9e" }]
+        },
+        {
+            featureType: "transit.line",
+            elementType: "geometry",
+            stylers: [{ color: "#e5e5e5" }]
+        },
+        {
+            featureType: "transit.station",
+            elementType: "geometry",
+            stylers: [{ color: "#eeeeee" }]
+        },
+        {
+            featureType: "water",
+            elementType: "geometry",
+            stylers: [{ color: "#c9c9c9" }]
+        },
+        {
+            featureType: "water",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#9e9e9e" }]
+        }
+    ];
+
+    window.setMapTheme = function(theme) {
+        if (!map) return;
+        currentMapTheme = theme;
+
+        const darkBtn = document.getElementById("map-theme-dark-btn");
+        const lightBtn = document.getElementById("map-theme-light-btn");
+        const satBtn = document.getElementById("map-theme-satellite-btn");
+
+        const resetButton = (btn) => {
+            if (!btn) return;
+            btn.style.background = "transparent";
+            btn.style.borderColor = "rgba(148, 163, 184, 0.3)";
+            btn.style.color = "#94a3b8";
+        };
+
+        const setActiveButton = (btn) => {
+            if (!btn) return;
+            btn.style.background = "rgba(0, 240, 255, 0.15)";
+            btn.style.borderColor = "#00f0ff";
+            btn.style.color = "#00f0ff";
+        };
+
+        resetButton(darkBtn);
+        resetButton(lightBtn);
+        resetButton(satBtn);
+
+        if (theme === 'dark') {
+            setActiveButton(darkBtn);
+            map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+            map.setOptions({ styles: darkMapStyle });
+        } else if (theme === 'light') {
+            setActiveButton(lightBtn);
+            map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+            map.setOptions({ styles: [] });
+        } else if (theme === 'satellite') {
+            setActiveButton(satBtn);
+            map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
+            map.setOptions({ styles: [] });
+        }
+
+        refreshOpenInfoWindow();
+    };
+
+    function updateCustomRouteMarkers(directions, routeIndex) {
+        if (routeStartMarker) {
+            routeStartMarker.setMap(null);
+            routeStartMarker = null;
+        }
+        if (routeEndMarker) {
+            routeEndMarker.setMap(null);
+            routeEndMarker = null;
+        }
+        if (currentLocationMarker) {
+            currentLocationMarker.setMap(null);
+            currentLocationMarker = null;
+        }
+
+        if (!directions || !directions.routes || !directions.routes[routeIndex]) return;
+
+        const route = directions.routes[routeIndex];
+        if (!route || !route.legs || !route.legs[0]) return;
+
+        const leg = route.legs[0];
+        const startLatLng = leg.start_location;
+        const endLatLng = leg.end_location;
+
+        let heading = 0;
+        if (leg.steps && leg.steps[0]) {
+            const firstStep = leg.steps[0];
+            const firstPath = firstStep.path;
+            if (firstPath && firstPath.length >= 2) {
+                if (typeof google !== "undefined" && google.maps && google.maps.geometry && google.maps.geometry.spherical) {
+                    heading = google.maps.geometry.spherical.computeHeading(firstPath[0], firstPath[1]);
+                } else {
+                    const lat1 = firstPath[0].lat();
+                    const lng1 = firstPath[0].lng();
+                    const lat2 = firstPath[1].lat();
+                    const lng2 = firstPath[1].lng();
+                    const dy = lat2 - lat1;
+                    const dx = Math.cos(Math.PI / 180 * lat1) * (lng2 - lng1);
+                    heading = Math.atan2(dx, dy) * 180 / Math.PI;
+                }
+            }
+        }
+
+        routeStartMarker = new google.maps.Marker({
+            position: startLatLng,
+            map: map,
+            title: "Starting Point",
+            icon: {
+                path: 'M 0,-18 L 10,12 L 0,5 L -10,12 Z',
+                fillColor: '#00f0ff',
+                fillOpacity: 1,
+                strokeColor: '#ffffff',
+                strokeWeight: 1.5,
+                scale: 1.2,
+                rotation: heading || 0,
+                anchor: new google.maps.Point(0, 0)
+            },
+            zIndex: 998
+        });
+
+        routeEndMarker = new google.maps.Marker({
+            position: endLatLng,
+            map: map,
+            title: "Destination",
+            icon: {
+                path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
+                fillColor: '#ff007f',
+                fillOpacity: 1,
+                strokeColor: '#ffffff',
+                strokeWeight: 1.5,
+                scale: 1.5,
+                anchor: new google.maps.Point(12, 22)
+            },
+            zIndex: 998
+        });
+    }
+
     window.initMap = function () {
         map = new google.maps.Map(document.getElementById("map"), {
             zoom: 5,
             center: { lat: 39.8283, lng: -98.5795 },
             mapTypeControl: false,
             streetViewControl: false,
-            styles: [
-                { elementType: "geometry", stylers: [{ color: "#090d16" }] },
-                { elementType: "labels.text.stroke", stylers: [{ color: "#090d16" }] },
-                { elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
-                {
-                    featureType: "administrative.locality",
-                    elementType: "labels.text.fill",
-                    stylers: [{ color: "#cbd5e1" }],
-                },
-                {
-                    featureType: "poi",
-                    elementType: "labels.text.fill",
-                    stylers: [{ color: "#94a3b8" }],
-                },
-                {
-                    featureType: "poi.park",
-                    elementType: "geometry",
-                    stylers: [{ color: "#111827" }],
-                },
-                {
-                    featureType: "poi.park",
-                    elementType: "labels.text.fill",
-                    stylers: [{ color: "#1e293b" }],
-                },
-                {
-                    featureType: "road",
-                    elementType: "geometry",
-                    stylers: [{ color: "#1e293b" }],
-                },
-                {
-                    featureType: "road",
-                    elementType: "geometry.stroke",
-                    stylers: [{ color: "#0f172a" }],
-                },
-                {
-                    featureType: "road",
-                    elementType: "labels.text.fill",
-                    stylers: [{ color: "#64748b" }],
-                },
-                {
-                    featureType: "road.highway",
-                    elementType: "geometry",
-                    stylers: [{ color: "#1f2937" }],
-                },
-                {
-                    featureType: "road.highway",
-                    elementType: "geometry.stroke",
-                    stylers: [{ color: "#111827" }],
-                },
-                {
-                    featureType: "road.highway",
-                    elementType: "labels.text.fill",
-                    stylers: [{ color: "#e2e8f0" }],
-                },
-                {
-                    featureType: "transit",
-                    elementType: "geometry",
-                    stylers: [{ color: "#1e293b" }],
-                },
-                {
-                    featureType: "transit.station",
-                    elementType: "labels.text.fill",
-                    stylers: [{ color: "#94a3b8" }],
-                },
-                {
-                    featureType: "water",
-                    elementType: "geometry",
-                    stylers: [{ color: "#040712" }],
-                },
-                {
-                    featureType: "water",
-                    elementType: "labels.text.fill",
-                    stylers: [{ color: "#475569" }],
-                },
-                {
-                    featureType: "water",
-                    elementType: "labels.text.stroke",
-                    stylers: [{ color: "#040712" }],
-                }
-            ]
+            styles: darkMapStyle
         });
 
         infoWindow = new google.maps.InfoWindow();
@@ -1384,9 +1696,10 @@
         directionsService = new google.maps.DirectionsService();
         directionsRenderer = new google.maps.DirectionsRenderer({
             map: map,
+            suppressMarkers: true,
             polylineOptions: {
-                strokeColor: "#ff4757",
-                strokeWeight: 5
+                strokeColor: "#ff0000",
+                strokeWeight: 6
             }
         });
 
@@ -1400,6 +1713,7 @@
                     if (simRestaurantData) {
                         setupPathFromDirections(activeRoute);
                     }
+                    updateCustomRouteMarkers(directions, routeIndex);
                 }
             }
         });
@@ -1611,65 +1925,54 @@
         const speedMph = parseFloat(document.getElementById("speed-input").value) || 60;
         const speedMps = (speedMph * 1609.34) / 3600;
 
-        let etaHtml = '';
+        let travelMinutes = 0;
+        let distanceMilesStr = '';
+        let isOnRoute = false;
+
         if (r.routeDistanceMeters !== undefined && r.routeDistanceMeters !== null) {
+            isOnRoute = true;
             const travelSeconds = r.routeDistanceMeters / speedMps;
-            const travelMinutes = Math.round(travelSeconds / 60);
-
-            const arrivalTime = new Date(Date.now() + travelSeconds * 1000);
-            const arrivalStr = arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            const readyStatus = (r.average_prep_time || 15) <= travelMinutes 
-                ? `<span style="color: #10b981; font-weight: bold;">✅ Fresh on Arrival</span> (Cooks on road)`
-                : `<span style="color: #f59e0b; font-weight: bold;">⚠️ Ready ${r.average_prep_time - travelMinutes}m after arrival</span>`;
-
-            etaHtml = `
-                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px; margin: 10px 0; display: flex; flex-direction: column; gap: 4px;">
-                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                        <span style="color: #166534; font-weight: 500;">🚗 Route Distance:</span>
-                        <span style="font-weight: bold; color: #14532d;">${(r.routeDistanceMeters / 1609.34).toFixed(1)} miles</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                        <span style="color: #166534; font-weight: 500;">⏱️ Drive Time (ETA):</span>
-                        <span style="font-weight: bold; color: #ff4757; font-size: 14px;">${travelMinutes} mins</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                        <span style="color: #166534; font-weight: 500;">🔔 Est. Arrival:</span>
-                        <span style="font-weight: bold; color: #14532d;">${arrivalStr}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                        <span style="color: #166534; font-weight: 500;">⏱️ Prep Duration:</span>
-                        <span style="font-weight: bold; color: #14532d;">${r.average_prep_time || 15} mins</span>
-                    </div>
-                </div>
-                <div style="font-size: 12px; margin-bottom: 12px; text-align: center;">
-                    ${readyStatus}
-                </div>
-            `;
-        } else {
-            etaHtml = `
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin: 10px 0; display: flex; flex-direction: column; gap: 4px;">
-                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                        <span style="color: #475569; font-weight: 500;">⏱️ Prep Duration:</span>
-                        <span style="font-weight: bold; color: #1e293b;">${r.average_prep_time || 15} mins</span>
-                    </div>
-                    <p style="margin: 4px 0 0 0; font-size: 11px; color: #64748b; line-height: 1.3;">Plan a route to view exact drive times and automated kitchen synchronization.</p>
-                </div>
-            `;
+            travelMinutes = Math.round(travelSeconds / 60);
+            distanceMilesStr = `${(r.routeDistanceMeters / 1609.34).toFixed(1)} mi`;
         }
 
+        const isLight = (currentMapTheme === 'light');
+        const bgColor = isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(15, 23, 42, 0.98)';
+        const textColor = isLight ? '#0f172a' : '#ffffff';
+        const labelColor = isLight ? '#475569' : '#94a3b8';
+        const accentTextShadow = isLight ? 'none' : '0 0 5px rgba(0, 240, 255, 0.3)';
+        const accentColor = isLight ? '#1e3a8a' : '#00f0ff';
+        const closeBtnColor = isLight ? '#475569' : '#cbd5e1';
+        const shadowStyle = isLight ? '0 4px 12px rgba(15, 23, 42, 0.15)' : '0 4px 15px rgba(0, 240, 255, 0.3)';
+        const borderStyle = isLight ? '1px solid rgba(15, 23, 42, 0.2)' : '1px solid rgba(0, 240, 255, 0.45)';
+        const etaColor = '#ff007f';
+
         const infoContent = `
-            <div style="font-family: system-ui, -apple-system, sans-serif; padding: 5px; min-width: 250px; max-width: 280px; box-sizing: border-box;">
-                <h3 style="margin: 0 0 5px 0; color: #1e293b; font-size: 15px; font-weight: bold; border-bottom: 2px solid #ff4757; padding-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
-                    <span>🏪 ${r.name}</span>
-                </h3>
-                <p style="margin: 5px 0; font-size: 12px; color: #64748b; line-height: 1.3;">📍 ${r.address}</p>
+            <div style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; padding: 12px; width: 190px; box-sizing: border-box; background: ${bgColor}; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: ${textColor}; border-radius: 12px; border: ${borderStyle}; box-shadow: ${shadowStyle}; display: flex; flex-direction: column; gap: 8px; position: relative;">
+                <!-- Custom elegant Close Button at top-right (no global button overrides) -->
+                <button class="iw-btn" onclick="closeInfoWindow()" style="position: absolute !important; top: 8px !important; right: 8px !important; background: none !important; border: none !important; color: ${closeBtnColor} !important; font-size: 16px !important; font-weight: bold !important; cursor: pointer !important; padding: 0 !important; line-height: 1 !important; transition: color 0.2s !important; margin: 0 !important; box-shadow: none !important; text-shadow: none !important; width: auto !important; height: auto !important;" onmouseover="this.style.color='#ff007f'" onmouseout="this.style.color='${closeBtnColor}'">×</button>
                 
-                ${etaHtml}
+                <!-- Restaurant Name -->
+                <div style="font-weight: 800; font-size: 12px; color: ${accentColor}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 155px; text-shadow: ${accentTextShadow}; display: flex; align-items: center; gap: 4px; line-height: 1.2; margin-right: 15px;">
+                    <span>🏪</span> <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${r.name}</span>
+                </div>
                 
-                <button onclick="openRestaurantMenu('${r.id}', '${r.name.replace(/'/g, "\\'")}')" 
-                        style="margin: 0; width: 100%; padding: 10px; background: #ff4757; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(255, 71, 87, 0.2); text-align: center; box-sizing: border-box; text-transform: uppercase; letter-spacing: 0.02em;">
-                    🛍️ Preorder Menu
+                <!-- ETA, clearly visible and beautiful -->
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px 0; border-top: 1px solid ${isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}; border-bottom: 1px solid ${isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'};">
+                    ${isOnRoute ? `
+                        <span style="font-size: 9px; font-weight: 700; color: ${labelColor}; letter-spacing: 0.05em; text-transform: uppercase;">Estimated ETA</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 800; color: ${etaColor}; text-shadow: ${isLight ? 'none' : '0 0 8px rgba(255,0,127,0.4)'}; line-height: 1;">${travelMinutes} mins</span>
+                    ` : `
+                        <div style="font-size: 9px; font-style: italic; color: #64748b; text-align: center; padding: 4px 0;">No active route</div>
+                    `}
+                </div>
+                
+                <!-- Action pre-order button -->
+                <button class="iw-btn" onclick="openRestaurantMenu('${r.id}', '${r.name.replace(/'/g, "\\'")}')" 
+                        style="margin: 0 !important; width: 100% !important; padding: 8px !important; background: #ff007f !important; color: white !important; border: none !important; border-radius: 6px !important; font-size: 10px !important; font-weight: 800 !important; cursor: pointer !important; transition: all 0.2s !important; box-shadow: 0 0 8px rgba(255, 0, 127, 0.4) !important; text-align: center !important; box-sizing: border-box !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; text-shadow: 0 0 3px #ffffff !important; line-height: 1.2 !important; height: auto !important;"
+                        onmouseover="this.style.background='#ff3399'; this.style.boxShadow='0 0 15px rgba(255,0,127,0.8)';"
+                        onmouseout="this.style.background='#ff007f'; this.style.boxShadow='0 0 8px rgba(255, 0, 127, 0.4)';">
+                    🛍️ PREORDER
                 </button>
             </div>
         `;
@@ -1849,8 +2152,8 @@
                     
                     activeRouteIndex = targetIndex;
                     
-                    directionsRenderer.setRouteIndex(targetIndex);
                     directionsRenderer.setDirections(response);
+                    directionsRenderer.setRouteIndex(targetIndex);
                     
                     drawAlternativePolylines(response, targetIndex);
                     updateRouteSelectionUI(response, targetIndex);
@@ -1886,8 +2189,8 @@
         localStorage.setItem('last_planned_route_index', index);
         
         // Update directions renderer to display the selected route index
-        directionsRenderer.setRouteIndex(index);
         directionsRenderer.setDirections(lastDirectionsResponse);
+        directionsRenderer.setRouteIndex(index);
         
         // Re-draw alternative polylines
         drawAlternativePolylines(lastDirectionsResponse, index);

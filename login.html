@@ -5,24 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Traveler Authentication - Route Preorder</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f7f9fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        .login-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 440px; box-sizing: border-box; transition: all 0.3s ease; border-top: 5px solid #ff4757; }
-        h2 { margin-top: 0; color: #2f3542; font-size: 24px; border-bottom: 2px solid #f1f2f6; padding-bottom: 12px; text-align: center; font-weight: 700; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #030308; background-image: radial-gradient(circle at 50% 50%, #0a0c1f 0%, #020205 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; color: #f1f5f9; }
+        .login-card { background: #080916; padding: 40px; border-radius: 12px; box-shadow: 0 0 25px rgba(0,240,255,0.15); width: 100%; max-width: 440px; box-sizing: border-box; transition: all 0.3s ease; border-top: 5px solid #00f0ff; border-left: 1px solid rgba(0,240,255,0.15); border-right: 1px solid rgba(0,240,255,0.15); border-bottom: 1px solid rgba(0,240,255,0.15); }
+        h2 { margin-top: 0; color: #ffffff; font-size: 24px; border-bottom: 2px solid rgba(0,240,255,0.15); padding-bottom: 12px; text-align: center; font-weight: 700; text-shadow: 0 0 10px rgba(0, 240, 255, 0.4); }
         .form-group { display: flex; flex-direction: column; margin-bottom: 16px; }
-        label { font-size: 11px; font-weight: bold; color: #57606f; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-        input { padding: 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; transition: all 0.2s; box-sizing: border-box; width: 100%; }
-        input:focus { border-color: #ff4757; box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.1); }
-        button { background-color: #ff4757; color: white; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; transition: all 0.2s; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
-        button:hover { background-color: #e84118; transform: translateY(-1px); }
+        label { font-size: 11px; font-weight: bold; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+        input { padding: 12px; border: 1px solid rgba(0, 240, 255, 0.15); border-radius: 6px; font-size: 14px; outline: none; transition: all 0.2s; box-sizing: border-box; width: 100%; background-color: #020306; color: #ffffff; }
+        input:focus { border-color: #00f0ff; box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
+        button { background-color: #ff007f; color: white; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; transition: all 0.2s; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.05em; text-shadow: 0 0 5px #ffffff; box-shadow: 0 0 15px rgba(255, 0, 127, 0.4); }
+        button:hover { background-color: #ff3399; transform: translateY(-1px); box-shadow: 0 0 25px rgba(255, 0, 127, 0.7); }
         button:active { transform: translateY(0); }
-        .error-message { background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 6px; font-size: 13px; margin-bottom: 15px; display: none; text-align: center; border: 1px solid #f5c6cb; font-weight: 500; }
-        .success-message { background-color: #e3fcef; color: #155724; padding: 12px; border-radius: 6px; font-size: 13px; margin-bottom: 15px; display: none; text-align: center; border: 1px solid #c3e6cb; font-weight: 500; }
-        .toggle-link { text-align: center; margin-top: 20px; font-size: 13px; color: #57606f; }
-        .toggle-link a { color: #ff4757; font-weight: bold; text-decoration: none; transition: color 0.2s; }
-        .toggle-link a:hover { color: #e84118; text-decoration: underline; }
+        .error-message { background-color: rgba(220, 38, 38, 0.1); color: #f87171; padding: 12px; border-radius: 6px; font-size: 13px; margin-bottom: 15px; display: none; text-align: center; border: 1px solid rgba(220, 38, 38, 0.25); font-weight: 500; }
+        .success-message { background-color: rgba(16, 185, 129, 0.1); color: #34d399; padding: 12px; border-radius: 6px; font-size: 13px; margin-bottom: 15px; display: none; text-align: center; border: 1px solid rgba(16, 185, 129, 0.25); font-weight: 500; }
+        .toggle-link { text-align: center; margin-top: 20px; font-size: 13px; color: #94a3b8; }
+        .toggle-link a { color: #00f0ff; font-weight: bold; text-decoration: none; transition: color 0.2s; text-shadow: 0 0 5px rgba(0, 240, 255, 0.3); }
+        .toggle-link a:hover { color: #55f5ff; text-decoration: underline; }
         .back-home { text-align: center; margin-top: 15px; }
-        .back-home a { font-size: 13px; color: #718096; text-decoration: none; font-weight: 500; }
-        .back-home a:hover { color: #1a202c; }
+        .back-home a { font-size: 13px; color: #64748b; text-decoration: none; font-weight: 500; }
+        .back-home a:hover { color: #00f0ff; text-shadow: 0 0 5px rgba(0, 240, 255, 0.3); }
     </style>
 </head>
 <body>
