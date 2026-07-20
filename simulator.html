@@ -185,6 +185,27 @@
     <button id="simulate-btn">Simulate Payment Success</button>
 
     <div id="response-box"></div>
+
+    <!-- 🎓 Developer Guide: What do these blanks help with? -->
+    <div style="background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.15); border-radius: 8px; padding: 16px; margin-top: 25px;">
+        <h4 style="margin: 0 0 12px 0; color: #ff4757; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+            <span>🎓 Developer Guide: What do these blanks do?</span>
+        </h4>
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12px; line-height: 1.6; color: #94a3b8;">
+            <div>
+                <strong style="color: #ffffff; display: block; margin-bottom: 2px;">🔑 1. Active Order UUID</strong>
+                This is the unique database identifier for the traveler's pending food preorder. When a user submits an order on the map, it starts in a <span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; padding: 1px 4px; border-radius: 4px; font-weight: 600;">PENDING</span> state. The UUID ensures the webhook triggers the payment update on the <em>exact correct order</em> in the database.
+            </div>
+            <div>
+                <strong style="color: #ffffff; display: block; margin-bottom: 2px;">💸 2. Mock Payment Intent ID</strong>
+                This represents the unique transaction receipt ID from a payment processor (like Stripe or PayPal). It serves as proof of authorization, securing the traveler's money in <strong>Escrow</strong>. This receipt ID is linked to the order for auditing and refund purposes.
+            </div>
+            <div>
+                <strong style="color: #ffffff; display: block; margin-bottom: 2px;">⚡ How this simulates a Real Webhook</strong>
+                In production, when a customer pays, the payment gateway automatically broadcasts a server-to-server HTTP POST request (a "webhook") to this backend route. This tool simulates that callback, confirming the funds are secured in escrow, which instantly alerts the restaurant's kitchen to start preparing the fresh meal!
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>

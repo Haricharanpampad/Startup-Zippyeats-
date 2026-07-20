@@ -3,39 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Operations & Investor ROI Dashboard</title>
+    <title>Web App Revenue & Investor ROI Dashboard</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
         body { 
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             margin: 20px; 
-            background-color: #090d16; 
+            background-color: #05070c; 
             color: #f1f5f9; 
             transition: background-color 0.3s ease;
         }
         
         .nav-bar { 
-            background: #111827; 
+            background: #0d121f; 
             padding: 15px 30px; 
-            border-radius: 10px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4); 
+            border-radius: 12px; 
+            box-shadow: 0 4px 25px rgba(0,0,0,0.5); 
             margin-bottom: 25px; 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            max-width: 1300px; 
+            max-width: 1400px; 
             margin-left: auto; 
             margin-right: auto; 
             width: 100%; 
             box-sizing: border-box; 
             border: 1px solid #1e293b;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .nav-logo { 
             font-size: 18px; 
-            font-weight: 700; 
+            font-weight: 800; 
             color: #ff4757; 
             display: flex; 
             align-items: center; 
@@ -50,10 +49,10 @@
         }
         .nav-link { 
             text-decoration: none; 
-            color: #9ca3af; 
+            color: #94a3b8; 
             font-weight: 600; 
             font-size: 14px; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            transition: all 0.2s ease; 
             padding-bottom: 4px; 
         }
         .nav-link:hover { 
@@ -61,38 +60,38 @@
         }
         .nav-link.active { 
             color: #ff4757; 
-            font-weight: 700; 
+            font-weight: 800; 
             border-bottom: 2px solid #ff4757; 
         }
 
         .container { 
-            max-width: 1300px; 
+            max-width: 1400px; 
             margin: 0 auto; 
             display: flex; 
             flex-direction: column; 
-            gap: 20px; 
+            gap: 24px; 
         }
 
         /* Metrics grid */
         .metrics-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
             gap: 20px; 
         }
         .metric-card { 
-            background: #111827; 
+            background: #0d121f; 
             border: 1px solid #1e293b; 
-            padding: 22px; 
-            border-radius: 10px; 
+            padding: 24px; 
+            border-radius: 12px; 
             position: relative; 
             overflow: hidden; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .metric-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.15);
-            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(255, 71, 87, 0.1);
+            border-color: rgba(255, 71, 87, 0.2);
         }
         .metric-card::after {
             content: '';
@@ -105,21 +104,21 @@
         .metric-blue::after { background-color: #3b82f6; }
         .metric-emerald::after { background-color: #10b981; }
         .metric-amber::after { background-color: #f59e0b; }
-        .metric-purple::after { background-color: #8b5cf6; }
+        .metric-purple::after { background-color: #a78bfa; }
 
         .metric-label { 
             font-size: 11px; 
-            font-weight: 700; 
+            font-weight: 800; 
             color: #94a3b8; 
             text-transform: uppercase; 
             letter-spacing: 0.08em; 
         }
         .metric-value { 
-            font-size: 28px; 
+            font-size: 32px; 
             font-weight: 800; 
             color: #ffffff; 
             margin-top: 8px; 
-            font-family: 'JetBrains Mono', 'Courier New', monospace; 
+            font-family: 'JetBrains Mono', monospace; 
             font-variant-numeric: tabular-nums;
         }
         .metric-trend { 
@@ -129,26 +128,153 @@
             align-items: center; 
             gap: 4px; 
         }
-        .trend-up { color: #10b981; }
-        .trend-down { color: #ef4444; }
+        .trend-up { color: #10b981; font-weight: 600; }
+        .trend-down { color: #ef4444; font-weight: 600; }
+
+        .metric-explanation {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 8px;
+            line-height: 1.4;
+            border-top: 1px solid #1e293b;
+            padding-top: 8px;
+        }
+
+        /* Stock Market Chart Panel */
+        .stock-chart-panel {
+            background: #0d121f;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .chart-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .chart-price-display {
+            font-size: 38px;
+            font-weight: 800;
+            color: #10b981; 
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 4px;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+        .chart-price-period {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .chart-selectors {
+            display: flex;
+            background: #030712;
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+            gap: 4px;
+        }
+        .chart-select-btn {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .chart-select-btn:hover {
+            color: #ffffff;
+        }
+        .chart-select-btn.active {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+        .chart-svg-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            background: #030712;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+        .chart-grid-line {
+            stroke: #111827;
+            stroke-width: 1;
+            stroke-dasharray: 4 4;
+        }
+        .chart-main-path {
+            fill: none;
+            stroke: #10b981;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0px 4px 10px rgba(16, 185, 129, 0.3));
+        }
+        .chart-area-path {
+            fill: url(#chart-gradient);
+            stroke: none;
+        }
+        .chart-hover-line {
+            stroke: #334155;
+            stroke-width: 1;
+            stroke-dasharray: 2 2;
+            pointer-events: none;
+            display: none;
+        }
+        .chart-hover-dot {
+            fill: #10b981;
+            stroke: #ffffff;
+            stroke-width: 2.5;
+            r: 6.5;
+            pointer-events: none;
+            display: none;
+            filter: drop-shadow(0px 0px 8px rgba(16, 185, 129, 0.8));
+        }
 
         /* Main layout split */
         .dashboard-split { 
             display: grid; 
             grid-template-columns: 1fr; 
-            gap: 20px; 
+            gap: 24px; 
         }
         @media (min-width: 1024px) {
-            .dashboard-split { grid-template-columns: 1.5fr 1.5fr; }
+            .dashboard-split { grid-template-columns: 1.1fr 0.9fr; }
         }
 
         .panel { 
-            background: #111827; 
+            background: #0d121f; 
             border: 1px solid #1e293b; 
-            border-radius: 10px; 
-            padding: 22px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px; 
+            padding: 24px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
+            display: flex;
+            flex-direction: column;
         }
         .panel-header { 
             display: flex; 
@@ -160,12 +286,56 @@
         }
         .panel-title { 
             font-size: 16px; 
-            font-weight: 700; 
+            font-weight: 800; 
             margin: 0; 
             color: #ffffff; 
             display: flex; 
             align-items: center; 
             gap: 8px; 
+        }
+
+        /* Custom tab buttons style */
+        .tab-btn {
+            background: #111827;
+            color: #94a3b8;
+            border: 1px solid #1e293b;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .tab-btn.active {
+            background: #ff4757;
+            color: white;
+            border-color: #ff4757;
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.25);
+        }
+
+        /* Interactive ROI Slider style */
+        .calculator-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #1e293b;
+            outline: none;
+            margin: 10px 0;
+        }
+        .calculator-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #ff4757;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(255, 71, 87, 0.8);
+            transition: transform 0.1s ease;
+        }
+        .calculator-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
         }
 
         /* Real-time Ticker console */
@@ -176,22 +346,22 @@
             padding: 15px; 
             height: 380px; 
             overflow-y: auto; 
-            font-family: 'JetBrains Mono', 'Courier New', monospace; 
-            font-size: 12px; 
+            font-family: 'JetBrains Mono', monospace; 
+            font-size: 11px; 
             line-height: 1.6; 
-            color: #06b6d4; 
+            color: #38bdf8; 
         }
         .ticker-line { 
-            margin-bottom: 10px; 
-            border-bottom: 1px dashed rgba(255,255,255,0.03); 
-            padding-bottom: 8px; 
+            margin-bottom: 8px; 
+            border-bottom: 1px dashed rgba(255,255,255,0.02); 
+            padding-bottom: 6px; 
             word-break: break-all;
         }
         .ticker-time { color: #475569; margin-right: 8px; }
         .ticker-tag { 
-            padding: 2px 6px; 
+            padding: 1px 5px; 
             border-radius: 4px; 
-            font-size: 10px; 
+            font-size: 9px; 
             font-weight: bold; 
             margin-right: 6px; 
             text-transform: uppercase; 
@@ -202,51 +372,74 @@
         .tag-escrow { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25); }
         .tag-hold { background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.25); }
 
-        /* SVG Chart designs */
-        .chart-container { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 20px; 
+        /* Transactions Feed Styles */
+        .transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 480px;
+            overflow-y: auto;
         }
-        .bar-chart-row { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            font-size: 12px; 
-        }
-        .bar-label { width: 80px; color: #94a3b8; font-weight: 700; text-align: right; }
-        .bar-wrapper { flex: 1; height: 16px; background-color: #090d16; border: 1px solid #1e293b; border-radius: 8px; overflow: hidden; position: relative; }
-        .bar-fill { height: 100%; border-radius: 8px; transition: width 0.8s ease; }
-        .bar-val { width: 50px; color: #ffffff; font-weight: 700; text-align: left; margin-left: 8px; font-family: 'JetBrains Mono', monospace; }
-
-        .bar-blue { background: linear-gradient(90deg, #2563eb, #3b82f6); }
-        .bar-emerald { background: linear-gradient(90deg, #059669, #10b981); }
-        .bar-amber { background: linear-gradient(90deg, #d97706, #f59e0b); }
-
-        .diner-stats-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 15px;
-        }
-        .stat-sub-box {
-            background-color: #090d16;
+        .transaction-row {
+            background: #030712;
             border: 1px solid #1e293b;
-            padding: 12px;
             border-radius: 8px;
-            text-align: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
         }
-        .stat-sub-box:hover {
-            border-color: rgba(59, 130, 246, 0.3);
-            background-color: #0f172a;
+        .transaction-row:hover {
+            border-color: rgba(16, 185, 129, 0.25);
+            background: #070c17;
         }
-        .stat-sub-num {
-            font-size: 18px;
-            font-weight: 700;
-            color: #ffffff;
-            margin-top: 4px;
+        .txn-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .txn-id {
             font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+        .txn-diner {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 600;
+        }
+        .txn-amount-box {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: flex-end;
+        }
+        .txn-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 800;
+            color: #ffffff;
+        }
+        .txn-badge {
+            font-size: 9px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            width: fit-content;
+        }
+        .badge-released {
+            background: rgba(16, 185, 129, 0.12);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .badge-escrow {
+            background: rgba(245, 158, 11, 0.12);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.2);
         }
 
         .pulse-light {
@@ -282,148 +475,233 @@
         
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
             <div>
-                <h1 style="margin: 0; font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
-                    <span>🛰️ Operations Control & ROI Analytics Center</span>
+                <h1 style="margin: 0; font-size: 26px; font-weight: 800; display: flex; align-items: center; gap: 10px; letter-spacing: -0.02em;">
+                    <span>📈 Web App Revenue & Investor ROI Dashboard</span>
                     <span class="pulse-light"></span>
                 </h1>
-                <p style="margin: 5px 0 0 0; color: #94a3b8; font-size: 14px;">Real-Time Traveler Preorder Sync, Dynamic Escrow Releases, and Environmental Metrics</p>
+                <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 14px;">An investor-ready overview tracking gross sales volume, platform monetization cuts, and secured escrow funds generated from our traveler preorder system.</p>
             </div>
             
-            <div style="background: #111827; padding: 6px 12px; border-radius: 8px; border: 1px solid #1e293b; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold; color: #94a3b8;">
-                <span>ACTIVE STREAM:</span>
+            <div style="background: #0d121f; padding: 8px 14px; border-radius: 8px; border: 1px solid #1e293b; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold; color: #94a3b8;">
+                <span style="color: #64748b;">LIVE DATA FEED:</span>
                 <span style="color: #ff4757;" id="current-stream-name">Pitstop Highway Diner</span>
             </div>
         </div>
 
-        <!-- KPI CARDS GRID -->
+        <!-- REVENUE & ROI KEY BUSINESS METRICS (INVESTOR FOCUS) -->
         <div class="metrics-grid">
             <div class="metric-card metric-blue">
-                <span class="metric-label">💵 Total Network Volume</span>
-                <div class="metric-value" id="kpi-revenue">$245.50</div>
+                <span class="metric-label">📊 Gross Merchandise Volume (GMV)</span>
+                <div class="metric-value" id="kpi-revenue">₹9,085.46</div>
                 <div class="metric-trend trend-up">
-                    <span>▲ +$18.50 en-route</span>
+                    <span>▲ +₹18.50 en-route</span>
+                </div>
+                <div class="metric-explanation">
+                    <strong>Total Sales:</strong> Cumulative customer food orders placed via the web app. Represents total transacted market size.
                 </div>
             </div>
             
             <div class="metric-card metric-emerald">
-                <span class="metric-label">🔒 Active Escrow Pool</span>
-                <div class="metric-value" id="kpi-escrow">$45.00</div>
-                <div class="metric-trend" style="color: #64748b;">
-                    <span>Secure Payment Authorizations</span>
+                <span class="metric-label">💰 Platform Fee Income (10% Take-rate)</span>
+                <div class="metric-value" id="kpi-net-income">₹908.55</div>
+                <div class="metric-trend trend-up" style="color: #10b981;">
+                    <span>SaaS & Transaction Revenue</span>
+                </div>
+                <div class="metric-explanation">
+                    <strong>Our Revenue:</strong> Pure platform monetization. We charge a direct 10% commission on every order routed by our GPS system.
                 </div>
             </div>
             
             <div class="metric-card metric-amber">
-                <span class="metric-label">🎯 Logistics Sync Accuracy</span>
-                <div class="metric-value" id="kpi-accuracy">98.7%</div>
-                <div class="metric-trend trend-up">
-                    <span>Fresh & on-time handover</span>
+                <span class="metric-label">🔒 Escrow Protected Volume</span>
+                <div class="metric-value" id="kpi-escrow">₹74.00</div>
+                <div class="metric-trend" style="color: #34d399; font-weight: 600;">
+                    <span>🛡️ Safe-Wallet Custody</span>
+                </div>
+                <div class="metric-explanation">
+                    <strong>No-Show Shield:</strong> Customer money paid en-route and held in escrow. Auto-releases to merchant upon physical geofence entry.
                 </div>
             </div>
             
             <div class="metric-card metric-purple">
-                <span class="metric-label">🌱 Carbon Emissions Saved</span>
-                <div class="metric-value" id="kpi-carbon">42.5 kg</div>
-                <div class="metric-trend trend-up">
-                    <span>Preventing vehicle idle times</span>
+                <span class="metric-label">🏷️ Average Basket Size (AOV)</span>
+                <div class="metric-value" id="kpi-aov">₹24.55</div>
+                <div class="metric-trend" style="color: #a78bfa; font-weight: 600;">
+                    <span>Strong Unit Economics</span>
+                </div>
+                <div class="metric-explanation">
+                    <strong>Value Per Trip:</strong> Higher than standard quick-service drivethrus. Commuters preorder full family meals before highway stops.
                 </div>
             </div>
         </div>
 
-        <!-- SPLIT PANEL VIEW -->
+        <!-- MAJESTIC STOCK-MARKET STYLE REVENUE CHART -->
+        <div class="stock-chart-panel">
+            <div class="chart-header">
+                <div class="chart-info">
+                    <span class="chart-title" id="chart-timeline-title">Cumulative Web App Revenue Graph</span>
+                    <div class="chart-price-display">
+                        <span id="chart-display-price">₹9,085.46</span>
+                        <span class="chart-price-period" id="chart-display-date">YTD Cumulative Performance</span>
+                    </div>
+                </div>
+                <div class="chart-selectors">
+                    <button class="chart-select-btn" onclick="setTimeframe('1D')">1D</button>
+                    <button class="chart-select-btn" onclick="setTimeframe('1W')">1W</button>
+                    <button class="chart-select-btn" onclick="setTimeframe('1M')">1M</button>
+                    <button class="chart-select-btn active" onclick="setTimeframe('ALL')">ALL</button>
+                </div>
+            </div>
+
+            <!-- SVG Vector Canvas -->
+            <div class="chart-svg-container" id="chart-container" onmousemove="handleChartHover(event)" onmouseleave="handleChartLeave()">
+                <svg width="100%" height="100%" viewBox="0 0 1000 280" preserveAspectRatio="none" id="chart-svg">
+                    <defs>
+                        <!-- Glow green gradient -->
+                        <linearGradient id="chart-gradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#10b981" stop-opacity="0.35" />
+                            <stop offset="100%" stop-color="#10b981" stop-opacity="0.0" />
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Horizontal Gridlines -->
+                    <line x1="50" y1="50" x2="950" y2="50" class="chart-grid-line" />
+                    <line x1="50" y1="110" x2="950" y2="110" class="chart-grid-line" />
+                    <line x1="50" y1="170" x2="950" y2="170" class="chart-grid-line" />
+                    <line x1="50" y1="230" x2="950" y2="230" class="chart-grid-line" />
+
+                    <!-- Vector Area Path -->
+                    <path d="" id="chart-area" class="chart-area-path" />
+
+                    <!-- Vector Stroke Path -->
+                    <path d="" id="chart-path" class="chart-main-path" stroke-linejoin="round" stroke-linecap="round" />
+
+                    <!-- Hover Crosshair / Guides -->
+                    <line x1="0" y1="0" x2="0" y2="280" id="hover-guide-v" class="chart-hover-line" />
+                    
+                    <!-- Hover dot indicator -->
+                    <circle cx="0" cy="0" id="hover-dot" class="chart-hover-dot" />
+                </svg>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #475569; padding: 0 10px;">
+                <span>📈 Real-time performance vectoring</span>
+                <span>💡 Hover or drag over the chart to scrub through historical web app earnings</span>
+            </div>
+        </div>
+
+        <!-- SPLIT PANEL VIEW (ROI CALCULATOR & RECENT TRANSACTED RECEIPTS) -->
         <div class="dashboard-split">
             
-            <!-- LEFT PANEL: TERMINAL FEED -->
+            <!-- LEFT PANEL: PITCH DECK & DYNAMIC ROI CALCULATOR / DEVELOPER LOGS -->
             <div class="panel">
-                <div class="panel-header">
-                    <h3 class="panel-title">
-                        <span>📟 Real-Time Logistics Feed & GPS Logs</span>
-                    </h3>
-                    <span style="font-size: 11px; font-weight: bold; background: rgba(6,182,212,0.1); color: #06b6d4; padding: 2px 10px; border-radius: 12px;" id="socket-connection-badge">Socket Connected</span>
+                <div class="panel-header" style="border-bottom: 1px solid #1e293b; padding-bottom: 15px; margin-bottom: 15px;">
+                    <div style="display: flex; gap: 10px;">
+                        <button class="tab-btn active" id="tab-pitch" onclick="switchLeftTab('pitch')">🚀 Revenue Monetization Model</button>
+                        <button class="tab-btn" id="tab-terminal" onclick="switchLeftTab('terminal')">📟 System Telemetry Log</button>
+                    </div>
+                    <span style="font-size: 11px; font-weight: bold; background: rgba(16,185,129,0.1); color: #10b981; padding: 2px 10px; border-radius: 12px;">Investor Playbook</span>
                 </div>
                 
-                <div class="ticker-terminal" id="terminal-screen">
-                    <div class="ticker-line">
-                        <span class="ticker-time">01:00:15 UTC</span>
-                        <span class="ticker-tag tag-sys">System</span>
-                        <span>Operations Center initialized. Awaiting traveler route planning and preorders...</span>
+                <!-- TAB CONTENT A: MONETIZATION MODEL -->
+                <div id="content-pitch" style="display: flex; flex-direction: column; gap: 18px;">
+                    
+                    <!-- Visual Process SVG -->
+                    <div style="background: #030712; padding: 16px; border-radius: 8px; border: 1px solid #1e293b;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800;">💸 The Escrow Payment & Handover Flow</h4>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding-top: 5px;">
+                            <div style="flex: 1; text-align: center;">
+                                <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(59,130,246,0.15); border: 2px solid #3b82f6; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px auto; font-weight: bold; color: #60a5fa; font-size: 11px;">1</div>
+                                <span style="font-size: 11px; font-weight: 700; color: #ffffff; display: block;">Authorize Payment</span>
+                                <span style="font-size: 9px; color: #64748b; display: block; margin-top: 2px;">Diner places preorder en-route. Money locks in escrow.</span>
+                            </div>
+                            
+                            <div style="flex: 1; text-align: center;">
+                                <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(245,158,11,0.15); border: 2px solid #f59e0b; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px auto; font-weight: bold; color: #f59e0b; font-size: 11px;">2</div>
+                                <span style="font-size: 11px; font-weight: 700; color: #ffffff; display: block;">GPS Countdown</span>
+                                <span style="font-size: 9px; color: #64748b; display: block; margin-top: 2px;">Kitchen fires cooking automatically on GPS traveler ETA.</span>
+                            </div>
+                            
+                            <div style="flex: 1; text-align: center;">
+                                <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(16,185,129,0.15); border: 2px solid #10b981; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px auto; font-weight: bold; color: #34d399; font-size: 11px;">3</div>
+                                <span style="font-size: 11px; font-weight: 700; color: #ffffff; display: block;">Escrow Released</span>
+                                <span style="font-size: 9px; color: #64748b; display: block; margin-top: 2px;">Traveler crosses geofence. Funds clear to restaurant instantly.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Interactive ROI Simulator for Investors -->
+                    <div style="background: #030712; padding: 20px; border-radius: 8px; border: 1px solid #1e293b;">
+                        <h4 style="margin: 0 0 14px 0; font-size: 12px; color: #ff4757; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800; display: flex; justify-content: space-between; align-items: center;">
+                            <span>🧮 Interactive Platform Revenue Model</span>
+                            <span style="font-size: 9px; background: rgba(255, 71, 87, 0.15); color: #ff4757; padding: 2px 8px; border-radius: 4px; font-weight: bold;">Interactive Model</span>
+                        </h4>
+
+                        <div style="display: flex; flex-direction: column; gap: 14px;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; font-weight: bold;">
+                                    <span>Average Daily Preorders (Per Diner)</span>
+                                    <span style="color: #ffffff; font-family: monospace;" id="calc-volume-label">35 orders</span>
+                                </div>
+                                <input type="range" min="5" max="150" value="35" class="calculator-slider" id="calc-volume-slider" oninput="recalculateROI()">
+                            </div>
+
+                            <div>
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; font-weight: bold;">
+                                    <span>Average Order Value (AOV)</span>
+                                    <span style="color: #ffffff; font-family: monospace;" id="calc-aov-label">₹18.50</span>
+                                </div>
+                                <input type="range" min="10" max="50" step="0.5" value="18.5" class="calculator-slider" id="calc-aov-slider" oninput="recalculateROI()">
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; border-top: 1px solid #1e293b; padding-top: 15px; margin-top: 5px;">
+                                <div style="background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.15); padding: 12px; border-radius: 6px; text-align: center;">
+                                    <span style="font-size: 9px; color: #94a3b8; font-weight: bold; display: block; text-transform: uppercase;">Diner Waste Saved</span>
+                                    <strong style="font-size: 14px; color: #60a5fa; font-family: monospace; display: block; margin-top: 4px;" id="calc-spoilage-savings">₹485.62/mo</strong>
+                                </div>
+                                <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.15); padding: 12px; border-radius: 6px; text-align: center;">
+                                    <span style="font-size: 9px; color: #94a3b8; font-weight: bold; display: block; text-transform: uppercase;">Our Platform Take</span>
+                                    <strong style="font-size: 14px; color: #34d399; font-family: monospace; display: block; margin-top: 4px;" id="calc-monthly-commission">₹1,942.50/mo</strong>
+                                </div>
+                                <div style="background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.15); padding: 12px; border-radius: 6px; text-align: center;">
+                                    <span style="font-size: 9px; color: #94a3b8; font-weight: bold; display: block; text-transform: uppercase;">ARR Run-Rate</span>
+                                    <strong style="font-size: 14px; color: #a78bfa; font-family: monospace; display: block; margin-top: 4px;" id="calc-projected-arr">₹23.3k/yr</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p style="margin: 0; color: #64748b; font-size: 11px; line-height: 1.5; text-align: center;">
+                        📊 <em>This business model scales exponentially as we acquire new highway diners across major national commuter corridors.</em>
+                    </p>
+                </div>
+
+                <!-- TAB CONTENT B: TELEMETRY SYSTEM -->
+                <div id="content-terminal" style="display: none; flex-direction: column;">
+                    <div class="ticker-terminal" id="terminal-screen">
+                        <div class="ticker-line">
+                            <span class="ticker-time">01:00:15 UTC</span>
+                            <span class="ticker-tag tag-sys">System</span>
+                            <span>Revenue system tracking active. Listening to traveler preorder webhook dispatches...</span>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <!-- RIGHT PANEL: ANALYTICS & ROI CHARTS -->
-            <div class="panel" style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- RIGHT PANEL: LIVE TRANSACTED ORDERS FEED -->
+            <div class="panel">
                 <div class="panel-header">
                     <h3 class="panel-title">
-                        <span>📊 Performance Diagnostics</span>
+                        <span>🧾 Web App Revenue stream Ledger</span>
                     </h3>
-                    <span style="font-size: 11px; font-weight: bold; background: rgba(16,185,129,0.1); color: #10b981; padding: 2px 10px; border-radius: 12px;">Investor Summary</span>
+                    <span style="font-size: 11px; font-weight: bold; background: rgba(16,185,129,0.1); color: #10b981; padding: 2px 10px; border-radius: 12px;">Live Cashflow</span>
                 </div>
 
-                <!-- Chart 1: Holding Time Spoilage Mitigation -->
-                <div>
-                    <h4 style="margin: 0 0 12px 0; font-size: 13px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">⏱️ Food Holding / Spoilage Reduction</h4>
-                    <div class="chart-container">
-                        <div class="bar-chart-row">
-                            <span class="bar-label">Traditional</span>
-                            <div class="bar-wrapper">
-                                <div class="bar-fill bar-amber" style="width: 84%;"></div>
-                            </div>
-                            <span class="bar-val">25.0m</span>
-                        </div>
-                        <div class="bar-chart-row">
-                            <span class="bar-label">Our Sync</span>
-                            <div class="bar-wrapper">
-                                <div class="bar-fill bar-emerald" style="width: 6%;"></div>
-                            </div>
-                            <span class="bar-val">1.8m</span>
-                        </div>
-                    </div>
-                    <p style="margin: 8px 0 0 0; color: #64748b; font-size: 11px; line-height: 1.4;">
-                        Our real-time en-route syncing reduces food holding delays in the restaurant by over **92%**, keeping ingredients perfectly hot and preventing moisture/coagulation.
-                    </p>
+                <!-- Recent Transactions Container -->
+                <div class="transaction-list" id="transaction-feed">
+                    <!-- Loaded dynamically via script -->
                 </div>
-
-                <!-- Chart 2: Preorder Growth Trends -->
-                <div style="border-top: 1px solid #1e293b; padding-top: 15px;">
-                    <h4 style="margin: 0 0 12px 0; font-size: 13px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">📦 Weekly Preorder Efficiency</h4>
-                    <div class="chart-container">
-                        <div class="bar-chart-row">
-                            <span class="bar-label">Mon-Wed</span>
-                            <div class="bar-wrapper">
-                                <div class="bar-fill bar-blue" style="width: 45%;"></div>
-                            </div>
-                            <span class="bar-val">120 qty</span>
-                        </div>
-                        <div class="bar-chart-row">
-                            <span class="bar-label">Thu-Fri</span>
-                            <div class="bar-wrapper">
-                                <div class="bar-fill bar-blue" style="width: 78%;"></div>
-                            </div>
-                            <span class="bar-val">210 qty</span>
-                        </div>
-                        <div class="bar-chart-row">
-                            <span class="bar-label">Sat-Sun</span>
-                            <div class="bar-wrapper">
-                                <div class="bar-fill bar-emerald" style="width: 95%;"></div>
-                            </div>
-                            <span class="bar-val">265 qty</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Extra ROI Metrics -->
-                <div class="diner-stats-info" style="border-top: 1px solid #1e293b; padding-top: 15px;">
-                    <div class="stat-sub-box">
-                        <label style="font-size: 9px; color: #9ca3af; text-transform: uppercase; font-weight: bold;">Idling Avoided</label>
-                        <div class="stat-sub-num" id="stats-idling">14.2k sec</div>
-                    </div>
-                    <div class="stat-sub-box">
-                        <label style="font-size: 9px; color: #9ca3af; text-transform: uppercase; font-weight: bold;">Escrow SLA Rate</label>
-                        <div class="stat-sub-num">100.0%</div>
-                    </div>
-                </div>
-
             </div>
 
         </div>
@@ -433,11 +711,243 @@
     <script>
         let socket;
         let currentRestaurantId = "f82e4f22-3816-4243-9a15-e642b8c2a0c0"; // default diner
-        let baseRevenue = 245.50;
-        let currentEscrow = 45.00;
-        let baseCarbon = 42.5;
-        let idleSecs = 14230;
+        
+        // Base state numbers
+        let baseRevenue = 9085.46;
+        let currentEscrow = 74.00;
+        let countOrders = 370;
 
+        // Recent real-time transaction state
+        let recentTransactions = [
+            { id: "order-1784269002", diner: "Pitstop Highway Diner", amount: 45.00, status: "Released", time: "10 mins ago" },
+            { id: "order-1784268114", diner: "Kitchen Live Diner", amount: 18.50, status: "Secured in Escrow", time: "25 mins ago" },
+            { id: "order-1784266776", diner: "Garden State Expressway", amount: 74.00, status: "Released", time: "1 hour ago" },
+            { id: "order-1784265667", diner: "NH-44 Bypass Pitstop", amount: 120.00, status: "Released", time: "2 hours ago" },
+            { id: "order-1784264301", diner: "Kompally Highway Oasis", amount: 32.50, status: "Released", time: "3 hours ago" }
+        ];
+
+        // Stock Chart Timelines & Data
+        let currentTimeframe = "ALL";
+        const chartData = {
+            "1D": {
+                labels: ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"],
+                values: [8410.00, 8430.50, 8480.00, 8680.00, 8740.00, 8790.00, 8820.00, 8850.00, 8910.00, 8990.00, 9045.00, 9085.46],
+                subtitle: "Today's Live Web App Billings Trend (Hourly Ticks)",
+                dates: ["Today 9:00 AM", "Today 10:00 AM", "Today 11:00 AM", "Today 12:00 PM", "Today 1:00 PM", "Today 2:00 PM", "Today 3:00 PM", "Today 4:00 PM", "Today 5:00 PM", "Today 6:00 PM", "Today 7:00 PM", "Today 8:00 PM"]
+            },
+            "1W": {
+                labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+                values: [6800.00, 7120.50, 7300.00, 7650.00, 8200.00, 8750.00, 9085.46],
+                subtitle: "Weekly Cumulative Sales Growth",
+                dates: ["Mon, Jul 13", "Tue, Jul 14", "Wed, Jul 15", "Thu, Jul 16", "Fri, Jul 17", "Sat, Jul 18", "Sun, Jul 19"]
+            },
+            "1M": {
+                labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+                values: [5400.00, 6800.00, 8100.00, 9085.46],
+                subtitle: "Monthly Revenue Hockey-Stick Curve",
+                dates: ["Week 1, Jul", "Week 2, Jul", "Week 3, Jul", "Week 4, Jul"]
+            },
+            "ALL": {
+                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
+                values: [940.00, 2150.00, 3890.00, 5100.00, 6720.00, 8150.00, 9085.46],
+                subtitle: "YTD Cumulative Performance (Exponential Scale)",
+                dates: ["Jan 2026", "Feb 2026", "Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026 (Live)"]
+            }
+        };
+
+        // Redraw SVG Stock Chart dynamically
+        function drawVectorChart() {
+            const timeframe = currentTimeframe;
+            const data = chartData[timeframe];
+            const svg = document.getElementById("chart-svg");
+            const path = document.getElementById("chart-path");
+            const area = document.getElementById("chart-area");
+            
+            if (!svg || !path || !area) return;
+
+            const values = data.values;
+            const labels = data.labels;
+
+            // Mathematical coordinate mapping
+            const minVal = Math.min(...values) * 0.95; // give 5% padding on bottom
+            const maxVal = Math.max(...values) * 1.02; // give 2% padding on top
+            const range = maxVal - minVal;
+
+            const paddingLeft = 50;
+            const paddingRight = 50;
+            const paddingTop = 40;
+            const paddingBottom = 40;
+
+            const chartWidth = 1000 - paddingLeft - paddingRight;
+            const chartHeight = 280 - paddingTop - paddingBottom;
+
+            let pathCoords = [];
+            
+            for (let i = 0; i < values.length; i++) {
+                const x = paddingLeft + (i / (values.length - 1)) * chartWidth;
+                const y = 280 - paddingBottom - ((values[i] - minVal) / range) * chartHeight;
+                pathCoords.push({ x, y });
+            }
+
+            // Create smooth bezier or direct line coordinates
+            let pathD = `M ${pathCoords[0].x} ${pathCoords[0].y}`;
+            for (let i = 1; i < pathCoords.length; i++) {
+                pathD += ` L ${pathCoords[i].x} ${pathCoords[i].y}`;
+            }
+
+            // Path closed for gradient area fill
+            let areaD = `${pathD} L ${pathCoords[pathCoords.length - 1].x} ${280 - paddingBottom} L ${pathCoords[0].x} ${280 - paddingBottom} Z`;
+
+            path.setAttribute("d", pathD);
+            area.setAttribute("d", areaD);
+
+            // Update ticker at top
+            updateDisplayTicker(values[values.length - 1], data.dates[data.dates.length - 1]);
+            document.getElementById("chart-timeline-title").textContent = data.subtitle;
+        }
+
+        function setTimeframe(tf) {
+            currentTimeframe = tf;
+            
+            // Toggle active styling
+            const buttons = document.querySelectorAll(".chart-select-btn");
+            buttons.forEach(btn => {
+                if (btn.textContent === tf) {
+                    btn.classList.add("active");
+                } else {
+                    btn.classList.remove("active");
+                }
+            });
+
+            drawVectorChart();
+        }
+
+        function updateDisplayTicker(price, label) {
+            document.getElementById("chart-display-price").textContent = `₹${price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById("chart-display-date").textContent = label;
+        }
+
+        // Handle vector scrubbing / hovering like in stock-market apps
+        function handleChartHover(event) {
+            const container = document.getElementById("chart-container");
+            const rect = container.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            
+            // Map client X to the SVG viewBox coordinates (width is 1000)
+            const svgX = (mouseX / rect.width) * 1000;
+
+            const timeframe = currentTimeframe;
+            const data = chartData[timeframe];
+            const values = data.values;
+
+            const paddingLeft = 50;
+            const paddingRight = 50;
+            const chartWidth = 1000 - paddingLeft - paddingRight;
+
+            // Find index of closest data point
+            let closestIndex = Math.round(((svgX - paddingLeft) / chartWidth) * (values.length - 1));
+            closestIndex = Math.max(0, Math.min(values.length - 1, closestIndex));
+
+            const minVal = Math.min(...values) * 0.95;
+            const maxVal = Math.max(...values) * 1.02;
+            const range = maxVal - minVal;
+            const chartHeight = 280 - 40 - 40; // 280 - paddingTop - paddingBottom
+
+            // Compute exact dot coordinates
+            const dotX = paddingLeft + (closestIndex / (values.length - 1)) * chartWidth;
+            const dotY = 280 - 40 - ((values[closestIndex] - minVal) / range) * chartHeight;
+
+            // Update elements visibility & coordinates
+            const hoverLine = document.getElementById("hover-guide-v");
+            const hoverDot = document.getElementById("hover-dot");
+
+            hoverLine.setAttribute("x1", dotX);
+            hoverLine.setAttribute("x2", dotX);
+            hoverLine.style.display = "block";
+
+            hoverDot.setAttribute("cx", dotX);
+            hoverDot.setAttribute("cy", dotY);
+            hoverDot.style.display = "block";
+
+            // Update dynamic top price ticker during scrubbing
+            updateDisplayTicker(values[closestIndex], data.dates[closestIndex]);
+        }
+
+        function handleChartLeave() {
+            // Hide guides
+            document.getElementById("hover-guide-v").style.display = "none";
+            document.getElementById("hover-dot").style.display = "none";
+
+            // Restore latest total actual revenue
+            const timeframe = currentTimeframe;
+            const data = chartData[timeframe];
+            updateDisplayTicker(data.values[data.values.length - 1], data.dates[data.dates.length - 1]);
+        }
+
+        // Switch tabs on the left panel
+        function switchLeftTab(tabName) {
+            const btnPitch = document.getElementById("tab-pitch");
+            const btnTerminal = document.getElementById("tab-terminal");
+            const contentPitch = document.getElementById("content-pitch");
+            const contentTerminal = document.getElementById("content-terminal");
+
+            if (tabName === "pitch") {
+                btnPitch.classList.add("active");
+                btnTerminal.classList.remove("active");
+                contentPitch.style.display = "flex";
+                contentTerminal.style.display = "none";
+            } else {
+                btnTerminal.classList.add("active");
+                btnPitch.classList.remove("active");
+                contentTerminal.style.display = "flex";
+                contentPitch.style.display = "none";
+            }
+        }
+
+        // Render direct cashflow transaction receipt ledger
+        function renderTransactions() {
+            const feed = document.getElementById("transaction-feed");
+            if (!feed) return;
+
+            feed.innerHTML = "";
+            recentTransactions.forEach(t => {
+                const badgeClass = t.status === "Released" ? "badge-released" : "badge-escrow";
+                const row = document.createElement("div");
+                row.className = "transaction-row";
+                row.innerHTML = `
+                    <div class="txn-meta">
+                        <span class="txn-id">🔑 ${t.id}</span>
+                        <span class="txn-diner">🏪 ${t.diner}</span>
+                    </div>
+                    <div class="txn-amount-box">
+                        <span class="txn-amount">₹${t.amount.toFixed(2)}</span>
+                        <span class="txn-badge ${badgeClass}">${t.status}</span>
+                    </div>
+                `;
+                feed.appendChild(row);
+            });
+        }
+
+        // Predict platform revenues based on user sliders
+        function recalculateROI() {
+            const vol = parseInt(document.getElementById("calc-volume-slider").value);
+            const aov = parseFloat(document.getElementById("calc-aov-slider").value);
+
+            document.getElementById("calc-volume-label").textContent = `${vol} orders/day`;
+            document.getElementById("calc-aov-label").textContent = `₹${aov.toFixed(2)}`;
+
+            // Spoilage saved is estimated at 15% of total GMV thanks to real-time ETA preparation matching
+            const monthlyGmv = vol * aov * 30;
+            const spoilageSaved = monthlyGmv * 0.15;
+            const platformCommission = monthlyGmv * 0.10;
+            const projectedArr = (platformCommission * 12) / 1000;
+
+            document.getElementById("calc-spoilage-savings").textContent = `₹${spoilageSaved.toFixed(2)}/mo`;
+            document.getElementById("calc-monthly-commission").textContent = `₹${platformCommission.toFixed(2)}/mo`;
+            document.getElementById("calc-projected-arr").textContent = `₹${projectedArr.toFixed(1)}k/yr`;
+        }
+
+        // System Telemetry line builder
         function addLogLine(tagClass, tagText, text) {
             const screen = document.getElementById("terminal-screen");
             if (!screen) return;
@@ -457,6 +967,7 @@
             screen.scrollTop = screen.scrollHeight;
         }
 
+        // Fetch metrics from live lightweight database file
         async function fetchMetrics() {
             try {
                 const response = await fetch('/api/investor/pitch-metrics');
@@ -464,19 +975,29 @@
                     const data = await response.json();
                     if (data && data.metrics) {
                         const m = data.metrics;
-                        // Strip 'Rs.' if present and format as '$'
-                        const gmv = m.gross_merchandise_value || "Rs.245.50";
-                        const carbon = m.carbon_mitigation_index || "42.5 kg CO2";
+                        const gmv = m.gross_merchandise_value || "Rs.9085.46";
+                        const netInc = m.platform_net_revenue || "Rs.908.55";
                         const escrowHolds = m.active_secure_escrow_holds || 0;
 
-                        // Normalize currency sign to dollar for visual alignment
-                        const rawVal = parseFloat(gmv.replace('Rs.', '')) || 245.50;
-                        baseRevenue = rawVal;
-                        currentEscrow = escrowHolds * 18.50; // Estimated dynamic locked pool
+                        // Parse out raw values
+                        const rawGMV = parseFloat(gmv.replace('Rs.', '').replace('₹', '')) || 9085.46;
+                        const rawNet = parseFloat(netInc.replace('Rs.', '').replace('₹', '')) || 908.55;
 
-                        document.getElementById("kpi-revenue").textContent = `$${baseRevenue.toFixed(2)}`;
-                        document.getElementById("kpi-escrow").textContent = `$${currentEscrow.toFixed(2)}`;
-                        document.getElementById("kpi-carbon").textContent = carbon.replace(' kg CO2', ' kg');
+                        baseRevenue = rawGMV;
+                        currentEscrow = escrowHolds > 0 ? escrowHolds * 24.55 : 74.00;
+
+                        // Sync top metrics UI
+                        document.getElementById("kpi-revenue").textContent = `₹${baseRevenue.toFixed(2)}`;
+                        document.getElementById("kpi-net-income").textContent = `₹${rawNet.toFixed(2)}`;
+                        document.getElementById("kpi-escrow").textContent = `₹${currentEscrow.toFixed(2)}`;
+                        
+                        // Dynamically scale chart final points to align with DB
+                        chartData["ALL"].values[chartData["ALL"].values.length - 1] = baseRevenue;
+                        chartData["1M"].values[chartData["1M"].values.length - 1] = baseRevenue;
+                        chartData["1W"].values[chartData["1W"].values.length - 1] = baseRevenue;
+                        chartData["1D"].values[chartData["1D"].values.length - 1] = baseRevenue;
+
+                        drawVectorChart();
                     }
                 }
             } catch (err) {
@@ -484,75 +1005,113 @@
             }
         }
 
-        // Setup real-time listeners for simulation activity
-        if (typeof io !== 'undefined') {
-            socket = io(window.location.origin, { transports: ['websocket'] });
+        // Initial setup on load
+        window.onload = function() {
+            recalculateROI();
+            renderTransactions();
+            drawVectorChart();
+            fetchMetrics();
 
-            socket.on("connect", () => {
-                console.log("NOC Dashboard Socket Connected");
-                socket.emit("join_restaurant_room", currentRestaurantId);
-                addLogLine("tag-sys", "system", "Connected to socket dispatcher. Joined restaurant room f82e4f22...");
-                
-                // Fetch dynamic backend database metrics on connect
-                fetchMetrics();
-            });
+            // Setup real-time listeners for active simulator activity
+            if (typeof io !== 'undefined') {
+                socket = io(window.location.origin, { transports: ['websocket'] });
 
-            // Listen to route preorder notifications
-            socket.on("ORDER_PLACED", (data) => {
-                const orderAmount = parseFloat(data.total_amount || 18.50);
-                currentEscrow += orderAmount;
-                document.getElementById("kpi-escrow").textContent = `$${currentEscrow.toFixed(2)}`;
-                
-                addLogLine("tag-sys", "preorder", `Order #${data.order_id.substring(0,8)}... placed en-route! Authorization Escrow of $${orderAmount.toFixed(2)} securely locked in smart-wallet.`);
-            });
+                socket.on("connect", () => {
+                    socket.emit("join_restaurant_room", currentRestaurantId);
+                    addLogLine("tag-sys", "system", "Connected to socket dispatcher. Monitoring preorder transactions...");
+                    fetchMetrics();
+                });
 
-            socket.on("ORDER_SCHEDULE_UPDATED", (data) => {
-                const eta = data.updated_eta_minutes;
-                const fire = data.scheduled_fire_time;
-                let fireStr = "-";
-                if (fire) {
-                    const fTime = new Date(fire);
-                    fireStr = fTime.toLocaleTimeString([], { hour12: false });
-                }
-                
-                addLogLine("tag-gps", "logistics", `GPS Route Sync updated for Order #${data.order_id.substring(0,8)}... Traveler ETA is ${eta} mins. Calculated optimal auto-fire time: ${fireStr} UTC.`);
-            });
+                // Listen to route preorder placement (Secure payment in transit)
+                socket.on("ORDER_PLACED", (data) => {
+                    const orderAmount = parseFloat(data.total_amount || 24.55);
+                    currentEscrow += orderAmount;
+                    document.getElementById("kpi-escrow").textContent = `₹${currentEscrow.toFixed(2)}`;
+                    
+                    // Push live transacted receipt
+                    const newTx = {
+                        id: `order-${data.order_id.substring(0,8)}`,
+                        diner: document.getElementById("current-stream-name").textContent || "Pitstop Highway Diner",
+                        amount: orderAmount,
+                        status: "Escrow Locked",
+                        time: "Just now"
+                    };
+                    recentTransactions.unshift(newTx);
+                    if (recentTransactions.length > 5) recentTransactions.pop();
+                    renderTransactions();
 
-            socket.on("ORDER_ETA_UPDATED", (data) => {
-                const eta = data.updated_eta_minutes;
-                
-                // Dynamically simulate carbon reduction & idling ticking up
-                baseCarbon += 0.05;
-                idleSecs += 12;
-                document.getElementById("kpi-carbon").textContent = `${baseCarbon.toFixed(2)} kg`;
-                document.getElementById("stats-idling").textContent = `${(idleSecs/1000).toFixed(1)}k sec`;
-                
-                addLogLine("tag-gps", "tracking", `Traveler is moving en-route. Simulated GPS telemetry update: ETA now ${eta} mins.`);
-            });
+                    addLogLine("tag-sys", "preorder", `Order #${data.order_id.substring(0,8)} placed en-route. ₹${orderAmount.toFixed(2)} payment authorization securely locked in escrow.`);
+                });
 
-            socket.on("NEW_KITCHEN_FIRE_ORDER", (data) => {
-                addLogLine("tag-cook", "cooking", `🔥 TRAVELER CROSSED FIRE-THRESHOLD! Kitchen Live Display automatically fired prep sequence for Order #${data.order_id.substring(0,8)}...`);
-            });
+                socket.on("ORDER_SCHEDULE_UPDATED", (data) => {
+                    const eta = data.updated_eta_minutes;
+                    const fire = data.scheduled_fire_time;
+                    let fireStr = "-";
+                    if (fire) {
+                        const fTime = new Date(fire);
+                        fireStr = fTime.toLocaleTimeString([], { hour12: false });
+                    }
+                    addLogLine("tag-gps", "logistics", `GPS Route Sync updated for Order #${data.order_id.substring(0,8)}... Traveler ETA is ${eta} mins. Autocook fired at ${fireStr} UTC.`);
+                });
 
-            socket.on("EMERGENCY_HOLD_ALERT", (data) => {
-                addLogLine("tag-hold", "emergency", `🚨 EMERGENCY TRAVEL HOLD: Traveler stuck in highway traffic detour! Automatically paused preparation on Order #${data.order_id.substring(0,8)}... to avoid cold, spoiled food.`);
-            });
+                socket.on("ORDER_FAILSAFE_ACTIVE", (data) => {
+                    addLogLine("tag-hold", "failsafe", `⚠️ DELAY FAILSafe: Order #${data.order_id.substring(0,8)}... Speed drop (stuck in traffic). Preparation delayed to keep food fresh.`);
+                });
 
-            socket.on("ORDER_FULFILLED", (data) => {
-                // Relocate escrow pool to finalized revenue
-                const resolvedVal = 45.00; // estimated order val
-                currentEscrow = Math.max(0, currentEscrow - resolvedVal);
-                baseRevenue += resolvedVal;
-                
-                document.getElementById("kpi-escrow").textContent = `$${currentEscrow.toFixed(2)}`;
-                document.getElementById("kpi-revenue").textContent = `$${baseRevenue.toFixed(2)}`;
-                
-                addLogLine("tag-escrow", "escrow", `🎉 GEOFENCE ENTRANCE MATCHED! Traveler has physically arrived inside restaurant's 200m radius. Verified double-signature: Escrow funds of $${resolvedVal.toFixed(2)} successfully released to Diner.`);
-                
-                // Refresh metrics from DB to ensure alignment
-                setTimeout(fetchMetrics, 1000);
-            });
-        }
+                socket.on("ORDER_ETA_UPDATED", (data) => {
+                    const eta = data.updated_eta_minutes;
+                    addLogLine("tag-gps", "tracking", `Traveler moving en-route. Live GPS telemetry refreshed: ETA now ${eta} mins.`);
+                });
+
+                socket.on("NEW_KITCHEN_FIRE_ORDER", (data) => {
+                    addLogLine("tag-cook", "cooking", `🔥 TRAVELER CROSSED FIRE-THRESHOLD! Kitchen Display automatically fired cook sequence for Order #${data.order_id.substring(0,8)}...`);
+                });
+
+                socket.on("ORDER_FULFILLED", (data) => {
+                    const resolvedVal = parseFloat(data.total_amount || 24.55);
+                    currentEscrow = Math.max(0, currentEscrow - resolvedVal);
+                    baseRevenue += resolvedVal;
+                    
+                    document.getElementById("kpi-escrow").textContent = `₹${currentEscrow.toFixed(2)}`;
+                    document.getElementById("kpi-revenue").textContent = `₹${baseRevenue.toFixed(2)}`;
+                    document.getElementById("kpi-net-income").textContent = `₹${(baseRevenue * 0.10).toFixed(2)}`;
+
+                    // Find and release matching transaction in the local array
+                    const matchTx = recentTransactions.find(t => t.id.includes(data.order_id.substring(0,8)));
+                    if (matchTx) {
+                        matchTx.status = "Released";
+                        matchTx.time = "Just now";
+                    } else {
+                        recentTransactions.unshift({
+                            id: `order-${data.order_id.substring(0,8)}`,
+                            diner: document.getElementById("current-stream-name").textContent || "Pitstop Highway Diner",
+                            amount: resolvedVal,
+                            status: "Released",
+                            time: "Just now"
+                        });
+                        if (recentTransactions.length > 5) recentTransactions.pop();
+                    }
+                    renderTransactions();
+
+                    // Update dynamic stock chart lines YTD points live
+                    chartData["ALL"].values[chartData["ALL"].values.length - 1] = baseRevenue;
+                    chartData["1M"].values[chartData["1M"].values.length - 1] = baseRevenue;
+                    chartData["1W"].values[chartData["1W"].values.length - 1] = baseRevenue;
+                    chartData["1D"].values[chartData["1D"].values.length - 1] = baseRevenue;
+                    drawVectorChart();
+
+                    addLogLine("tag-escrow", "escrow", `🎉 GEOFENCE ARRIVAL SUCCESS! Traveler arrived within 200m. Escrow payment of ₹${resolvedVal.toFixed(2)} successfully released to Diner.`);
+                    
+                    // Refresh database values
+                    setTimeout(fetchMetrics, 1000);
+                });
+            }
+        };
+
+        // Redraw vector chart on window resize to ensure full responsive visual rendering
+        window.onresize = function() {
+            drawVectorChart();
+        };
     </script>
 </body>
 </html>

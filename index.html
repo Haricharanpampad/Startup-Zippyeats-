@@ -240,6 +240,19 @@
         <button id="find-route-btn" style="height: 46px; margin-top: auto; display: flex; align-items: center; justify-content: center; margin-bottom: 0;">Plan Route</button>
     </div>
 
+    <!-- Route Selection Container (shown after planning route) -->
+    <div id="route-selector-container" style="display: none; background: #111827; border: 1px solid #1e293b; padding: 15px; border-radius: 10px; margin-top: 15px; margin-bottom: 15px; border-left: 4px solid #3b82f6; transition: all 0.3s ease-in-out;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+            <h4 style="margin: 0; color: #ffffff; font-size: 14px; display: flex; align-items: center; gap: 6px; font-weight: 700;">
+                <span>🗺️ Alternate Routes Available</span>
+            </h4>
+            <span style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace;">👉 Tap/click route on map or select a route below:</span>
+        </div>
+        <div id="route-options-list" style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <!-- Rendered dynamically -->
+        </div>
+    </div>
+
     <!-- Map & Sidebar Side-by-Side Container -->
     <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px; margin-bottom: 30px;">
         <!-- Map (2/3 width on wide screens) -->
@@ -335,6 +348,45 @@
                 </button>
             </div>
         </div>
+
+        <!-- 🛍️ CUSTOMER PREORDERED FOOD DETAILS & CHECKOUT CARD -->
+        <div id="sim-preorder-details-card" style="display: none; background: #090d16; border: 1px solid #1e293b; border-radius: 8px; padding: 16px; margin-top: 5px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 12px;">
+                <h4 style="margin: 0; color: #ff4757; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                    <span>🛍️ Customer Preordered Food Details</span>
+                </h4>
+                <span id="sim-order-fulfillment-badge" style="font-size: 10px; background: #1e293b; color: #94a3b8; padding: 2px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase;">-</span>
+            </div>
+            
+            <div id="sim-preorder-items-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                <!-- Dynamically rendered items -->
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #111827; padding: 10px 14px; border-radius: 6px; border: 1px solid #1e293b;">
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <span style="font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; font-weight: bold;">Seating / Handover</span>
+                    <span id="sim-order-location-detail" style="font-size: 13px; color: #ffffff; font-weight: 600;">-</span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 2px; text-align: right;">
+                    <span style="font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; font-weight: bold;">Preorder Total (Paid via Escrow)</span>
+                    <span id="sim-order-total-price" style="font-size: 16px; color: #10b981; font-weight: 800; font-family: 'JetBrains Mono', monospace;">₹0.00</span>
+                </div>
+            </div>
+            
+            <!-- Quick Link to Webhook Simulator -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.15); padding: 10px 14px; border-radius: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 16px;">💳</span>
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-size: 12px; color: #ffffff; font-weight: 600;">Escrow Payment Protection Synchronizer</span>
+                        <span id="sim-order-escrow-status-text" style="font-size: 11px; color: #a78bfa; font-weight: 500;">Payment Status: PENDING_AUTHORIZATION</span>
+                    </div>
+                </div>
+                <a href="simulator.html" target="_blank" style="text-decoration: none; font-size: 12px; background: #8b5cf6; color: white; padding: 6px 12px; border-radius: 4px; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#7c3aed'" onmouseout="this.style.background='#8b5cf6'">
+                    Open Webhook Simulator 🔗
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -406,6 +458,10 @@
     }, true);
 
     let map, directionsService, directionsRenderer;
+    let lastDirectionsResponse = null;
+    let activeRouteIndex = 0;
+    let isRestoringSavedRoute = false;
+    let alternatePolylines = [];
     let originAutocomplete, destinationAutocomplete;
     let selectedOriginPlace = null;
     let selectedDestPlace = null;
@@ -430,11 +486,71 @@
     let simAddedDelayMinutes = 0;
     let simRestaurantData = null;
 
+    let navigationTrackingInterval = null;
+
+    function startTravelerNavigationTracking(placedOrderId) {
+        if (!placedOrderId) return;
+        console.log(`🌐 Initializing real-time telemetry stream for Order: ${placedOrderId}`);
+
+        // Clear any active track loops to prevent memory leak crashes
+        if (navigationTrackingInterval) clearInterval(navigationTrackingInterval);
+
+        // Scan, compute, and sync coordinates every 20 seconds
+        navigationTrackingInterval = setInterval(() => {
+            if (!navigator.geolocation) {
+                console.warn("Geolocation API is disabled or unsupported by client hardware.");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const payload = {
+                    current_lat: position.coords.latitude,
+                    current_lng: position.coords.longitude
+                };
+
+                try {
+                    const response = await fetch(`/api/orders/${placedOrderId}/update-eta`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+                    console.log(`⚙️ Geolocation synced with network engine. Status: ${data.status}, Live ETA Calculated: ${data.calculated_eta_minutes} mins`);
+                    
+                    if (data.status === "EMERGENCY_HOLD_TRIGGERED") {
+                        alert("⚠️ Traffic Jam Warning: The server has paused kitchen cooking sequence to protect freshness!");
+                    }
+                } catch (err) {
+                    console.warn("Telemetry update failed to route through network framework:", err);
+                }
+            }, (geoError) => {
+                console.warn("Unable to gather local geolocation device hardware streams (using virtual simulation telemetry):", geoError.message);
+                // Smart Fallback: if browser denies GPS, feed current simulated location to keep multi-device updates active!
+                if (simPathPoints && simPathPoints.length > 0) {
+                    const currentPos = simPathPoints[currentSimStepIndex] || simPathPoints[0];
+                    const fallbackLat = typeof currentPos.lat === 'function' ? currentPos.lat() : currentPos.lat;
+                    const fallbackLng = typeof currentPos.lng === 'function' ? currentPos.lng() : currentPos.lng;
+                    fetch(`/api/orders/${placedOrderId}/update-eta`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ current_lat: fallbackLat, current_lng: fallbackLng })
+                    }).catch(err => console.warn("Fallback telemetry failed:", err));
+                }
+            }, { enableHighAccuracy: true });
+
+        }, 20000); 
+    }
+
     // Reset simulator UI and values completely
     function resetSimulatorUI() {
         if (simulationInterval) {
             clearInterval(simulationInterval);
             simulationInterval = null;
+        }
+        if (navigationTrackingInterval) {
+            clearInterval(navigationTrackingInterval);
+            navigationTrackingInterval = null;
         }
         if (simCarMarker) {
             simCarMarker.setMap(null);
@@ -455,11 +571,98 @@
         document.getElementById("sim-cooking-status-display").textContent = "Waiting for Fire Window";
         document.getElementById("sim-cooking-status-display").style.color = "#d97706";
         document.getElementById("sim-cooking-countdown-display").textContent = "-";
+        
+        const preorderCard = document.getElementById("sim-preorder-details-card");
+        if (preorderCard) preorderCard.style.display = "none";
+    }
+
+    // Render the active preorder items and quantities below simulator
+    function renderSimPreorderCard(orderData) {
+        const preorderCard = document.getElementById("sim-preorder-details-card");
+        const itemsList = document.getElementById("sim-preorder-items-list");
+        const fulfillmentBadge = document.getElementById("sim-order-fulfillment-badge");
+        const locationDetail = document.getElementById("sim-order-location-detail");
+        const totalPriceEl = document.getElementById("sim-order-total-price");
+        const escrowStatusText = document.getElementById("sim-order-escrow-status-text");
+
+        if (!preorderCard || !itemsList || !orderData) return;
+
+        preorderCard.style.display = "block";
+
+        const fulfillment = orderData.fulfillment_type || "DINE_IN";
+        fulfillmentBadge.textContent = fulfillment === "DINE_IN" ? "🍽️ Dine-In" : "🛍️ Takeaway";
+        fulfillmentBadge.style.backgroundColor = fulfillment === "DINE_IN" ? "rgba(59, 130, 246, 0.15)" : "rgba(16, 185, 129, 0.15)";
+        fulfillmentBadge.style.color = fulfillment === "DINE_IN" ? "#60a5fa" : "#34d399";
+        fulfillmentBadge.style.border = fulfillment === "DINE_IN" ? "1px solid rgba(59, 130, 246, 0.3)" : "1px solid rgba(16, 185, 129, 0.3)";
+
+        if (fulfillment === "DINE_IN") {
+            const tableNum = orderData.table_id ? orderData.table_id.replace("table-", "") : "1";
+            locationDetail.innerHTML = `Reserved Table <span style="color: #3b82f6; font-weight: bold;">#${tableNum}</span>`;
+        } else {
+            locationDetail.innerHTML = `<span style="color: #10b981; font-weight: bold;">Curbside / Counter Pickup</span>`;
+        }
+
+        itemsList.innerHTML = "";
+        let calculatedTotal = 0;
+
+        if (orderData.items && orderData.items.length > 0) {
+            orderData.items.forEach(item => {
+                const qty = item.quantity || 1;
+                const price = parseFloat(item.price_at_purchase || 0);
+                const itemTotal = price * qty;
+                calculatedTotal += itemTotal;
+
+                const itemRow = document.createElement("div");
+                itemRow.style.display = "flex";
+                itemRow.style.justifyContent = "space-between";
+                itemRow.style.alignItems = "center";
+                itemRow.style.fontSize = "13px";
+                itemRow.style.padding = "6px 0";
+                itemRow.style.borderBottom = "1px solid #1e293b";
+
+                itemRow.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="background: rgba(255, 71, 87, 0.15); color: #ff4757; font-weight: 800; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-family: monospace;">x${qty}</span>
+                        <span style="color: #e2e8f0; font-weight: 500;">${item.name || "Menu Item"}</span>
+                    </div>
+                    <span style="color: #94a3b8; font-family: 'JetBrains Mono', monospace;">₹${itemTotal.toFixed(2)}</span>
+                `;
+                itemsList.appendChild(itemRow);
+            });
+        } else {
+            itemsList.innerHTML = `<p style="color: #94a3b8; font-size: 12px; margin: 0; text-align: center;">No preorder items recorded.</p>`;
+        }
+
+        totalPriceEl.textContent = `₹${calculatedTotal.toFixed(2)}`;
+
+        let escrowText = "PENDING_AUTHORIZATION";
+        let escrowColor = "#f59e0b";
+        
+        if (orderData.escrow_status === "HELD_IN_ESCROW") {
+            escrowText = "💳 SECURED IN ESCROW (Paid)";
+            escrowColor = "#10b981";
+        } else if (orderData.escrow_status === "RELEASED_TO_MERCHANT") {
+            escrowText = "✅ RELEASED TO RESTAURANT";
+            escrowColor = "#3b82f6";
+        } else if (orderData.escrow_status === "REFUNDED_TO_BUYER") {
+            escrowText = "🛑 REFUNDED TO BUYER";
+            escrowColor = "#ef4444";
+        } else if (orderData.payment_intent_id) {
+            escrowText = "💳 SECURED IN ESCROW (Paid)";
+            escrowColor = "#10b981";
+        } else {
+            escrowText = "⚠️ UNPAID - PENDING MOCK CHECKOUT";
+            escrowColor = "#f59e0b";
+        }
+
+        escrowStatusText.textContent = `Escrow Protection: ${escrowText}`;
+        escrowStatusText.style.color = escrowColor;
     }
 
     // Initialize simulation from placed or active order
     async function initSimulationFromOrder(orderId) {
         resetSimulatorUI();
+        startTravelerNavigationTracking(orderId);
         document.getElementById("live-simulation-panel").style.display = "flex";
         document.getElementById("sim-order-id-display").textContent = `#${orderId.substring(0,8)}...`;
         
@@ -471,6 +674,9 @@
                 return;
             }
             simOrderData = await response.json();
+            
+            // Render the preorder items and details immediately!
+            renderSimPreorderCard(simOrderData);
             
             // Find restaurant
             simRestaurantData = allRestaurants.find(r => r.id === simOrderData.restaurant_id);
@@ -532,7 +738,37 @@
                     });
                 }
             } else {
-                setupPathFromDirections(activeDirections.routes[0]);
+                const originVal = document.getElementById("origin-input").value.trim();
+                const destVal = document.getElementById("destination-input").value.trim();
+                
+                // If we have an active route from A to B, and the destination is not already the restaurant itself,
+                // re-route with the restaurant as a waypoint so we have a completely optimal, correct path and accurate timing.
+                if (originVal && destVal && simRestaurantData && !destVal.toLowerCase().includes(simRestaurantData.name.toLowerCase())) {
+                    if (directionsService) {
+                        directionsService.route({
+                            origin: originVal,
+                            destination: destVal,
+                            waypoints: [{
+                                location: { lat: parseFloat(simRestaurantData.latitude), lng: parseFloat(simRestaurantData.longitude) },
+                                stopover: true
+                            }],
+                            optimizeWaypoints: true,
+                            travelMode: google.maps.TravelMode.DRIVING
+                        }, (res, status) => {
+                            if (status === "OK") {
+                                if (directionsRenderer) directionsRenderer.setDirections(res);
+                                findRestaurantsAlongRoute(res.routes[0]);
+                                setTimeout(() => setupPathFromDirections(res.routes[0]), 500);
+                            } else {
+                                setupPathFromDirections(activeDirections.routes[0]);
+                            }
+                        });
+                    } else {
+                        setupPathFromDirections(activeDirections.routes[0]);
+                    }
+                } else {
+                    setupPathFromDirections(activeDirections.routes[0]);
+                }
             }
         } catch (e) {
             console.error("Error setting up simulation tracking:", e);
@@ -559,8 +795,20 @@
         
         // Slice path up to closest restaurant index so simulation stops at delivery point!
         simPathPoints = fullPath.slice(0, closestIndex + 1);
+        
+        // Append restaurant coordinates to ensure precise arrival at the dining table / pickup spot!
+        if (simPathPoints.length > 0) {
+            const lastPoint = simPathPoints[simPathPoints.length - 1];
+            const distToRest = google.maps.geometry.spherical.computeDistanceBetween(lastPoint, restLatLng);
+            if (distToRest > 10) { // If last point is more than 10 meters away from restaurant, append it!
+                simPathPoints.push(restLatLng);
+            }
+        } else {
+            simPathPoints = [restLatLng];
+        }
+
         if (simPathPoints.length < 2) {
-            simPathPoints = fullPath;
+            simPathPoints = [new google.maps.LatLng(restLatLng.lat() - 0.005, restLatLng.lng() - 0.005), restLatLng];
         }
         
         // Set original ETA in minutes
@@ -1142,6 +1390,20 @@
             }
         });
 
+        directionsRenderer.addListener('directions_changed', () => {
+            const directions = directionsRenderer.getDirections();
+            if (directions && directions.routes) {
+                const routeIndex = directionsRenderer.getRouteIndex() || 0;
+                const activeRoute = directions.routes[routeIndex];
+                if (activeRoute) {
+                    findRestaurantsAlongRoute(activeRoute);
+                    if (simRestaurantData) {
+                        setupPathFromDirections(activeRoute);
+                    }
+                }
+            }
+        });
+
         const originInput = document.getElementById("origin-input");
         const destInput = document.getElementById("destination-input");
 
@@ -1166,6 +1428,7 @@
 
         originAutocomplete.addListener("place_changed", () => {
             selectedOriginPlace = originAutocomplete.getPlace();
+            currentLocationLatLng = null; // Clear stale current location so selected address is used!
         });
         destinationAutocomplete.addListener("place_changed", () => {
             selectedDestPlace = destinationAutocomplete.getPlace();
@@ -1234,7 +1497,7 @@
                         map.setZoom(13);
                     },
                     (error) => {
-                        console.error("Geolocation error:", error);
+                        console.warn("Geolocation error:", error);
                         let errMsg = "Unable to retrieve your location.";
                         if (error.code === 1) errMsg = "Location permission denied. Please enable location access in your browser settings.";
                         else if (error.code === 2) errMsg = "Location position unavailable.";
@@ -1277,8 +1540,19 @@
             renderRestaurantsList(allRestaurants);
             renderRestaurantsMarkers(allRestaurants);
             
-            // Resume tracking if there is an active preorder in progress
-            checkActiveOrderTracker();
+            // Resume/Restore the last planned route if present in localStorage!
+            const savedOrigin = localStorage.getItem('last_planned_origin');
+            const savedDest = localStorage.getItem('last_planned_destination');
+            if (savedOrigin && savedDest) {
+                console.log("🗺️ Found saved route in storage. Restoring planned path...");
+                isRestoringSavedRoute = true;
+                document.getElementById("origin-input").value = savedOrigin;
+                document.getElementById("destination-input").value = savedDest;
+                calculateAndDisplayRoute();
+            } else {
+                // Resume tracking if there is an active preorder in progress
+                checkActiveOrderTracker();
+            }
         } catch (e) {
             console.error("Error loading restaurants:", e);
             document.getElementById("restaurants-sidebar-list").innerHTML = `
@@ -1510,6 +1784,7 @@
 
         if (!originInputVal || !destInputVal) {
             showCustomNotification("Missing Information", "<p>Please input both a starting point and a destination to plan your route.</p>");
+            isRestoringSavedRoute = false;
             return;
         }
 
@@ -1553,17 +1828,207 @@
                 origin: originQuery,
                 destination: destQuery,
                 travelMode: google.maps.TravelMode.DRIVING,
-                provideRouteAlternatives: false
+                provideRouteAlternatives: true
             },
             (response, status) => {
                 if (status === google.maps.DirectionsStatus.OK) {
+                    lastDirectionsResponse = response;
+                    
+                    let targetIndex = 0;
+                    if (isRestoringSavedRoute) {
+                        const savedRouteIndex = localStorage.getItem('last_planned_route_index');
+                        if (savedRouteIndex !== null) {
+                            const parsed = parseInt(savedRouteIndex, 10);
+                            if (!isNaN(parsed) && parsed >= 0 && parsed < response.routes.length) {
+                                targetIndex = parsed;
+                            }
+                        }
+                    } else {
+                        localStorage.setItem('last_planned_route_index', 0);
+                    }
+                    
+                    activeRouteIndex = targetIndex;
+                    
+                    directionsRenderer.setRouteIndex(targetIndex);
                     directionsRenderer.setDirections(response);
-                    findRestaurantsAlongRoute(response.routes[0]);
+                    
+                    drawAlternativePolylines(response, targetIndex);
+                    updateRouteSelectionUI(response, targetIndex);
+                    
+                    findRestaurantsAlongRoute(response.routes[targetIndex]);
+                    
+                    // Save inputs to localStorage
+                    localStorage.setItem('last_planned_origin', originInputVal);
+                    localStorage.setItem('last_planned_destination', destInputVal);
+                    
+                    // Trigger live simulation recovery if needed
+                    if (isRestoringSavedRoute) {
+                        isRestoringSavedRoute = false;
+                        const activeOrderId = localStorage.getItem('last_placed_order_id');
+                        if (activeOrderId) {
+                            console.log("🔄 Auto-resuming live simulation tracking for saved route...");
+                            initSimulationFromOrder(activeOrderId);
+                        }
+                    }
                 } else {
+                    isRestoringSavedRoute = false;
                     showCustomNotification("Directions Request Failed", `<p>Directions request failed due to: <strong>${status}</strong>. Please verify the addresses entered.</p>`);
                 }
             }
         );
+    }
+
+    function selectRouteIndex(index) {
+        if (!lastDirectionsResponse) return;
+        activeRouteIndex = index;
+        
+        // Save to localStorage
+        localStorage.setItem('last_planned_route_index', index);
+        
+        // Update directions renderer to display the selected route index
+        directionsRenderer.setRouteIndex(index);
+        directionsRenderer.setDirections(lastDirectionsResponse);
+        
+        // Re-draw alternative polylines
+        drawAlternativePolylines(lastDirectionsResponse, index);
+        
+        // Update the partner diners along the newly selected route
+        const activeRoute = lastDirectionsResponse.routes[index];
+        findRestaurantsAlongRoute(activeRoute);
+        
+        // If simulation restaurant is selected, update path!
+        if (simRestaurantData) {
+            setupPathFromDirections(activeRoute);
+        }
+        
+        // Update selection UI buttons/cards
+        updateRouteSelectionUI(lastDirectionsResponse, index);
+    }
+
+    function drawAlternativePolylines(response, activeIndex) {
+        // Clear old polylines
+        alternatePolylines.forEach(p => p.setMap(null));
+        alternatePolylines = [];
+        
+        if (!response || !response.routes || response.routes.length <= 1) {
+            return;
+        }
+        
+        for (let i = 0; i < response.routes.length; i++) {
+            if (i === activeIndex) continue;
+            
+            const route = response.routes[i];
+            const path = route.overview_path;
+            
+            // Draw gray polyline for alternate route
+            const polyline = new google.maps.Polyline({
+                path: path,
+                strokeColor: "#475569", // slate gray
+                strokeOpacity: 0.65,
+                strokeWeight: 6,
+                map: map,
+                zIndex: 10, // draw above base maps but below active route
+                cursor: "pointer"
+            });
+            
+            // Add custom property for easy access
+            polyline.routeIndex = i;
+            
+            // Mouse events for hover styling
+            google.maps.event.addListener(polyline, "mouseover", () => {
+                polyline.setOptions({
+                    strokeColor: "#3b82f6", // highlight in bright blue/active color
+                    strokeOpacity: 0.85,
+                    strokeWeight: 8
+                });
+            });
+            
+            google.maps.event.addListener(polyline, "mouseout", () => {
+                polyline.setOptions({
+                    strokeColor: "#475569",
+                    strokeOpacity: 0.65,
+                    strokeWeight: 6
+                });
+            });
+            
+            // Click to switch route
+            google.maps.event.addListener(polyline, "click", () => {
+                selectRouteIndex(i);
+            });
+            
+            alternatePolylines.push(polyline);
+        }
+    }
+
+    function updateRouteSelectionUI(response, activeIndex) {
+        const selectorContainer = document.getElementById("route-selector-container");
+        const optionsList = document.getElementById("route-options-list");
+        
+        if (!selectorContainer || !optionsList) return;
+        
+        if (!response || !response.routes || response.routes.length === 0) {
+            selectorContainer.style.display = "none";
+            return;
+        }
+        
+        selectorContainer.style.display = "block";
+        optionsList.innerHTML = "";
+        
+        response.routes.forEach((route, i) => {
+            const isActive = i === activeIndex;
+            const leg = route.legs[0];
+            const durationText = leg ? leg.duration.text : "N/A";
+            const distanceText = leg ? leg.distance.text : "N/A";
+            const summary = route.summary || `Route ${i + 1}`;
+            
+            const card = document.createElement("div");
+            card.id = `route-card-${i}`;
+            card.className = `route-card ${isActive ? 'active' : ''}`;
+            card.style.cssText = `
+                flex: 1;
+                min-width: 180px;
+                background: ${isActive ? 'rgba(59, 130, 246, 0.15)' : '#090d16'};
+                border: 2px solid ${isActive ? '#3b82f6' : '#1e293b'};
+                padding: 12px;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s ease-in-out;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            `;
+            
+            if (!isActive) {
+                card.onmouseover = () => {
+                    card.style.borderColor = "#4b5563";
+                    card.style.background = "#1f2937";
+                };
+                card.onmouseout = () => {
+                    card.style.borderColor = "#1e293b";
+                    card.style.background = "#090d16";
+                };
+            }
+            
+            card.onclick = () => {
+                selectRouteIndex(i);
+            };
+            
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700; font-size: 13px; color: ${isActive ? '#60a5fa' : '#ffffff'};">${summary}</span>
+                    ${isActive ? '<span style="font-size: 10px; background: #3b82f6; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase;">Selected</span>' : ''}
+                </div>
+                <div style="display: flex; align-items: baseline; gap: 6px; margin-top: 4px;">
+                    <span style="font-size: 18px; font-weight: 800; color: #ffffff;">${durationText}</span>
+                    <span style="font-size: 12px; color: #94a3b8;">(${distanceText})</span>
+                </div>
+                <span style="font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">
+                    ${isActive ? '🚗 Active Navigation Path' : '🗺️ Click to switch route'}
+                </span>
+            `;
+            
+            optionsList.appendChild(card);
+        });
     }
 
     function findRestaurantsAlongRoute(route) {
@@ -1575,7 +2040,7 @@
         }
 
         const pathPoints = route.overview_path;
-        const THRESHOLD_METERS = 16000; // 10 miles
+        const THRESHOLD_METERS = 2000; // 2km (approx 1.24 miles)
 
         let foundNearRoute = false;
 
@@ -1583,12 +2048,12 @@
             const restLatLng = new google.maps.LatLng(parseFloat(r.latitude), parseFloat(r.longitude));
             let minDistance = Infinity;
             
-            for (let i = 0; i < pathPoints.length; i += Math.max(1, Math.floor(pathPoints.length / 150))) { 
+            for (let i = 0; i < pathPoints.length; i += Math.max(1, Math.floor(pathPoints.length / 300))) { 
                 const dist = google.maps.geometry.spherical.computeDistanceBetween(restLatLng, pathPoints[i]);
                 if (dist < minDistance) {
                     minDistance = dist;
                 }
-                if (dist < 1000) break;
+                if (dist < 500) break;
             }
 
             r.isNearRoute = minDistance <= THRESHOLD_METERS;
@@ -1607,7 +2072,7 @@
             filterMsg.style.display = "block";
             filterMsg.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>🔍 Showing only route-adjacent diners</span>
+                    <span>🔍 Showing only diners within 2km of route</span>
                     <button onclick="toggleRouteFilter(false)" style="margin-top:0; padding:4px 8px; font-size:11px; background:#4a5568; color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">Show All</button>
                 </div>
             `;
@@ -1628,7 +2093,7 @@
         } else {
             filterMsg.style.display = "block";
             filterMsg.innerHTML = `
-                <span>ℹ️ No partner diners within 10 miles of this route. Showing all available.</span>
+                <span>ℹ️ No partner diners within 2km of this route. Showing all available.</span>
             `;
             markers.forEach(m => {
                 m.setMap(map);
@@ -1670,7 +2135,7 @@
 
             filterMsg.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>🔍 Showing only route-adjacent diners</span>
+                    <span>🔍 Showing only diners within 2km of route</span>
                     <button onclick="toggleRouteFilter(false)" style="margin-top:0; padding:4px 8px; font-size:11px; background:#4a5568; color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">Show All</button>
                 </div>
             `;
@@ -1779,7 +2244,7 @@
                         </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="font-weight: bold; color: #ff4757;">$${parseFloat(item.price).toFixed(2)}</span>
+                        <span style="font-weight: bold; color: #ff4757;">₹${parseFloat(item.price).toFixed(2)}</span>
                         ${item.is_available === false ? 
                             '<span style="font-size: 11px; background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px; font-weight: bold;">Sold Out</span>' :
                             `<input type="number" min="1" value="1" data-menu-item-id="${item.id}" style="width: 50px; padding: 5px; border: 1px solid #cbd5e0; border-radius: 4px; text-align: center;">`
@@ -1814,9 +2279,17 @@
         // Calculate initial ETA if available
         let initial_eta = 15;
         try {
-            const route = directionsRenderer.getDirections().routes[0];
-            if (route && route.legs && route.legs[0] && route.legs[0].duration) {
-                initial_eta = Math.round(route.legs[0].duration.value / 60);
+            const activeRest = allRestaurants.find(r => r.id === selectedRestaurantId);
+            if (activeRest && activeRest.routeDistanceMeters !== undefined && activeRest.routeDistanceMeters !== null) {
+                const speedMph = parseFloat(document.getElementById("speed-input").value) || 60;
+                const speedMps = (speedMph * 1609.34) / 3600;
+                const travelSeconds = activeRest.routeDistanceMeters / speedMps;
+                initial_eta = Math.max(1, Math.round(travelSeconds / 60));
+            } else {
+                const route = directionsRenderer.getDirections().routes[0];
+                if (route && route.legs && route.legs[0] && route.legs[0].duration) {
+                    initial_eta = Math.round(route.legs[0].duration.value / 60);
+                }
             }
         } catch(e) {}
 

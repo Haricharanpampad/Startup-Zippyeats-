@@ -1136,6 +1136,151 @@ app.patch('/api/navigation/update-eta', async (req, res) => {
 });
 
 // =======================================================
+// 🚗 DYNAMIC ETA RE-CALCULATION & GEOLOCATION STREAM ENGINE
+// =======================================================
+app.put('/api/orders/:order_id/update-eta', async (req, res) => {
+    const { order_id } = req.params;
+    const { current_lat, current_lng, updated_eta_minutes } = req.body;
+    
+    // Fallback security check to ensure simulation continuity
+    await ensureOrderExists(order_id);
+
+    try {
+        // 1. Fetch order details and the matching restaurant's coordinates & speed parameters
+        let orderRes = await pool.query(`
+            SELECT o.restaurant_id, o.order_status, r.latitude, r.longitude, r.average_prep_time 
+            FROM orders o
+            JOIN restaurants r ON o.restaurant_id = r.id
+            WHERE o.id = $1
+        `, [order_id]);
+        
+        // In-memory fallback handler if working in raw mock simulation mode
+        if (orderRes.rows.length === 0) {
+            const memOrder = orders.find(o => o.id === order_id);
+            if (!memOrder) return res.status(404).json({ error: "Order context missing." });
+            const memRest = restaurants.find(r => r.id === memOrder.restaurant_id);
+            orderRes.rows = [{
+                restaurant_id: memOrder.restaurant_id,
+                order_status: memOrder.order_status,
+                latitude: memRest ? memRest.latitude : 17.5200,
+                longitude: memRest ? memRest.longitude : 78.4500,
+                average_prep_time: memRest ? memRest.average_prep_time : 15
+            }];
+        }
+
+        const { order_status, restaurant_id, latitude, longitude, average_prep_time } = orderRes.rows[0];
+
+        // 2. Core Prototyping Moat: Dynamic Math Estimation based on live pings
+        let finalEtaMinutes = updated_eta_minutes;
+        
+        if (current_lat && current_lng && !finalEtaMinutes) {
+            // Straight line distance calculation vector across coordinates grid
+            const distanceDelta = Math.sqrt(Math.pow(current_lat - latitude, 2) + Math.pow(current_lng - longitude, 2));
+            // Convert coordinate distance into reliable highway drive time parameters (1 unit gap ~ 60 mins driving)
+            finalEtaMinutes = Math.max(2, Math.round(distanceDelta * 60));
+        }
+
+        if (!finalEtaMinutes) {
+            return res.status(400).json({ error: "Missing navigation tracking coordinates or custom ETA minutes." });
+        }
+
+        const currentTime = new Date();
+        const driverArrivalTimestamp = new Date(currentTime.getTime() + finalEtaMinutes * 60 * 1000);
+        const scheduledFireTimestamp = new Date(driverArrivalTimestamp.getTime() - average_prep_time * 60 * 1000);
+
+        // 3. CASE A: EMERGENCY HOLD ACTION (Traffic Jam hit while food is cooking)
+        if (order_status === 'PREPARING' && finalEtaMinutes > (average_prep_time + 15)) {
+            io.to(restaurant_id).emit('EMERGENCY_HOLD_ALERT', {
+                order_id: order_id,
+                message: `⚠️ Traveler delayed by traffic jam! New ETA: ${finalEtaMinutes} mins. Pausing kitchen fire sequence.`
+            });
+            
+            await pool.query(`
+                UPDATE orders 
+                SET current_driver_eta = $1, scheduled_fire_time = $2, order_status = 'PLACED'
+                WHERE id = $3
+            `, [driverArrivalTimestamp, scheduledFireTimestamp, order_id]);
+            
+            const matchedMemOrder = orders.find(o => o.id === order_id);
+            if (matchedMemOrder) {
+                matchedMemOrder.current_driver_eta = driverArrivalTimestamp;
+                matchedMemOrder.scheduled_fire_time = scheduledFireTimestamp;
+                matchedMemOrder.order_status = 'PLACED';
+                saveMockDb();
+            }
+
+            io.to(restaurant_id).emit('ORDER_SCHEDULE_UPDATED', {
+                order_id,
+                updated_eta_minutes: finalEtaMinutes,
+                scheduled_fire_time: scheduledFireTimestamp,
+                order_status: 'PLACED'
+            });
+
+            return res.json({ 
+                status: "EMERGENCY_HOLD_TRIGGERED", 
+                calculated_eta_minutes: finalEtaMinutes,
+                scheduled_fire_time: scheduledFireTimestamp 
+            });
+        }
+
+        // 4. CASE B: Standard update loop before cooking (Shift the fire window dynamically)
+        if (order_status === 'PLACED') {
+            await pool.query(`
+                UPDATE orders 
+                SET current_driver_eta = $1, scheduled_fire_time = $2
+                WHERE id = $3
+            `, [driverArrivalTimestamp, scheduledFireTimestamp, order_id]);
+
+            const matchedMemOrder = orders.find(o => o.id === order_id);
+            if (matchedMemOrder) {
+                matchedMemOrder.current_driver_eta = driverArrivalTimestamp;
+                matchedMemOrder.scheduled_fire_time = scheduledFireTimestamp;
+                saveMockDb();
+            }
+
+            io.to(restaurant_id).emit('ORDER_SCHEDULE_UPDATED', {
+                order_id,
+                updated_eta_minutes: finalEtaMinutes,
+                scheduled_fire_time: scheduledFireTimestamp,
+                order_status: 'PLACED'
+            });
+        } else {
+            // CASE C: Order is already actively frying/baking, just update driver arrival clock on tablet display
+            await pool.query(`
+                UPDATE orders 
+                SET current_driver_eta = $1
+                WHERE id = $2
+            `, [driverArrivalTimestamp, order_id]);
+
+            const matchedMemOrder = orders.find(o => o.id === order_id);
+            if (matchedMemOrder) {
+                matchedMemOrder.current_driver_eta = driverArrivalTimestamp;
+                saveMockDb();
+            }
+
+            io.to(restaurant_id).emit('ORDER_ETA_UPDATED', {
+                order_id,
+                updated_eta_minutes: finalEtaMinutes,
+                order_status: 'PREPARING'
+            });
+        }
+
+        // Re-run standard internal scanning pipeline instantly to check if new window hits criteria
+        setTimeout(checkAndFireOrders, 50);
+
+        res.json({ 
+            status: "ETA_SYNCED", 
+            calculated_eta_minutes: finalEtaMinutes, 
+            scheduled_fire_time: scheduledFireTimestamp 
+        });
+
+    } catch (err) {
+        console.error("Dynamic ETA engine loop error:", err);
+        res.status(500).json({ error: "Internal engine fault compiling dynamic synchronization parameters." });
+    }
+});
+
+// =======================================================
 // RESTAURANTS ENDPOINT: Fetch all active restaurants
 // =======================================================
 app.get('/api/restaurants', async (req, res) => {
@@ -1652,8 +1797,8 @@ app.get('/api/investor/pitch-metrics', async (req, res) => {
                 total_network_traffic: totalOrders,
                 successful_fulfillments: completedOrders,
                 active_secure_escrow_holds: escrowLocked,
-                gross_merchandise_value: `Rs.${totalVolume.toFixed(2)}`,
-                platform_net_revenue: `Rs.${marketplaceRevenue.toFixed(2)}`,
+                gross_merchandise_value: `₹${totalVolume.toFixed(2)}`,
+                platform_net_revenue: `₹${marketplaceRevenue.toFixed(2)}`,
                 carbon_mitigation_index: `${(completedOrders * 3.4).toFixed(1)} kg CO2`
             }
         });

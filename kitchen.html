@@ -472,7 +472,7 @@
                             <form class="add-form" onsubmit="addMenuItem(event)">
                                 <strong style="width: 100%; display: block; margin-bottom: 5px; font-size: 12px; color: #a4b0be;">Add Menu Item:</strong>
                                 <input type="text" id="new-item-name" class="form-input" placeholder="e.g., Highway Burger" required>
-                                <input type="number" id="new-item-price" class="form-input" placeholder="Price ($)" step="0.01" min="0" required style="max-width: 90px;">
+                                <input type="number" id="new-item-price" class="form-input" placeholder="Price (₹)" step="0.01" min="0" required style="max-width: 90px;">
                                 <button type="submit" class="form-btn">Add Item</button>
                             </form>
                         </div>
@@ -565,7 +565,7 @@
                     <div class="item-row">
                         <div class="item-info">
                             <span class="item-name">${escapeHtml(item.name)}</span>
-                            <span class="item-meta">Active Price: $${parseFloat(item.price).toFixed(2)}</span>
+                            <span class="item-meta">Active Price: ₹${parseFloat(item.price).toFixed(2)}</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span class="badge ${badgeClass}">${statusText}</span>
@@ -755,7 +755,7 @@
                                     </div>
                                 </div>
                                 <div style="text-align: right;">
-                                    <span style="font-weight: bold; color: #ffffff; background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 6px; font-size: 14px;">$${parseFloat(o.total_amount).toFixed(2)}</span>
+                                    <span style="font-weight: bold; color: #ffffff; background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 6px; font-size: 14px;">₹${parseFloat(o.total_amount).toFixed(2)}</span>
                                 </div>
                             </div>
                             
@@ -813,7 +813,7 @@
                                     </div>
                                 </div>
                                 <div style="text-align: right;">
-                                    <span style="font-weight: bold; color: #ffa502; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; font-size: 13px;">$${parseFloat(o.total_amount).toFixed(2)}</span>
+                                    <span style="font-weight: bold; color: #ffa502; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; font-size: 13px;">₹${parseFloat(o.total_amount).toFixed(2)}</span>
                                 </div>
                             </div>
                             
@@ -861,7 +861,7 @@
                                 <span style="color: #747d8c; margin-left: 8px;">${o.fulfillment_type}${tableBadgeHtml}</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="color: #2ed573; font-weight: bold;">$${parseFloat(o.total_amount).toFixed(2)}</span>
+                                <span style="color: #2ed573; font-weight: bold;">₹${parseFloat(o.total_amount).toFixed(2)}</span>
                                 <span style="font-size: 11px; color: #a4b0be;">Ready / Picked Up</span>
                             </div>
                         </div>
