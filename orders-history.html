@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History - Route Preorder</title>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color: #030308; background-image: radial-gradient(circle at 50% 50%, #0a0c1f 0%, #020205 100%); margin: 0; padding: 20px; color: #f1f5f9; min-height: 100vh; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(8, 9, 22, 0.9); padding: 15px 25px; border-radius: 12px; border: 1px solid rgba(0,240,255,0.2); backdrop-filter: blur(10px); margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .nav-brand { font-size: 20px; font-weight: 800; color: #00f0ff; text-decoration: none; text-shadow: 0 0 10px rgba(0,240,255,0.4); }
+        .nav-links a { color: #cbd5e1; text-decoration: none; margin-left: 20px; font-size: 14px; font-weight: 600; transition: color 0.2s; }
+        .nav-links a:hover { color: #00f0ff; text-shadow: 0 0 5px rgba(0, 240, 255, 0.4); }
+        h1 { font-size: 28px; margin-bottom: 20px; border-bottom: 2px solid rgba(255,0,127,0.3); padding-bottom: 10px; color: #ffffff; text-shadow: 0 0 10px rgba(255,0,127,0.3); }
+        .order-card { background: #080916; border: 1px solid rgba(0,240,255,0.15); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.3s ease; }
+        .order-card:hover { border-color: rgba(0,240,255,0.4); box-shadow: 0 6px 20px rgba(0,240,255,0.15); transform: translateY(-2px); }
+        .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+        .order-rest-name { font-size: 18px; font-weight: 700; color: #00f0ff; }
+        .order-date { font-size: 12px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; }
+        .order-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+        .status-placed { background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+        .status-preparing { background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+        .status-completed { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+        .order-items { margin-bottom: 15px; font-size: 14px; color: #cbd5e1; }
+        .order-item-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .order-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .order-total { font-size: 18px; font-weight: 800; color: #ff007f; }
+        .reorder-btn { background: #ff007f; color: white; border: none; padding: 8px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em; text-shadow: 0 0 5px rgba(255,255,255,0.5); box-shadow: 0 0 10px rgba(255,0,127,0.3); }
+        .reorder-btn:hover { background: #ff3399; transform: translateY(-1px); box-shadow: 0 0 15px rgba(255,0,127,0.5); }
+        .loading, .no-orders { text-align: center; color: #94a3b8; padding: 40px; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-bar">
+            <a href="index.html" class="nav-brand">🗺️ Route Preorder</a>
+            <div class="nav-links">
+                <a href="index.html">Back to Map</a>
+                <a href="#" id="logout-btn">Log Out</a>
+            </div>
+        </div>
+
+        <h1>Your Order History</h1>
+        <div id="orders-container">
+            <div class="loading">Loading your delicious history...</div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('traveler_jwt_token');
+        const userId = localStorage.getItem('traveler_user_id');
+
+        if (!token || !userId) {
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('traveler_jwt_token');
+            localStorage.removeItem('traveler_user_id');
+            localStorage.removeItem('traveler_name');
+            window.location.href = 'login.html';
+        });
+
+        async function fetchOrders() {
+            try {
+                const response = await fetch(`/api/users/${userId}/orders`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch orders');
+                
+                const orders = await response.json();
+                renderOrders(orders);
+            } catch (err) {
+                console.error(err);
+                document.getElementById('orders-container').innerHTML = `<div class="no-orders" style="color: #ef4444;">Error loading orders. Please try again.</div>`;
+            }
+        }
+
+        function renderOrders(orders) {
+            const container = document.getElementById('orders-container');
+            if (!orders || orders.length === 0) {
+                container.innerHTML = '<div class="no-orders">No past orders found. Time to hit the road!</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).forEach(order => {
+                const date = new Date(order.created_at).toLocaleString();
+                let statusClass = 'status-placed';
+                if (order.order_status === 'PREPARING') statusClass = 'status-preparing';
+                if (order.order_status === 'COMPLETED') statusClass = 'status-completed';
+
+                let itemsHtml = '';
+                if (order.items && order.items.length) {
+                    order.items.forEach(item => {
+                        itemsHtml += `<div class="order-item-row"><span>${item.quantity}x ${item.name}</span><span>$${parseFloat(item.price * item.quantity).toFixed(2)}</span></div>`;
+                    });
+                } else if (order.items_json) {
+                    try {
+                        const items = typeof order.items_json === 'string' ? JSON.parse(order.items_json) : order.items_json;
+                        items.forEach(item => {
+                            itemsHtml += `<div class="order-item-row"><span>${item.quantity}x ${item.name}</span><span>$${parseFloat(item.price * item.quantity).toFixed(2)}</span></div>`;
+                        });
+                    } catch(e) {}
+                } else {
+                    itemsHtml = '<div class="order-item-row"><span>Items details unavailable</span></div>';
+                }
+
+                // Make sure we pass the exact items JSON to reorder
+                const itemsStr = order.items_json ? (typeof order.items_json === 'string' ? order.items_json : JSON.stringify(order.items_json)) : JSON.stringify(order.items || []);
+
+                const card = document.createElement('div');
+                card.className = 'order-card';
+                card.innerHTML = `
+                    <div class="order-header">
+                        <div>
+                            <div class="order-rest-name">🏪 ${order.restaurant_name || 'Restaurant'}</div>
+                            <div class="order-date">${date}</div>
+                        </div>
+                        <div class="order-status ${statusClass}">${order.order_status}</div>
+                    </div>
+                    <div class="order-items">
+                        ${itemsHtml}
+                    </div>
+                    <div class="order-footer">
+                        <div class="order-total">Total: $${parseFloat(order.total_amount).toFixed(2)}</div>
+                        <button class="reorder-btn" onclick="reorder('${order.restaurant_id}', this)" data-items='${itemsStr.replace(/'/g, "&apos;")}'>Reorder</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.reorder = function(restaurantId, btnEl) {
+            const items = JSON.parse(btnEl.getAttribute('data-items'));
+            localStorage.setItem('reorder_restaurant_id', restaurantId);
+            localStorage.setItem('reorder_items', JSON.stringify(items));
+            window.location.href = 'index.html?reorder=true';
+        };
+
+        fetchOrders();
+    </script>
+</body>
+</html>

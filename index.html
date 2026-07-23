@@ -540,6 +540,10 @@
     let routeStartMarker = null;
     let routeEndMarker = null;
     let currentMapTheme = 'dark';
+    let activeRoutePolyline = null;
+    let activeRouteGlowPolyline = null;
+    let routeAnimationId = null;
+    let routeTipMarker = null;
 
     // =========================================================================
     // 🚗 LIVE PREORDER GPS TRIP SIMULATOR CORE ENGINE
@@ -879,15 +883,18 @@
             simPathPoints = [new google.maps.LatLng(restLatLng.lat() - 0.005, restLatLng.lng() - 0.005), restLatLng];
         }
         
-        // Set original ETA in minutes
-        simOriginalEtaMinutes = Math.round((route.legs[0]?.duration?.value || 900) / 60);
+        // Calculate exact route progress to the selected restaurant
+        const simProgress = calculateRouteProgressToPoint(route, restLatLng);
+
+        // Set original ETA in minutes specifically for drive to the restaurant
+        simOriginalEtaMinutes = Math.max(1, Math.round((simProgress.durationSeconds || 900) / 60));
         simEtaMinutes = simOriginalEtaMinutes;
         
         document.getElementById("sim-status-badge").textContent = "READY";
         document.getElementById("sim-status-badge").style.backgroundColor = "#dcfce7";
         document.getElementById("sim-status-badge").style.color = "#15803d";
         document.getElementById("sim-distance-display").textContent = "0% along route";
-        document.getElementById("sim-miles-display").textContent = `${((route.legs[0]?.distance?.value || 50000) / 1609.34).toFixed(1)} miles remaining`;
+        document.getElementById("sim-miles-display").textContent = `${((simProgress.distanceMeters || 50000) / 1609.34).toFixed(1)} miles remaining`;
         document.getElementById("sim-eta-display").textContent = `${simEtaMinutes} mins`;
         
         // Show reset button
@@ -895,6 +902,7 @@
         
         // Place initial car marker at index 0
         if (simCarMarker) simCarMarker.setMap(null);
+        if (routeStartMarker) routeStartMarker.setMap(null);
         
         let initialHeading = 0;
         if (simPathPoints.length >= 2) {
@@ -1053,7 +1061,7 @@
     }
 
     // Send updated simulated drive times to backend API
-    async function syncSimEtaWithBackend() {
+    async function syncSimEtaWithBackend(isExplicitDelay = false) {
         if (!simOrderData) return;
         try {
             const response = await fetch('/api/navigation/update-eta', {
@@ -1061,7 +1069,9 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     order_id: simOrderData.id,
-                    updated_eta_minutes: simEtaMinutes
+                    updated_eta_minutes: simEtaMinutes,
+                    sim_added_delay: simAddedDelayMinutes,
+                    is_traffic_delay: isExplicitDelay || simAddedDelayMinutes >= 15
                 })
             });
             const data = await response.json();
@@ -1107,8 +1117,8 @@
         document.getElementById("sim-eta-display").textContent = `${simEtaMinutes} mins`;
         updateSyncCountdown();
         
-        // Push instant sync to backend
-        await syncSimEtaWithBackend();
+        // Push instant sync to backend with explicit traffic delay trigger
+        await syncSimEtaWithBackend(true);
     }
 
     // Simulate Clear Roads Sprint
@@ -1600,6 +1610,10 @@
         }
 
         refreshOpenInfoWindow();
+
+        if (activeRoutePolyline && lastDirectionsResponse && lastDirectionsResponse.routes && lastDirectionsResponse.routes[activeRouteIndex]) {
+            animateRoutePolyline(lastDirectionsResponse.routes[activeRouteIndex], 400);
+        }
     };
 
     function updateCustomRouteMarkers(directions, routeIndex) {
@@ -1649,14 +1663,8 @@
             map: map,
             title: "Starting Point",
             icon: {
-                path: 'M 0,-18 L 10,12 L 0,5 L -10,12 Z',
-                fillColor: '#00f0ff',
-                fillOpacity: 1,
-                strokeColor: '#ffffff',
-                strokeWeight: 1.5,
-                scale: 1.2,
-                rotation: heading || 0,
-                anchor: new google.maps.Point(0, 0)
+                url: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+                scaledSize: new google.maps.Size(32, 32)
             },
             zIndex: 998
         });
@@ -1698,8 +1706,8 @@
             map: map,
             suppressMarkers: true,
             polylineOptions: {
-                strokeColor: "#ff0000",
-                strokeWeight: 6
+                strokeOpacity: 0,
+                strokeWeight: 0
             }
         });
 
@@ -1922,17 +1930,13 @@
         infoWindow.activeRestaurantId = r.id;
         infoWindow.activeMarker = marker;
 
-        const speedMph = parseFloat(document.getElementById("speed-input").value) || 60;
-        const speedMps = (speedMph * 1609.34) / 3600;
-
         let travelMinutes = 0;
         let distanceMilesStr = '';
         let isOnRoute = false;
 
         if (r.routeDistanceMeters !== undefined && r.routeDistanceMeters !== null) {
             isOnRoute = true;
-            const travelSeconds = r.routeDistanceMeters / speedMps;
-            travelMinutes = Math.round(travelSeconds / 60);
+            travelMinutes = getRestaurantDriveEtaMinutes(r);
             distanceMilesStr = `${(r.routeDistanceMeters / 1609.34).toFixed(1)} mi`;
         }
 
@@ -1960,10 +1964,13 @@
                 <!-- ETA, clearly visible and beautiful -->
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px 0; border-top: 1px solid ${isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}; border-bottom: 1px solid ${isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'};">
                     ${isOnRoute ? `
-                        <span style="font-size: 9px; font-weight: 700; color: ${labelColor}; letter-spacing: 0.05em; text-transform: uppercase;">Estimated ETA</span>
-                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 800; color: ${etaColor}; text-shadow: ${isLight ? 'none' : '0 0 8px rgba(255,0,127,0.4)'}; line-height: 1;">${travelMinutes} mins</span>
+                        <span style="font-size: 9px; font-weight: 700; color: ${labelColor}; letter-spacing: 0.05em; text-transform: uppercase;">Drive ETA to Diner</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 800; color: ${etaColor}; text-shadow: ${isLight ? 'none' : '0 0 8px rgba(255,0,127,0.4)'}; line-height: 1.2;">🚗 ${travelMinutes} mins</span>
+                        <span style="font-size: 10px; color: ${labelColor}; font-weight: 600;">${distanceMilesStr} along route</span>
                     ` : `
-                        <div style="font-size: 9px; font-style: italic; color: #64748b; text-align: center; padding: 4px 0;">No active route</div>
+                        <span style="font-size: 9px; font-weight: 700; color: ${labelColor}; letter-spacing: 0.05em; text-transform: uppercase;">Average Prep Time</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 800; color: #3b82f6; line-height: 1.2;">⏱️ ${r.average_prep_time || 15} mins prep</span>
+                        <span style="font-size: 9px; font-style: italic; color: #64748b; text-align: center;">Set route to calculate drive ETA</span>
                     `}
                 </div>
                 
@@ -1990,7 +1997,87 @@
         }
     }
 
-    function calculateDistanceToRoutePoint(path, targetLatLng) {
+        function getRestaurantDriveEtaMinutes(r) {
+        if (!r) return null;
+        if (r.routeDurationSeconds !== undefined && r.routeDurationSeconds !== null && r.routeDurationSeconds > 0) {
+            const speedMph = parseFloat(document.getElementById("speed-input").value) || 60;
+            const speedRatio = 60 / speedMph;
+            return Math.max(1, Math.round((r.routeDurationSeconds * speedRatio) / 60));
+        } else if (r.routeDistanceMeters !== undefined && r.routeDistanceMeters !== null) {
+            const speedMph = parseFloat(document.getElementById("speed-input").value) || 60;
+            const speedMps = (speedMph * 1609.34) / 3600;
+            return Math.max(1, Math.round((r.routeDistanceMeters / speedMps) / 60));
+        }
+        return null;
+    }
+
+    function calculateRouteProgressToPoint(route, targetLatLng) {
+        if (!route) {
+            return { distanceMeters: 0, durationSeconds: 0, offRouteDistanceMeters: Infinity };
+        }
+
+        const leg = (route.legs && route.legs[0]) ? route.legs[0] : null;
+        const steps = leg ? (leg.steps || []) : [];
+
+        if (steps.length > 0) {
+            let minDistanceToRest = Infinity;
+            let closestStepIndex = 0;
+            let closestPointIndexInStep = 0;
+
+            for (let s = 0; s < steps.length; s++) {
+                const stepPath = steps[s].path || [];
+                for (let p = 0; p < stepPath.length; p++) {
+                    const dist = google.maps.geometry.spherical.computeDistanceBetween(targetLatLng, stepPath[p]);
+                    if (dist < minDistanceToRest) {
+                        minDistanceToRest = dist;
+                        closestStepIndex = s;
+                        closestPointIndexInStep = p;
+                    }
+                }
+            }
+
+            let accumulatedDistanceMeters = 0;
+            let accumulatedDurationSeconds = 0;
+
+            for (let s = 0; s < closestStepIndex; s++) {
+                accumulatedDistanceMeters += steps[s].distance.value;
+                accumulatedDurationSeconds += steps[s].duration.value;
+            }
+
+            const currentStep = steps[closestStepIndex];
+            if (currentStep) {
+                const stepPath = currentStep.path || [];
+                if (stepPath.length > 1) {
+                    let stepPathLength = 0;
+                    let pathSubLength = 0;
+                    for (let p = 1; p < stepPath.length; p++) {
+                        const segDist = google.maps.geometry.spherical.computeDistanceBetween(stepPath[p - 1], stepPath[p]);
+                        stepPathLength += segDist;
+                        if (p <= closestPointIndexInStep) {
+                            pathSubLength += segDist;
+                        }
+                    }
+                    const fraction = stepPathLength > 0 ? (pathSubLength / stepPathLength) : 0;
+                    accumulatedDistanceMeters += currentStep.distance.value * fraction;
+                    accumulatedDurationSeconds += currentStep.duration.value * fraction;
+                } else {
+                    accumulatedDistanceMeters += currentStep.distance.value;
+                    accumulatedDurationSeconds += currentStep.duration.value;
+                }
+            }
+
+            return {
+                distanceMeters: Math.round(accumulatedDistanceMeters),
+                durationSeconds: Math.round(accumulatedDurationSeconds),
+                offRouteDistanceMeters: minDistanceToRest
+            };
+        }
+
+        const path = route.overview_path || [];
+        if (!path || path.length === 0) {
+            return { distanceMeters: 0, durationSeconds: 0, offRouteDistanceMeters: Infinity };
+        }
+
         let minDistance = Infinity;
         let closestPointIndex = 0;
 
@@ -2004,10 +2091,20 @@
 
         let cumulativeDistanceMeters = 0;
         for (let i = 1; i <= closestPointIndex; i++) {
-            cumulativeDistanceMeters += google.maps.geometry.spherical.computeDistanceBetween(path[i-1], path[i]);
+            cumulativeDistanceMeters += google.maps.geometry.spherical.computeDistanceBetween(path[i - 1], path[i]);
         }
 
-        return cumulativeDistanceMeters;
+        const durationSeconds = cumulativeDistanceMeters / 26.8224;
+
+        return {
+            distanceMeters: Math.round(cumulativeDistanceMeters),
+            durationSeconds: Math.round(durationSeconds),
+            offRouteDistanceMeters: minDistance
+        };
+    }
+
+    function calculateDistanceToRoutePoint(path, targetLatLng) {
+        return calculateRouteProgressToPoint({ overview_path: path }, targetLatLng).distanceMeters;
     }
 
     function renderRestaurantsList(restaurantsToRender) {
@@ -2029,14 +2126,12 @@
 
             let etaHtml = '';
             if (r.routeDistanceMeters !== undefined && r.routeDistanceMeters !== null) {
-                const speedMph = parseFloat(document.getElementById("speed-input").value) || 60;
-                const speedMps = (speedMph * 1609.34) / 3600;
-                const travelSeconds = r.routeDistanceMeters / speedMps;
-                const travelMinutes = Math.round(travelSeconds / 60);
+                const travelMinutes = getRestaurantDriveEtaMinutes(r);
+                const milesStr = (r.routeDistanceMeters / 1609.34).toFixed(1);
                 
                 etaHtml = `
                     <div style="font-size: 12px; color: #ff4757; font-weight: bold; background: rgba(255, 71, 87, 0.1); border: 1px solid rgba(255, 71, 87, 0.2); padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; width: fit-content; font-family: 'JetBrains Mono', monospace;">
-                        🚗 Drive Time: ${travelMinutes} mins (${(r.routeDistanceMeters / 1609.34).toFixed(1)} mi)
+                        🚗 Drive Time: ${travelMinutes} mins (${milesStr} mi)
                     </div>
                 `;
             }
@@ -2091,6 +2186,13 @@
             return;
         }
 
+        const routeBtn = document.getElementById("find-route-btn");
+        if (routeBtn) {
+            routeBtn.innerHTML = '⚡ Calculating Route...';
+            routeBtn.disabled = true;
+            routeBtn.style.opacity = '0.8';
+        }
+
         // Try to match with known partner restaurants to use exact coordinates and prevent geocoding issues
         const matchedOriginRestaurant = allRestaurants.find(r => 
             originInputVal.toLowerCase().includes(r.name.toLowerCase()) || 
@@ -2134,6 +2236,12 @@
                 provideRouteAlternatives: true
             },
             (response, status) => {
+                if (routeBtn) {
+                    routeBtn.innerHTML = 'Plan Route';
+                    routeBtn.disabled = false;
+                    routeBtn.style.opacity = '1';
+                }
+
                 if (status === google.maps.DirectionsStatus.OK) {
                     lastDirectionsResponse = response;
                     
@@ -2156,6 +2264,7 @@
                     directionsRenderer.setRouteIndex(targetIndex);
                     
                     drawAlternativePolylines(response, targetIndex);
+                    animateRoutePolyline(response.routes[targetIndex], 1200);
                     updateRouteSelectionUI(response, targetIndex);
                     
                     findRestaurantsAlongRoute(response.routes[targetIndex]);
@@ -2197,6 +2306,7 @@
         
         // Update the partner diners along the newly selected route
         const activeRoute = lastDirectionsResponse.routes[index];
+        animateRoutePolyline(activeRoute, 1000);
         findRestaurantsAlongRoute(activeRoute);
         
         // If simulation restaurant is selected, update path!
@@ -2206,6 +2316,145 @@
         
         // Update selection UI buttons/cards
         updateRouteSelectionUI(lastDirectionsResponse, index);
+    }
+
+    function animateRoutePolyline(route, duration = 1200) {
+        if (routeAnimationId) {
+            cancelAnimationFrame(routeAnimationId);
+            routeAnimationId = null;
+        }
+
+        if (activeRoutePolyline) {
+            activeRoutePolyline.setMap(null);
+            activeRoutePolyline = null;
+        }
+        if (activeRouteGlowPolyline) {
+            activeRouteGlowPolyline.setMap(null);
+            activeRouteGlowPolyline = null;
+        }
+        if (routeTipMarker) {
+            routeTipMarker.setMap(null);
+            routeTipMarker = null;
+        }
+
+        if (!route || !route.overview_path || route.overview_path.length === 0) return;
+
+        const path = route.overview_path;
+        const isLight = (currentMapTheme === 'light');
+        const primaryColor = isLight ? "#2563eb" : "#00f0ff";
+        const glowColor = isLight ? "rgba(37, 99, 235, 0.35)" : "rgba(0, 240, 255, 0.45)";
+        const tipColor = isLight ? "#1d4ed8" : "#ffffff";
+
+        activeRouteGlowPolyline = new google.maps.Polyline({
+            path: [],
+            strokeColor: glowColor,
+            strokeOpacity: 0.85,
+            strokeWeight: 12,
+            map: map,
+            zIndex: 20
+        });
+
+        activeRoutePolyline = new google.maps.Polyline({
+            path: [],
+            strokeColor: primaryColor,
+            strokeOpacity: 0.95,
+            strokeWeight: 6,
+            map: map,
+            zIndex: 21
+        });
+
+        routeTipMarker = new google.maps.Marker({
+            position: path[0],
+            map: map,
+            zIndex: 25,
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 7,
+                fillColor: tipColor,
+                fillOpacity: 1,
+                strokeColor: primaryColor,
+                strokeWeight: 3
+            }
+        });
+
+        let totalDist = 0;
+        const segDistances = [];
+        for (let i = 0; i < path.length - 1; i++) {
+            let dist = 0;
+            if (google.maps.geometry && google.maps.geometry.spherical) {
+                dist = google.maps.geometry.spherical.computeDistanceBetween(path[i], path[i+1]);
+            } else {
+                const dlat = path[i+1].lat() - path[i].lat();
+                const dlng = path[i+1].lng() - path[i].lng();
+                dist = Math.sqrt(dlat * dlat + dlng * dlng);
+            }
+            segDistances.push(dist);
+            totalDist += dist;
+        }
+
+        if (totalDist === 0) {
+            activeRouteGlowPolyline.setPath(path);
+            activeRoutePolyline.setPath(path);
+            if (routeTipMarker) {
+                routeTipMarker.setMap(null);
+                routeTipMarker = null;
+            }
+            return;
+        }
+
+        const startTime = performance.now();
+
+        function step(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(1, elapsed / duration);
+            const easedProgress = 1 - Math.pow(1 - progress, 3);
+            const targetDist = totalDist * easedProgress;
+
+            let accumulated = 0;
+            const currentPath = [path[0]];
+            let tipPoint = path[0];
+
+            for (let i = 0; i < path.length - 1; i++) {
+                const segLen = segDistances[i];
+                if (accumulated + segLen <= targetDist) {
+                    currentPath.push(path[i + 1]);
+                    accumulated += segLen;
+                    tipPoint = path[i + 1];
+                } else {
+                    const fraction = segLen > 0 ? (targetDist - accumulated) / segLen : 0;
+                    if (google.maps.geometry && google.maps.geometry.spherical && google.maps.geometry.spherical.interpolate) {
+                        tipPoint = google.maps.geometry.spherical.interpolate(path[i], path[i + 1], fraction);
+                    } else {
+                        const lat = path[i].lat() + (path[i + 1].lat() - path[i].lat()) * fraction;
+                        const lng = path[i].lng() + (path[i + 1].lng() - path[i].lng()) * fraction;
+                        tipPoint = new google.maps.LatLng(lat, lng);
+                    }
+                    currentPath.push(tipPoint);
+                    break;
+                }
+            }
+
+            activeRouteGlowPolyline.setPath(currentPath);
+            activeRoutePolyline.setPath(currentPath);
+
+            if (routeTipMarker) {
+                routeTipMarker.setPosition(tipPoint);
+            }
+
+            if (progress < 1) {
+                routeAnimationId = requestAnimationFrame(step);
+            } else {
+                activeRouteGlowPolyline.setPath(path);
+                activeRoutePolyline.setPath(path);
+                if (routeTipMarker) {
+                    routeTipMarker.setMap(null);
+                    routeTipMarker = null;
+                }
+                routeAnimationId = null;
+            }
+        }
+
+        routeAnimationId = requestAnimationFrame(step);
     }
 
     function drawAlternativePolylines(response, activeIndex) {
@@ -2342,29 +2591,21 @@
             return;
         }
 
-        const pathPoints = route.overview_path;
         const THRESHOLD_METERS = 2000; // 2km (approx 1.24 miles)
-
         let foundNearRoute = false;
 
         allRestaurants.forEach(r => {
             const restLatLng = new google.maps.LatLng(parseFloat(r.latitude), parseFloat(r.longitude));
-            let minDistance = Infinity;
-            
-            for (let i = 0; i < pathPoints.length; i += Math.max(1, Math.floor(pathPoints.length / 300))) { 
-                const dist = google.maps.geometry.spherical.computeDistanceBetween(restLatLng, pathPoints[i]);
-                if (dist < minDistance) {
-                    minDistance = dist;
-                }
-                if (dist < 500) break;
-            }
+            const progress = calculateRouteProgressToPoint(route, restLatLng);
 
-            r.isNearRoute = minDistance <= THRESHOLD_METERS;
+            r.isNearRoute = progress.offRouteDistanceMeters <= THRESHOLD_METERS;
             if (r.isNearRoute) {
                 foundNearRoute = true;
-                r.routeDistanceMeters = calculateDistanceToRoutePoint(pathPoints, restLatLng);
+                r.routeDistanceMeters = progress.distanceMeters;
+                r.routeDurationSeconds = progress.durationSeconds;
             } else {
                 r.routeDistanceMeters = null;
+                r.routeDurationSeconds = null;
             }
         });
 
@@ -2579,19 +2820,20 @@
             }
         }
 
-        // Calculate initial ETA if available
+        // Calculate initial ETA using exact Google route drive duration
         let initial_eta = 15;
         try {
             const activeRest = allRestaurants.find(r => r.id === selectedRestaurantId);
-            if (activeRest && activeRest.routeDistanceMeters !== undefined && activeRest.routeDistanceMeters !== null) {
-                const speedMph = parseFloat(document.getElementById("speed-input").value) || 60;
-                const speedMps = (speedMph * 1609.34) / 3600;
-                const travelSeconds = activeRest.routeDistanceMeters / speedMps;
-                initial_eta = Math.max(1, Math.round(travelSeconds / 60));
-            } else {
-                const route = directionsRenderer.getDirections().routes[0];
-                if (route && route.legs && route.legs[0] && route.legs[0].duration) {
-                    initial_eta = Math.round(route.legs[0].duration.value / 60);
+            if (activeRest) {
+                const computedEta = getRestaurantDriveEtaMinutes(activeRest);
+                if (computedEta) {
+                    initial_eta = computedEta;
+                } else {
+                    const activeDir = directionsRenderer.getDirections();
+                    const route = activeDir ? activeDir.routes?.[0] : null;
+                    if (route && route.legs && route.legs[0] && route.legs[0].duration) {
+                        initial_eta = Math.round(route.legs[0].duration.value / 60);
+                    }
                 }
             }
         } catch(e) {}

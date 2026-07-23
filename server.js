@@ -1093,12 +1093,16 @@ app.patch('/api/navigation/update-eta', async (req, res) => {
         }
 
         const { order_status, restaurant_id, average_prep_time } = orderRes.rows[0];
+        const { is_traffic_delay, sim_added_delay } = req.body;
 
         const currentTime = new Date();
         const driverArrivalTimestamp = new Date(currentTime.getTime() + updated_eta_minutes * 60 * 1000);
         const scheduledFireTimestamp = new Date(driverArrivalTimestamp.getTime() - average_prep_time * 60 * 1000);
 
-        if (order_status === 'PREPARING' && updated_eta_minutes > 25) {
+        // Emergency hold ONLY triggers if order is actively PREPARING and an explicit traffic delay was added (+15m+)
+        const hasExplicitTrafficDelay = (is_traffic_delay === true) || (typeof sim_added_delay === 'number' && sim_added_delay >= 15);
+
+        if (order_status === 'PREPARING' && hasExplicitTrafficDelay) {
             // Trigger emergency hold alert
             io.to(restaurant_id).emit('EMERGENCY_HOLD_ALERT', {
                 order_id: order_id,
@@ -1131,11 +1135,16 @@ app.patch('/api/navigation/update-eta', async (req, res) => {
             return res.json({ status: "EMERGENCY_HOLD_TRIGGERED", scheduled_fire_time: scheduledFireTimestamp });
         }
 
-        // Standard update handling: update current driver ETA and recalculate scheduled fire time if it is not yet cooking
-        if (order_status === 'PLACED') {
+        // Determine effective order status: if driver is far away (> prep_time + 5) without explicit delay, status is PLACED (waiting for fire window)
+        let effectiveStatus = order_status;
+        if (order_status === 'PREPARING' && updated_eta_minutes > (average_prep_time + 5) && !hasExplicitTrafficDelay) {
+            effectiveStatus = 'PLACED';
+        }
+
+        if (effectiveStatus === 'PLACED') {
             await pool.query(`
                 UPDATE orders 
-                SET current_driver_eta = $1, scheduled_fire_time = $2
+                SET current_driver_eta = $1, scheduled_fire_time = $2, order_status = 'PLACED'
                 WHERE id = $3
             `, [driverArrivalTimestamp, scheduledFireTimestamp, order_id]);
 
@@ -1143,6 +1152,7 @@ app.patch('/api/navigation/update-eta', async (req, res) => {
             if (matchedMemOrder) {
                 matchedMemOrder.current_driver_eta = driverArrivalTimestamp;
                 matchedMemOrder.scheduled_fire_time = scheduledFireTimestamp;
+                matchedMemOrder.order_status = 'PLACED';
                 saveMockDb();
             }
 
@@ -1239,8 +1249,11 @@ app.put('/api/orders/:order_id/update-eta', async (req, res) => {
         const driverArrivalTimestamp = new Date(currentTime.getTime() + finalEtaMinutes * 60 * 1000);
         const scheduledFireTimestamp = new Date(driverArrivalTimestamp.getTime() - average_prep_time * 60 * 1000);
 
+        const { is_traffic_delay, sim_added_delay } = req.body;
+        const hasExplicitTrafficDelay = (is_traffic_delay === true) || (typeof sim_added_delay === 'number' && sim_added_delay >= 15);
+
         // 3. CASE A: EMERGENCY HOLD ACTION (Traffic Jam hit while food is cooking)
-        if (order_status === 'PREPARING' && finalEtaMinutes > (average_prep_time + 15)) {
+        if (order_status === 'PREPARING' && hasExplicitTrafficDelay) {
             io.to(restaurant_id).emit('EMERGENCY_HOLD_ALERT', {
                 order_id: order_id,
                 message: `⚠️ Traveler delayed by traffic jam! New ETA: ${finalEtaMinutes} mins. Pausing kitchen fire sequence.`
@@ -1274,11 +1287,17 @@ app.put('/api/orders/:order_id/update-eta', async (req, res) => {
             });
         }
 
+        // Determine effective order status: if driver is far away (> prep_time + 5) without explicit delay, status is PLACED
+        let effectiveStatus = order_status;
+        if (order_status === 'PREPARING' && finalEtaMinutes > (average_prep_time + 5) && !hasExplicitTrafficDelay) {
+            effectiveStatus = 'PLACED';
+        }
+
         // 4. CASE B: Standard update loop before cooking (Shift the fire window dynamically)
-        if (order_status === 'PLACED') {
+        if (effectiveStatus === 'PLACED') {
             await pool.query(`
                 UPDATE orders 
-                SET current_driver_eta = $1, scheduled_fire_time = $2
+                SET current_driver_eta = $1, scheduled_fire_time = $2, order_status = 'PLACED'
                 WHERE id = $3
             `, [driverArrivalTimestamp, scheduledFireTimestamp, order_id]);
 
@@ -1286,6 +1305,7 @@ app.put('/api/orders/:order_id/update-eta', async (req, res) => {
             if (matchedMemOrder) {
                 matchedMemOrder.current_driver_eta = driverArrivalTimestamp;
                 matchedMemOrder.scheduled_fire_time = scheduledFireTimestamp;
+                matchedMemOrder.order_status = 'PLACED';
                 saveMockDb();
             }
 

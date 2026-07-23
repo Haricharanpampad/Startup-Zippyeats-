@@ -42,8 +42,8 @@
       "id": "rest-gardenstate123",
       "name": "Garden State Expressway Diner",
       "address": "1200 Garden State Parkway, Service Plaza South",
-      "latitude": 40.6900,
-      "longitude": -74.1500,
+      "latitude": 40.69,
+      "longitude": -74.15,
       "average_prep_time": 12,
       "is_active": true,
       "email": "garden@expressway.com",
@@ -53,8 +53,8 @@
       "id": "rest-crossbronx456",
       "name": "Cross Bronx Express Junction",
       "address": "580 Cross Bronx Expressway, Exit 4B",
-      "latitude": 40.8400,
-      "longitude": -73.8900,
+      "latitude": 40.84,
+      "longitude": -73.89,
       "average_prep_time": 15,
       "is_active": true,
       "email": "bronx@junction.com",
@@ -75,8 +75,8 @@
       "id": "rest-secunderabad789",
       "name": "Secunderabad Express Diner",
       "address": "90 Highway Corridor NH-44, Secunderabad",
-      "latitude": 17.4500,
-      "longitude": 78.4800,
+      "latitude": 17.45,
+      "longitude": 78.48,
       "average_prep_time": 10,
       "is_active": true,
       "email": "secunderabad@diner.com",
@@ -86,8 +86,8 @@
       "id": "rest-nh44pitstop",
       "name": "NH-44 Bypass Pitstop",
       "address": "Highway 44, Medchal-Khambapur Toll Plaza",
-      "latitude": 17.5200,
-      "longitude": 78.4500,
+      "latitude": 17.52,
+      "longitude": 78.45,
       "average_prep_time": 15,
       "is_active": true,
       "email": "nh44@pitstop.com",
@@ -97,8 +97,8 @@
       "id": "rest-kompallyoasis",
       "name": "Kompally Highway Oasis",
       "address": "NH-44, Next to Cineplanet, Kompally",
-      "latitude": 17.5420,
-      "longitude": 78.4410,
+      "latitude": 17.542,
+      "longitude": 78.441,
       "average_prep_time": 12,
       "is_active": true,
       "email": "kompally@oasis.com",
@@ -108,8 +108,8 @@
       "id": "rest-bowenpallygrill",
       "name": "Bowenpally Junction Grill",
       "address": "Bowenpally X Roads, National Highway 44",
-      "latitude": 17.4850,
-      "longitude": 78.4680,
+      "latitude": 17.485,
+      "longitude": 78.468,
       "average_prep_time": 8,
       "is_active": true,
       "email": "bowenpally@grill.com",
@@ -119,8 +119,8 @@
       "id": "rest-kandlakoyadhaba",
       "name": "Kandlakoya Toll Plaza Dhaba",
       "address": "Outer Ring Road Exit, Kandlakoya, NH-44",
-      "latitude": 17.5810,
-      "longitude": 78.4320,
+      "latitude": 17.581,
+      "longitude": 78.432,
       "average_prep_time": 14,
       "is_active": true,
       "email": "kandlakoya@dhaba.com",
@@ -130,8 +130,8 @@
       "id": "rest-manhattanbistro",
       "name": "Manhattan Mid-Route Bistro",
       "address": "142 West 34th St, Midtown Manhattan",
-      "latitude": 40.7520,
-      "longitude": -73.9820,
+      "latitude": 40.752,
+      "longitude": -73.982,
       "average_prep_time": 11,
       "is_active": true,
       "email": "manhattan@bistro.com",
@@ -141,8 +141,8 @@
       "id": "rest-hobokendiner",
       "name": "Hoboken Hudson Diner",
       "address": "80 River Street, Hoboken, NJ",
-      "latitude": 40.7390,
-      "longitude": -74.0300,
+      "latitude": 40.739,
+      "longitude": -74.03,
       "average_prep_time": 9,
       "is_active": true,
       "email": "hoboken@diner.com",
@@ -152,11 +152,77 @@
       "id": "rest-astoriafood",
       "name": "Astoria Transit Food Court",
       "address": "31-10 Astoria Blvd, Queens, NY",
-      "latitude": 40.7680,
-      "longitude": -73.9210,
+      "latitude": 40.768,
+      "longitude": -73.921,
       "average_prep_time": 13,
       "is_active": true,
       "email": "astoria@transit.com",
+      "password": "password"
+    },
+    {
+      "id": "rest-miyapur101",
+      "name": "Miyapur Metro Highway Grill",
+      "address": "Miyapur X Roads, Highway 65, Miyapur",
+      "latitude": 17.4975,
+      "longitude": 78.3622,
+      "average_prep_time": 10,
+      "is_active": true,
+      "email": "miyapur@grill.com",
+      "password": "password"
+    },
+    {
+      "id": "rest-gandimaisamma102",
+      "name": "Gandimaisamma Highway Food Plaza",
+      "address": "Gandimaisamma X Roads, Dundigal Highway, Gandimaisamma",
+      "latitude": 17.5712,
+      "longitude": 78.4118,
+      "average_prep_time": 12,
+      "is_active": true,
+      "email": "gandimaisamma@foodplaza.com",
+      "password": "password"
+    },
+    {
+      "id": "rest-balanagar103",
+      "name": "Balanagar Flyover Pitstop Diner",
+      "address": "Near Balanagar Flyover, NH-44 Corridor, Balanagar",
+      "latitude": 17.4702,
+      "longitude": 78.4438,
+      "average_prep_time": 12,
+      "is_active": true,
+      "email": "balanagar@pitstop.com",
+      "password": "password"
+    },
+    {
+      "id": "rest-bachupally104",
+      "name": "Bachupally ORR Link Highway Kitchen",
+      "address": "Miyapur-Bachupally Road, Near ORR Exit, Bachupally",
+      "latitude": 17.5312,
+      "longitude": 78.3848,
+      "average_prep_time": 10,
+      "is_active": true,
+      "email": "bachupally@kitchen.com",
+      "password": "password"
+    },
+    {
+      "id": "rest-kphb105",
+      "name": "KPHB Highway Express Kitchen",
+      "address": "KPHB Main Road, Phase 1, Kukatpally",
+      "latitude": 17.4858,
+      "longitude": 78.3888,
+      "average_prep_time": 15,
+      "is_active": true,
+      "email": "kphb@express.com",
+      "password": "password"
+    },
+    {
+      "id": "rest-suchitra106",
+      "name": "Suchitra Junction Family Diner",
+      "address": "Suchitra X Roads, NH-44 Expressway, Suchitra",
+      "latitude": 17.5148,
+      "longitude": 78.4628,
+      "average_prep_time": 12,
+      "is_active": true,
+      "email": "suchitra@diner.com",
       "password": "password"
     }
   ],
@@ -213,7 +279,7 @@
       "restaurant_id": "rest-gardenstate123",
       "name": "Disco Fries",
       "description": "Crispy golden french fries smothered in rich brown gravy and melted mozzarella cheese.",
-      "price": 7.50,
+      "price": 7.5,
       "is_available": true
     },
     {
@@ -221,7 +287,7 @@
       "restaurant_id": "rest-gardenstate123",
       "name": "Turnpike Vanilla Milkshake",
       "description": "Old-fashioned hand-spun vanilla bean milkshake topped with whipped cream and a cherry.",
-      "price": 5.50,
+      "price": 5.5,
       "is_available": true
     },
     {
@@ -229,7 +295,7 @@
       "restaurant_id": "rest-crossbronx456",
       "name": "Philly Cheesesteak Hero",
       "description": "Thinly shaved ribeye steak with grilled onions and melted cheese whiz on an authentic hoagie roll.",
-      "price": 13.50,
+      "price": 13.5,
       "is_available": true
     },
     {
@@ -245,7 +311,7 @@
       "restaurant_id": "rest-crossbronx456",
       "name": "New York Cheesecake Slice",
       "description": "Creamy, rich NY-style cheesecake with a buttery graham cracker crust.",
-      "price": 6.50,
+      "price": 6.5,
       "is_available": true
     },
     {
@@ -261,7 +327,7 @@
       "restaurant_id": "rest-secunderabad789",
       "name": "Paneer Tikka Roll",
       "description": "Spiced grilled cottage cheese cubes wrapped in a soft paratha with mint chutney and onions.",
-      "price": 8.50,
+      "price": 8.5,
       "is_available": true
     },
     {
@@ -285,7 +351,7 @@
       "restaurant_id": "rest-nh44pitstop",
       "name": "Highway Kadai Paneer with Roti",
       "description": "Fresh cottage cheese cooked with bell peppers and freshly ground spices in a traditional wok. Served with 2 rotis.",
-      "price": 11.50,
+      "price": 11.5,
       "is_available": true
     },
     {
@@ -293,7 +359,7 @@
       "restaurant_id": "rest-nh44pitstop",
       "name": "Irani Chai with Osmania Biscuits",
       "description": "Rich, creamy milk-reduced tea served alongside two classic sweet-salty biscuits.",
-      "price": 3.50,
+      "price": 3.5,
       "is_available": true
     },
     {
@@ -309,7 +375,7 @@
       "restaurant_id": "rest-kompallyoasis",
       "name": "Tandoori Malai Kebab",
       "description": "Creamy, melt-in-mouth chicken chunks marinated in cheese and cashew paste.",
-      "price": 9.50,
+      "price": 9.5,
       "is_available": true
     },
     {
@@ -325,7 +391,7 @@
       "restaurant_id": "rest-bowenpallygrill",
       "name": "Spiced Mint Mojito",
       "description": "A refreshing cooler with fresh mint, lime, and a pinch of Indian black salt.",
-      "price": 4.50,
+      "price": 4.5,
       "is_available": true
     },
     {
@@ -341,7 +407,7 @@
       "restaurant_id": "rest-kandlakoyadhaba",
       "name": "Dhaba Butter Chicken with Butter Naan",
       "description": "Rich, creamy tomato gravy with charcoal-grilled chicken. Served with 2 hot butter naans.",
-      "price": 14.50,
+      "price": 14.5,
       "is_available": true
     },
     {
@@ -357,7 +423,7 @@
       "restaurant_id": "rest-manhattanbistro",
       "name": "Artisan Double Espresso",
       "description": "Freshly pulled double shot of organic espresso beans.",
-      "price": 3.50,
+      "price": 3.5,
       "is_available": true
     },
     {
@@ -389,7 +455,151 @@
       "restaurant_id": "rest-astoriafood",
       "name": "Honey Pistachio Baklava",
       "description": "Sweet pastry made of layers of filo filled with chopped nuts and sweetened with syrup.",
-      "price": 5.50,
+      "price": 5.5,
+      "is_available": true
+    },
+    {
+      "id": "item-myp-biryani",
+      "restaurant_id": "rest-miyapur101",
+      "name": "Miyapur Pot Biryani",
+      "description": "Spiced dum biryani cooked with tender chicken and aromatic basmati rice.",
+      "price": 12.99,
+      "is_available": true
+    },
+    {
+      "id": "item-myp-kebabs",
+      "restaurant_id": "rest-miyapur101",
+      "name": "Tangdi Kebab (3 Pcs)",
+      "description": "Charcoal grilled chicken drumsticks marinated in rich yogurt spices.",
+      "price": 9.99,
+      "is_available": true
+    },
+    {
+      "id": "item-myp-lassi",
+      "restaurant_id": "rest-miyapur101",
+      "name": "Cool Sweet Lassi",
+      "description": "Refreshing churned sweet yogurt drink served chilled.",
+      "price": 3.5,
+      "is_available": true
+    },
+    {
+      "id": "item-gdm-thali",
+      "restaurant_id": "rest-gandimaisamma102",
+      "name": "Gandimaisamma Highway Thali",
+      "description": "Complete meal platter with 2 curries, dal, sambar, rice, roti, and sweet.",
+      "price": 11.5,
+      "is_available": true
+    },
+    {
+      "id": "item-gdm-paneer",
+      "restaurant_id": "rest-gandimaisamma102",
+      "name": "Paneer Butter Masala & Naan",
+      "description": "Creamy tomato paneer curry served with 2 hot butter naans.",
+      "price": 10.5,
+      "is_available": true
+    },
+    {
+      "id": "item-gdm-tea",
+      "restaurant_id": "rest-gandimaisamma102",
+      "name": "Special Ginger Tea & Biscuit",
+      "description": "Freshly boiled spiced tea served with Osmania biscuits.",
+      "price": 2.5,
+      "is_available": true
+    },
+    {
+      "id": "item-bln-shawarma",
+      "restaurant_id": "rest-balanagar103",
+      "name": "Balanagar Special Chicken Shawarma",
+      "description": "Slow-roasted chicken, pickled veggies, and garlic sauce in rumali wrap.",
+      "price": 7.99,
+      "is_available": true
+    },
+    {
+      "id": "item-bln-grill",
+      "restaurant_id": "rest-balanagar103",
+      "name": "Half Tandoori Chicken Grill",
+      "description": "Juicy grilled chicken served with mint chutney and onion rings.",
+      "price": 13.5,
+      "is_available": true
+    },
+    {
+      "id": "item-bln-soda",
+      "restaurant_id": "rest-balanagar103",
+      "name": "Fresh Lime Soda",
+      "description": "Chilled sparkling lime drink with a touch of mint.",
+      "price": 2.99,
+      "is_available": true
+    },
+    {
+      "id": "item-bcp-dosa",
+      "restaurant_id": "rest-bachupally104",
+      "name": "Bachupally Ghee Karam Dosa",
+      "description": "Crispy golden crepe smeared with spicy red chili paste and pure ghee.",
+      "price": 5.5,
+      "is_available": true
+    },
+    {
+      "id": "item-bcp-friedrice",
+      "restaurant_id": "rest-bachupally104",
+      "name": "Schezwan Chicken Fried Rice",
+      "description": "Wok-tossed rice with shredded chicken, veggies, and spicy schezwan sauce.",
+      "price": 9.99,
+      "is_available": true
+    },
+    {
+      "id": "item-bcp-shake",
+      "restaurant_id": "rest-bachupally104",
+      "name": "Thick Chocolate Shake",
+      "description": "Creamy hand-blended chocolate ice cream shake.",
+      "price": 6.5,
+      "is_available": true
+    },
+    {
+      "id": "item-kphb-mutton",
+      "restaurant_id": "rest-kphb105",
+      "name": "KPHB Rayalaseema Mutton Biryani",
+      "description": "Fiery marinated mutton cooked dum style with seeraga samba rice.",
+      "price": 15.99,
+      "is_available": true
+    },
+    {
+      "id": "item-kphb-mirchi",
+      "restaurant_id": "rest-kphb105",
+      "name": "Hyderabadi Mirchi Bajji (4 Pcs)",
+      "description": "Double fried stuffed green chili fritters served with tangy tamarind dip.",
+      "price": 4.5,
+      "is_available": true
+    },
+    {
+      "id": "item-kphb-falooda",
+      "restaurant_id": "rest-kphb105",
+      "name": "Royal Dry Fruit Falooda",
+      "description": "Layered dessert with rose syrup, vermicelli, basil seeds, ice cream, and nuts.",
+      "price": 6.99,
+      "is_available": true
+    },
+    {
+      "id": "item-sch-chicken",
+      "restaurant_id": "rest-suchitra106",
+      "name": "Suchitra Spl Butter Chicken + 2 Naans",
+      "description": "Smokey butter chicken in rich cashew gravy with 2 garlic naans.",
+      "price": 13.99,
+      "is_available": true
+    },
+    {
+      "id": "item-sch-manchurian",
+      "restaurant_id": "rest-suchitra106",
+      "name": "Crispy Veg Manchurian",
+      "description": "Deep-fried vegetable balls tossed in spicy soy-garlic sauce.",
+      "price": 7.99,
+      "is_available": true
+    },
+    {
+      "id": "item-sch-smoothie",
+      "restaurant_id": "rest-suchitra106",
+      "name": "Mango Mango Smoothie",
+      "description": "Rich blended fresh mango smoothie topped with mango chunks.",
+      "price": 4.99,
       "is_available": true
     }
   ],
@@ -462,7 +672,7 @@
       "fulfillment_type": "DINE_IN",
       "current_driver_eta": "2026-07-17T09:26:14.983Z",
       "scheduled_fire_time": "2026-07-17T09:11:14.983Z",
-      "order_status": "PLACED"
+      "order_status": "PREPARING"
     },
     {
       "id": "order-1784270720509",
@@ -494,7 +704,7 @@
       "fulfillment_type": "TAKEAWAY",
       "current_driver_eta": "2026-07-17T11:03:26.377Z",
       "scheduled_fire_time": "2026-07-17T10:48:26.377Z",
-      "order_status": "PLACED",
+      "order_status": "PREPARING",
       "table_id": null
     },
     {
@@ -505,6 +715,17 @@
       "fulfillment_type": "TAKEAWAY",
       "current_driver_eta": "2026-07-17T11:03:37.571Z",
       "scheduled_fire_time": "2026-07-17T10:48:37.571Z",
+      "order_status": "PREPARING",
+      "table_id": null
+    },
+    {
+      "id": "order-1784542124424",
+      "user_id": "mock-user-id",
+      "restaurant_id": "f82e4f22-3816-4243-9a15-e642b8c2a0c0",
+      "total_amount": 19.49,
+      "fulfillment_type": "PICKUP",
+      "current_driver_eta": "2026-07-29T16:32:59.159Z",
+      "scheduled_fire_time": "2026-07-29T16:17:59.159Z",
       "order_status": "PLACED",
       "table_id": null
     }
@@ -557,6 +778,18 @@
       "menu_item_id": "item-1784265206947",
       "quantity": 1,
       "price_at_purchase": 1000
+    },
+    {
+      "order_id": "order-1784542124424",
+      "menu_item_id": "item-burger",
+      "quantity": 1,
+      "price_at_purchase": 14.99
+    },
+    {
+      "order_id": "order-1784542124424",
+      "menu_item_id": "item-coffee",
+      "quantity": 1,
+      "price_at_purchase": 4.5
     }
   ],
   "tables": [
@@ -711,6 +944,83 @@
       "id": "table-af1",
       "restaurant_id": "rest-astoriafood",
       "table_number": "Main Hall Table A",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-myp1",
+      "restaurant_id": "rest-miyapur101",
+      "table_number": "Table 1",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-myp2",
+      "restaurant_id": "rest-miyapur101",
+      "table_number": "Table 2",
+      "capacity": 6,
+      "is_available": true
+    },
+    {
+      "id": "table-gdm1",
+      "restaurant_id": "rest-gandimaisamma102",
+      "table_number": "Highway Hut 1",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-gdm2",
+      "restaurant_id": "rest-gandimaisamma102",
+      "table_number": "Highway Hut 2",
+      "capacity": 6,
+      "is_available": true
+    },
+    {
+      "id": "table-bln1",
+      "restaurant_id": "rest-balanagar103",
+      "table_number": "Flyover View Table 1",
+      "capacity": 2,
+      "is_available": true
+    },
+    {
+      "id": "table-bln2",
+      "restaurant_id": "rest-balanagar103",
+      "table_number": "Flyover View Table 2",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-bcp1",
+      "restaurant_id": "rest-bachupally104",
+      "table_number": "Garden Table 1",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-kphb1",
+      "restaurant_id": "rest-kphb105",
+      "table_number": "Family Booth A",
+      "capacity": 6,
+      "is_available": true
+    },
+    {
+      "id": "table-kphb2",
+      "restaurant_id": "rest-kphb105",
+      "table_number": "Table 3",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-sch1",
+      "restaurant_id": "rest-suchitra106",
+      "table_number": "Main Hall Table 1",
+      "capacity": 4,
+      "is_available": true
+    },
+    {
+      "id": "table-sch2",
+      "restaurant_id": "rest-suchitra106",
+      "table_number": "Main Hall Table 2",
       "capacity": 4,
       "is_available": true
     }
